@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "../../../gun"
+		},
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../../tail-kit"
+		},
+		{
+			"path": "../../../gundb-multisocket"
+		},
+		{
+			"path": "../../../../Projects/CNXT/remix-starter-kit"
+		},
+		{
+			"path": "../../../remix-tailwind-starter"
+		}
+	],
+	"settings": {}
+}

@@ -1,0 +1,9 @@
+# generate app key with:
+#  yarn generate-app-key
+APP_KEY_PAIR='{"pub":"Hym4mcBS1FB7mCf2gmcI0gCAfueJ1k-2H95ne5Tvx_4.QMxEQeOBJk66LazVgOORKoRm5YC2VcPTUB_fkbFQSpE","priv":"kJgTUkJXVgXt1BYjNIS5W5rfcRRx3Wk9x3VJz11EHV8","epub":"v4t9Lk8ZE8kXmMmUCKPFE9J2tw6uzwxEUA918-Az0sQ.8dANP-4s_1ceJEmBf6b4awxXMSWlfzNWJ_HeAIxb-n0","epriv":"-poRdOyozocooYoC8Eb58nMDUEevhCicwxJqG64_xGE"}'
+# a long, secret value used to encrypt the JWT
+# generate with:
+#  node -e "console.log(crypto.randomBytes(32).toString('hex'))"
+APP_TOKEN_SECRET='8a63248f9c1ebce93a52f917da1a21487eda20a7f08dc301eac5ca0dacdaf0f4'
+APP_PUBLIC_KEY='Hym4mcBS1FB7mCf2gmcI0gCAfueJ1k-2H95ne5Tvx_4.QMxEQeOBJk66LazVgOORKoRm5YC2VcPTUB_fkbFQSpE'
+
