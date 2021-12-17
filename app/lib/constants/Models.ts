@@ -1,10 +1,11 @@
 import Hashids from 'hashids'
+import { getDate } from './gun'
 
 
 
 export const newNameSpace = (name: string, soul: string) => {
     const hashids = new Hashids()
-    const key = hashids.encode(Date.now().toString())
+    const key = hashids.encode(getDate())
     const value = {
         created: new Date().toString(),
         type: 'tag',
@@ -19,6 +20,6 @@ export const newNameSpace = (name: string, soul: string) => {
 export const editedNameSpace = (tag: any[], updates: any) => {
     let update = tag
     update[1] = Object.assign(tag[1], updates)
-    update[1].edited = new Date().toString()
+    update[1].edited = getDate()
     return update
 }

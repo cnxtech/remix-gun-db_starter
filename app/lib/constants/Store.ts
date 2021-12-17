@@ -1,12 +1,5 @@
-import Gun from 'gun/gun'
-
-const port = '8765'
-const address = 'localhost'
-const peers = [`http://${address}:${port}/gun`]
-
-const gun = new Gun({
-    peers: peers,
-})
+import { json } from 'remix'
+import {gun} from './gun' 
 
 
 /**
@@ -17,7 +10,7 @@ const gun = new Gun({
  */
 export function storeItem(item: Array<any>) {
     return new Promise((resolve, reject) => {
-        console.log(`Storing ${JSON.stringify(item)}`)
+        console.log(`Storing ${json(item)}`)
         gun.get('Items').get(item[0]).set(item[1], ack => {
             ack.err ? reject(ack.err) : resolve(item)
         })
@@ -157,62 +150,62 @@ export const storeMap = (result: any[], validator: (arg0: any) => boolean) => {
     else return false
 }
 
-/**
- * 
- * @param {*} validator 
- */
-export const getAll = (validator: any) => {
-    return new Promise(async (resolve, reject) => {
-        const stores = await multiGet()
-        if (!stores && !Array.isArray(stores)) reject('Invalid Store.')
-        let results = stores.map((result: any) => storeMap(result, validator)).filter((result: any) => result)
-        resolve(results)
-    })
+// /**
+//  * 
+//  * @param {*} validator 
+//  */
+// export const getAll = (validator: any) => {
+//     return new Promise(async (resolve, reject) => {
+//         const stores = await multiGet()
+//         if (!stores && !Array.isArray(stores)) reject('Invalid Store.')
+//         let results = stores.map((result: any) => storeMap(result, validator)).filter((result: any) => result)
+//         resolve(results)
+//     })
 
-}
+// }
 
-/**
- * 
- * @param {*} validator 
- */
-export const getAllOptimized = async (validator: (arg0: any) => any) => {
-    let results: readonly any[] = []
-    let keys = await getKeys()
-    if (!Array.isArray(keys)) return ('invalid keys')
-    await keys.map(async key => {
-        await gun.get('Items').get(key).map(item => typeof item[1] === 'object' && validator(item[1]) ? item : undefined).once((data, key) => {
-            results.push(new Promise((resolve, reject) => {
-                if (!data) reject(key)
-                resolve([key, trimSoul(data)])
-            }))
-        })
-    })
-    return Promise.all(results)
-}
+// /**
+//  * 
+//  * @param {*} validator 
+//  */
+// export const getAllOptimized = async (validator: (arg0: any) => any) => {
+//     let results: readonly any[] = []
+//     let keys = await getKeys()
+//     if (!Array.isArray(keys)) return ('invalid keys')
+//     await keys.map(async key => {
+//         await gun.get('Items').get(key).map(item => typeof item[1] === 'object' && validator(item[1]) ? item : undefined).once((data, key) => {
+//             results.push(new Promise((resolve, reject) => {
+//                 if (!data) reject(key)
+//                 resolve([key, trimSoul(data)])
+//             }))
+//         })
+//     })
+//     return Promise.all(results)
+// }
 
 
-/**
- * get all items that are valid, subscribe to each
- * @param {*} validator
- */
-export const getAllSubscribe = (validator: any) => {
-    return new Promise(async (resolve, reject) => {
-        const stores = await multiGet()
-        if (!stores && !Array.isArray(stores)) reject('Invalid Store.')
-        let results = stores.map((result: any) => storeMap(result, validator)).filter((result: any) => result)
-        resolve(results)
-    })
+// /**
+//  * get all items that are valid, subscribe to each
+//  * @param {*} validator
+//  */
+// export const getAllSubscribe = (validator: any) => {
+//     return new Promise(async (resolve, reject) => {
+//         const stores = await multiGet()
+//         if (!stores && !Array.isArray(stores)) reject('Invalid Store.')
+//         let results = stores.map((result: any) => storeMap(result, validator)).filter((result: any) => result)
+//         resolve(results)
+//     })
 
-}
+// }
 
-/**
- * `DANGER!`
- * Nullifies entire Item Store.
- */
-export const removeAll = async () => {
-    let keys = await getKeys()
-    let results:  any[] = []
-    if (!Array.isArray(keys)) return ('invalid keys')
-    await keys.map(key => results.push(storeItem([key, null])))
-    return Promise.all(results)
-}
+// /**
+//  * `DANGER!`
+//  * Nullifies entire Item Store.
+//  */
+// export const removeAll = async () => {
+//     let keys = await getKeys()
+//     let results:  any[] = []
+//     if (!Array.isArray(keys)) return ('invalid keys')
+//     await keys.map(key => results.push(storeItem([key, null])))
+//     return Promise.all(results)
+// }

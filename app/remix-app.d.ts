@@ -2,11 +2,12 @@
 declare global {
     interface Window {
         ENV: {
-            SUPABASE_URL: string,
-            SUPABASE_KEY: string
+            APP_KEY_PAIR: string
+            APP_TOKEN_SECRET: string
+            APP_PUBLIC_KEY: string
 
         },
     }
 }
 
-export {}
+export { }

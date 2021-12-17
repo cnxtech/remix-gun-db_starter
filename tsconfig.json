@@ -1,11 +1,22 @@
 {
-  "include": ["remix.env.d.ts", "**/*.ts", "**/*.tsx", "app/lib/gun/useGunContext.js", "app/lib/gun/useGunContext.js"],
+  "include": [app/lib/gun/useGunContext.tsapp/lib/gun/useGunContext.ts
+    "remix.env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "app/lib/gun/useGunContext.tsx",
+  ],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2019"],
-    "esModuleInterop": true,
-    "jsx": "react-jsx",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true,
+    "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "esModuleInterop": true,
     "target": "ES2019",
     "strict": true,
     "paths": {
