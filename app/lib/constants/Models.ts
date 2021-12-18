@@ -1,5 +1,5 @@
 import Hashids from 'hashids'
-import { getDate } from './gun'
+import { getDate } from './Gun'
 
 
 

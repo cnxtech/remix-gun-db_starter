@@ -16,25 +16,14 @@ let gunOpts = async() => {
  let relay = await Relays();
  let relayOpts: IGunConstructorOptions = {
   peers: relay,
+  
 };
 return relayOpts
 }
 export const gun = Gun(gunOpts);
 
-
-interface Admin {
-  pubKey: string;
-  name: string;
-}
-
 export const sea = Gun.SEA;
-//storage compressor
-// const LZString = require('~/utils/lzstring');
 
-// const [GunCtx, GunDispatch,  GunProvider] = createCtxWithReducer();
-/*
-Passswordless SignUp
-*/
 export const signUp = async (username: string, password: string) => {
   gun.user().create(username, password, ({ ack }: any) => {
     gun

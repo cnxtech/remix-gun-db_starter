@@ -1,5 +1,5 @@
 import { json } from 'remix'
-import {gun} from './gun' 
+import {gun} from './Gun' 
 
 
 /**

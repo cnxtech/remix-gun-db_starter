@@ -18,9 +18,9 @@ import darkStylesUrl from '~/styles/dark.css';
 import Header from './components/Header';
 import Logo from './components/Logo';
 // @ts-ignore
-import GunContextProvider from './lib/gun/useGunContext.js'
+import GunContextProvider from './lib/contexts/useGunContext.js';
 import { createContext, useEffect, useRef } from 'react';
-import { gun } from './lib/constants/Data';
+import { gun, user } from './lib/constants/Data';
 import Gun from 'gun';
 import { IGunChainReference } from 'gun/types/chain';
 import { IGunStatic } from 'gun/types/static';
@@ -151,103 +151,7 @@ function Document({
   title?: string;
 }) {
   let data = useLoaderData();
-  const gunRef = useRef();
-  const userRef = useRef();
-  const certificateRef = useRef();
-  const accessTokenRef = useRef();
-  const onAuthCbRef = useRef();
 
-  useEffect(() => {
-    // @ts-ignore
-    Gun.on('opt', (ctx) => {
-      if (ctx.once) return;
-
-      ctx.on('out',  (msg:any) => {
-    // @ts-ignore
-        const to = this.to;
-        // Adds headers for put
-        msg.headers = {
-          accessToken: accessTokenRef.current,
-        };
-        to.next(msg); // pass to next middleware
-
-        if (msg.err === 'Invalid access token') {
-          // not implemented: handle invalid access token
-          // you might want to do a silent refresh, or
-          // redirect the user to a log in page
-        }
-      });
-    });
-
-    // create user
-    const user = gun
-      .user()
-      // save user creds in session storage
-      // this appears to be the only type of storage supported.
-      // use broadcast channels to sync between tabs
-      .recall({ sessionStorage: true });
-
-    // @ts-ignore
-    gun.on('auth', (...args:any) => {
-      if (!accessTokenRef.current) {
-        // get new token 
-        //TODO: MAKE THIS AN ACTION 
-        user.get('alias').once((username) => {
-          fetch('http://0.0.0.0:5150/api/tokens', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              username,
-    // @ts-ignore
-              pub: user.pub,
-            }),
-          })
-            .then((resp) => resp.json())
-            .then(({ accessToken }) => {
-              // store token in app memory
-              accessTokenRef.current = accessToken;
-            });
-        });
-      }
-
-      if (!certificateRef.current) {
-        // get new certificate
-        //TODO: MAKE THIS AN ACTION 
-        user.get('alias').once((username) => {
-          fetch('http://0.0.0.0:5150/api/certificates', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              username,
-    // @ts-ignore
-              pub: user.is.pub,
-            }),
-          })
-            .then((resp) => resp.json())
-            .then(({ certificate }) => {
-              // store certificate in app memory
-              // TODO check if expiry isn't working or misconfigured
-              // TODO handle expired certificates
-              certificateRef.current = certificate;
-            });
-        });
-      }
-
-      if (onAuthCbRef.current) {
-    // @ts-ignore
-        onAuthCbRef.current(...args);
-      }
-    });
-
-    // @ts-ignore
-    gunRef.current = gun;
-    // @ts-ignore
-    userRef.current = user;
-  }, []);
   return (
     <html lang="en">
       <head>
@@ -277,22 +181,32 @@ function Document({
 export let loader: LoaderFunction = async ({ params }) => {
   // loader function
   return {
-    navlinks: [{ to: '/', label: 'Home' }],
+    links: [
+      { to: '/', label: 'Home' },
+      { to: '/login', label: 'Login' },
+    ],
   };
 };
 function Layout({ children }: { children: React.ReactNode }) {
   let data = useLoaderData();
   return (
-    <div className="remix-app">
-      <Header links={data.navlinks} logo={<Logo />} />
-      <div className="remix-app__main">
-        <div className="container remix-app__main-content">{children}</div>
-      </div>
-      <footer className="remix-app__footer">
-        <div className="container remix-app__footer-content">
-          <p>&copy; You!</p>
+    <div className="relative">
+      <div className="mx-auto h-full" style={{ minHeight: 85 + 'vh' }}>
+        <div className="relative z-10 pb-8 overflow-hidden sm:pb-16 md:pb-20 lg:w-full lg:pb-28 xl:pb-32 h-full">
+          <div className="dark">
+            <Header
+              links={data.links}
+              hideHelp={true}
+              logo={<Logo />}
+            />
+          </div>
+
+          <main className={`mx-auto px-4 mt-8 sm:px-6  lg:px-8 h-full`}>
+            {children}
+          </main>
         </div>
-      </footer>
+      </div>
+      <div className="dark">{/* <FooterLight links={footerLink} /> */}</div>
     </div>
   );
 }

@@ -7,11 +7,32 @@ import 'gun/lib/radisk';
 import 'gun/lib/store';
 import 'gun/lib/rindexed';
 import 'gun/lib/not.js';
+import { json } from 'remix';
 
-const port = process.env.PORT ||'5150'
-const address = process.env.URL || '0.0.0.0'
-const peers = [`http://${address}:${port}/gun`]
+const jwt = require('jsonwebtoken');
+const APP_TOKEN_SECRET = process.env.APP_TOKEN_SECRET;
 
+function verifyToken(msg: any) {
+  if (msg?.headers?.accessToken) {
+    try {
+      jwt.verify(msg.headers.accessToken, APP_TOKEN_SECRET);
+
+      return true;
+    } catch (err) {
+      const error = new Error('Invalid access token');
+      // @ts-ignore
+      if (err.name === 'TokenExpiredError') {
+        // you might want to implement silent refresh here
+        // @ts-ignore
+        error.expiredAt = err.expiredAt;
+      }
+
+      return error;
+    }
+  }
+
+  return false;
+}
 let gunOpts = async () => {
   let relay = await Relays();
   let relayOpts: IGunConstructorOptions = {
@@ -21,7 +42,36 @@ let gunOpts = async () => {
 }
 export const gun = Gun(gunOpts);
 
+export const user = gun
+  .user()
+  // save user creds in session storage
+  // this appears to be the only type of storage supported.
+  // use broadcast channels to sync between tabs
+  .recall({ sessionStorage: true });
 
+export const signUpOrJoin = async (username: string, password: string) => {
+try {
+    user.create(username, password, ( ack : any) => {
+    user
+      .get(ack.pub)
+      .get('auth')
+      .on(() => {
+        gun.user(ack.pub).put({ username: username, pub: ack.pub });
+      });
+    if (!ack) {
+      user.auth(username, password);
+      user.get('auth').get(`${ack.pub}`).on((data: any) => {
+        console.log({ pub: data.pub });
+      });
+      return user;
+    }
+  });
+
+} catch (error) {
+  console.log(error);
+}
+
+};
 
 export const createNameSpace = (name:string, soul:string) => {
   const nameSpace: Array<any> = newNameSpace(name, soul)

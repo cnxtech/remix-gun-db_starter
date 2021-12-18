@@ -2,6 +2,23 @@
 # yarn lockfile v1
 
 
+"@altrx/gundb-react-auth@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@altrx/gundb-react-auth/-/gundb-react-auth-0.4.0.tgz#0c7e347c41a07ffb18cadf45eb23996cf2e3e8dc"
+  integrity sha512-RMULvlfMGok+6l7LbAtO11fMjVpr6b1RNV0QkjfjNJ1o/3GOxQfemMF9mj9RFshYcvDP/rnLtuEMXLpACIEiGQ==
+  dependencies:
+    "@altrx/gundb-react-hooks" "0.9.3"
+
+"@altrx/gundb-react-hooks@0.9.3":
+  version "0.9.3"
+  resolved "https://registry.yarnpkg.com/@altrx/gundb-react-hooks/-/gundb-react-hooks-0.9.3.tgz#7489ba50378a433c48417a5a7a01164d553cd8b7"
+  integrity sha512-PgN8L1jpSbrXIrO1pUZryB0+fofa6IRrURHiwV2L+snF77EQl/gYrFnw7IepftDHrApY8o1OzkbbQRi280xdgw==
+
+"@altrx/gundb-react-hooks@^0.9.6":
+  version "0.9.6"
+  resolved "https://registry.yarnpkg.com/@altrx/gundb-react-hooks/-/gundb-react-hooks-0.9.6.tgz#8973adf1f847f050f9469c902d1b2c7621452f08"
+  integrity sha512-bk1onQ2yo8TKJ7uFvRT88J+GcND5myUOTBvbLfN+1Epfd+AJvjBTbFaOjeqaIWoyilU2YV/H22iyKos2DU/mag==
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.16.0":
   version "7.16.0"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.16.0.tgz#0dfc80309beec8411e65e706461c408b0bb9b431"
@@ -4342,7 +4359,7 @@ prelude-ls@^1.2.1:
   resolved "https://registry.yarnpkg.com/prelude-ls/-/prelude-ls-1.2.1.tgz#debc6489d7a6e6b0e7611888cec880337d316396"
   integrity sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==
 
-prettier@^2.5.1:
+prettier@^2.4.1, prettier@^2.5.1:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.5.1.tgz#fff75fa9d519c54cf0fce328c1017d94546bc56a"
   integrity sha512-vBZcPRUR5MZJwoyi3ZoyQlc1rXeEck8KgeC9AwwOn+exuxLxq5toTRDTSaVrXHxelDMHy9zlicw8u66yxoSUFg==
@@ -4625,12 +4642,29 @@ remark-rehype@^9.0.0:
     mdast-util-to-hast "^11.0.0"
     unified "^10.0.0"
 
+remix-auth@^2.5.1:
+  version "2.5.1"
+  resolved "https://registry.yarnpkg.com/remix-auth/-/remix-auth-2.5.1.tgz#f412bd336a3abdf21849e73b790eea1d8d131a39"
+  integrity sha512-Yua+6tpTd0XDB0v7+i3kxM3Ra7RskukddfHiLVV2nIqOpIuvLhbHIGWjqp+AAfW6J9Y+twBTwVOXO03CNj9vCw==
+  dependencies:
+    remix-utils "^2.1.0"
+    uuid "^8.3.2"
+
 remix-seo@^0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/remix-seo/-/remix-seo-0.0.3.tgz#466a3e4ae473c74b4000804bbc9f09ac2640034c"
   integrity sha512-taulp+2LvQUhTcZeXfe0IIt0ZMXJZgtGlyI6zNNLpJedZPb8IPKQDO1zQyaJHKPkFy4dHS3lx+YAEEmCnr6R1w==
   dependencies:
     just-merge "^2.1.1"
+
+remix-utils@^2.1.0:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/remix-utils/-/remix-utils-2.1.3.tgz#8829fe544fc3d14e95a607a3e5d880d4cf41eb11"
+  integrity sha512-2TVkInIRRCXy46zJw5O8Vzas5lWB8/0Q5TM/ZXOur0QOMF13GZ3pYQBNDAOhIWgCxamHIFz2qp+88AlX+qTkug==
+  dependencies:
+    prettier "^2.4.1"
+    type-fest "^2.5.2"
+    uuid "^8.3.2"
 
 remix@^1.0.6:
   version "1.0.6"
@@ -5280,6 +5314,11 @@ type-fest@^0.8.1:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.8.1.tgz#09e249ebde851d3b1e48d27c105444667f17b83d"
   integrity sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==
 
+type-fest@^2.5.2:
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-2.8.0.tgz#39d7c9f9c508df8d6ce1cf5a966b0e6568dcc50d"
+  integrity sha512-O+V9pAshf9C6loGaH0idwsmugI2LxVNR7DtS40gVo2EXZVYFgz9OuNtOhgHLdHdapOEWNdvz9Ob/eeuaWwwlxA==
+
 type-is@~1.6.17, type-is@~1.6.18:
   version "1.6.18"
   resolved "https://registry.yarnpkg.com/type-is/-/type-is-1.6.18.tgz#4e552cd05df09467dcbc4ef739de89f2cf37c131"
@@ -5443,6 +5482,11 @@ utils-merge@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/utils-merge/-/utils-merge-1.0.1.tgz#9f95710f50a267947b2ccc124741c1028427e713"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
+
+uuid@^8.3.2:
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
+  integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
 
 uvu@^0.5.0:
   version "0.5.2"

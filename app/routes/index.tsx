@@ -1,49 +1,56 @@
+import { useState, useEffect } from "react";
 import type { MetaFunction, LoaderFunction } from "remix";
 import { useLoaderData, json, Link } from "remix";
+import { user } from "~/lib/constants/Data";
+import useGunContext from "~/lib/contexts/useGunContext";
+import useSessionChannel from "~/lib/contexts/useSessionChannel";
 
-type IndexData = {
-  resources: Array<{ name: string; url: string }>;
-  demos: Array<{ name: string; to: string }>;
-};
+// type IndexData = {
+//   resources: Array<{ name: string; url: string }>;
+//   demos: Array<{ name: string; to: string }>;
+// };
 
 // Loaders provide data to components and are only ever called on the server, so
 // you can connect to a database or run any server side code you want right next
 // to the component that renders it.
 // https://remix.run/api/conventions#loader
 export let loader: LoaderFunction = () => {
-  let data: IndexData = {
+  let data = {
     resources: [
       {
-        name: "Remix Docs",
-        url: "https://remix.run/docs"
+        test: {
+          name: 'Remix Docs',
+          url: 'https://remix.run/docs',
+          to: 'demos/actions',
+          name1: 'Actions',
+        },
       },
       {
-        name: "React Router Docs",
-        url: "https://reactrouter.com/docs"
+        test1: {
+          name: 'Remix Docs',
+          url: 'https://remix.run/docs',
+          to: 'demos/actions',
+          name1: 'Actions',
+        },
       },
       {
-        name: "Remix Discord",
-        url: "https://discord.gg/VBePs6d"
-      }
+        test2: {
+          name: 'Remix Docs',
+          url: 'https://remix.run/docs',
+          to: 'demos/actions',
+          name1: 'Actions',
+        },
+      },
     ],
-    demos: [
-      {
-        to: "demos/actions",
-        name: "Actions"
-      },
-      {
-        to: "demos/about",
-        name: "Nested Routes, CSS loading/unloading"
-      },
-      {
-        to: "demos/params",
-        name: "URL Params and Error Boundaries"
-      }
-    ]
   };
-
-  // https://remix.run/api/remix#json
-  return json(data);
+let test = user.get('test').get('data');
+test.set(data.resources[0]);
+test.set(data.resources[1]);
+test.set(data.resources[2]);
+test.once((data: any) => {
+  console.log(data);
+});
+  return json(data) ;
 };
 
 // https://remix.run/api/conventions#meta
@@ -56,7 +63,7 @@ export let meta: MetaFunction = () => {
 
 // https://remix.run/guides/routing#index-routes
 export default function Index() {
-  let data = useLoaderData<IndexData>();
+  let data = useLoaderData();
 
   return (
     <div className="remix__page">
@@ -76,7 +83,7 @@ export default function Index() {
         </p>
       </main>
       <aside>
-        <h2>Demos In This App</h2>
+        {/* <h2>Demos In This App</h2>
         <ul>
           {data.demos.map(demo => (
             <li key={demo.to} className="remix__page__resource">
@@ -85,15 +92,15 @@ export default function Index() {
               </Link>
             </li>
           ))}
-        </ul>
+        </ul> */}
         <h2>Resources</h2>
-        <ul>
-          {data.resources.map(resource => (
+        {/* <ul> */}
+          {/* {data.resources.map(resource => (
             <li key={resource.url} className="remix__page__resource">
               <a href={resource.url}>{resource.name}</a>
             </li>
           ))}
-        </ul>
+        </ul> */}
       </aside>
     </div>
   );

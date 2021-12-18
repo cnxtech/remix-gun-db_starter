@@ -1,6 +1,7 @@
-import { renderToString } from "react-dom/server";
-import { RemixServer } from "remix";
-import type { EntryContext } from "remix";
+import { renderToString } from 'react-dom/server';
+import { RemixServer } from 'remix';
+import type { EntryContext } from 'remix';
+import { GunCtxProvider } from './lib/contexts/useGunContext';
 
 export default function handleRequest(
   request: Request,
@@ -9,13 +10,15 @@ export default function handleRequest(
   remixContext: EntryContext
 ) {
   let markup = renderToString(
-    <RemixServer context={remixContext} url={request.url} />
+    <GunCtxProvider>
+      <RemixServer context={remixContext} url={request.url} />
+    </GunCtxProvider>
   );
 
-  responseHeaders.set("Content-Type", "text/html");
+  responseHeaders.set('Content-Type', 'text/html');
 
-  return new Response("<!DOCTYPE html>" + markup, {
+  return new Response('<!DOCTYPE html>' + markup, {
     status: responseStatusCode,
-    headers: responseHeaders
+    headers: responseHeaders,
   });
 }

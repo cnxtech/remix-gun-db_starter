@@ -48,4 +48,4 @@ export function createCtx<A>(value?: any) {
   return [useCtx, ctx.Provider] as const; // make TypeScript infer a tuple, not an array of union types
 }
 
-const GunCtx = createCtx({ useGun: () => {} });
+

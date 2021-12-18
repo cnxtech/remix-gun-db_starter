@@ -32,7 +32,11 @@ interface DDMItem {
     desc?: string;
     link?: string;
 }
+export let loader: LoaderFunction = async ({ params }) => {
+  // loader function
+  return [{ to: '/', label: 'Home' }]
 
+};
 const Header = (props: HeaderProps) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -53,7 +57,7 @@ const Header = (props: HeaderProps) => {
                                 <div className="ml-10 flex items-baseline space-x-4">
                                     {props.links && (props.links.map((link:any) => {
                                         return (
-                                            <Link to={link.link || '#'}>
+                                            <Link to={link.to}>
                                                 <a
                                                     key={link.label}
                                                     className={`${
@@ -114,7 +118,7 @@ const Header = (props: HeaderProps) => {
                                 {!props.hideGitHubLink && (
                                     <a
                                         href="https://github.com/bresnow"
-                                        className="p-1 rounded-full text-gray-400 focus:outline-none hover:text-gray-200 focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
+                                        className="p-1 rounded-full text-gray-400  hover:text-gray-200  "
                                     >
                                         <span className="sr-only">View github</span>
                                         <svg

@@ -1,6 +1,5 @@
 {
-  "include": [app/lib/gun/useGunContext.tsapp/lib/gun/useGunContext.ts
-    "remix.env.d.ts",
+  "include": [
     "**/*.ts",
     "**/*.tsx",
     "app/lib/gun/useGunContext.tsx",
