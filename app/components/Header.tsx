@@ -32,11 +32,7 @@ interface DDMItem {
     desc?: string;
     link?: string;
 }
-export let loader: LoaderFunction = async ({ params }) => {
-  // loader function
-  return [{ to: '/', label: 'Home' }]
 
-};
 const Header = (props: HeaderProps) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -57,20 +53,22 @@ const Header = (props: HeaderProps) => {
                                 <div className="ml-10 flex items-baseline space-x-4">
                                     {props.links && (props.links.map((link:any) => {
                                         return (
-                                            <Link to={link.to}>
-                                                <a
-                                                    key={link.label}
-                                                    className={`${
-                                                        link.isSelected
-                                                            ? 'text-gray-800 dark:text-white'
-                                                            : 'text-gray-300'
-                                                    }  hover:text-gray-800 dark:hover:text-white px-3 py-2 rounded-md ${
-                                                        props.isFat ? 'text-md' : 'text-sm'
-                                                    } font-medium`}
-                                                >
-                                                    {link.label}
-                                                </a>
-                                            </Link>
+                                          <Link key={link.label} to={link.to}>
+                                            <h1
+                                              key={link.label}
+                                              className={`${
+                                                link.isSelected
+                                                  ? 'text-gray-800 dark:text-white'
+                                                  : 'text-gray-300'
+                                              }  hover:text-gray-800 dark:hover:text-white px-3 py-2 rounded-md ${
+                                                props.isFat
+                                                  ? 'text-md'
+                                                  : 'text-sm'
+                                              } font-medium`}
+                                            >
+                                              {link.label}
+                                            </h1>
+                                          </Link>
                                         );
                                     }))}
                                 </div>

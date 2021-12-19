@@ -3,9 +3,9 @@ const express = require("express");
 const compression = require("compression");
 const morgan = require("morgan");
 const { createRequestHandler } = require("@remix-run/express");
-const jwt = require('jsonwebtoken');
+
 let Gun = require('gun');
-const SEA = require('gun/sea');
+
 const MODE = process.env.NODE_ENV;
 const BUILD_DIR = path.join(process.cwd(), "server/build");
 
@@ -40,8 +40,6 @@ app.listen(port, () => {
 });
 
 const _port = process.env.PORT || 5150;
-const APP_KEY_PAIR = process.env.APP_KEY_PAIR;
-const APP_TOKEN_SECRET = process.env.APP_TOKEN_SECRET;
 const _server = app.listen(_port, () => {
   console.log(`Database is listening at http://localhost:${_port}/gun`);
 });

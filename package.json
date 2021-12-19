@@ -22,6 +22,7 @@
     "@remix-run/react": "^1.0.6",
     "compression": "^1.7.4",
     "cross-env": "^7.0.3",
+    "ethers": "^5.5.2",
     "express": "^4.17.1",
     "get-urls": "^10.0.1",
     "gun": "^0.2020.1235",
@@ -34,7 +35,8 @@
     "react-hot-toast": "^2.1.1",
     "react-icons": "^4.3.1",
     "remix": "^1.0.6",
-    "remix-seo": "^0.0.3"
+    "remix-seo": "^0.0.3",
+    "tiny-invariant": "^1.2.0"
   },
   "devDependencies": {
     "@remix-run/dev": "^1.0.6",

@@ -1,17 +1,18 @@
 import Gun from 'gun';
-import fetch from 'node-fetch';
+
 import getUrls from 'get-urls';
 import { json } from 'remix';
 require('gun/lib/then.js')
 // Suppress extraneous GUN logging
 let cl = console.log;
 console.log = () => {};
-
+const port = process.env.PORT || '5150'
+const address = process.env.URL || '0.0.0.0'
 const Relays = async () => {
   let gunRelays:Array<string> = [];
 
   let gun = new Gun({
-    peers: ['http://0.0.0.0:3369/gun','https://relay.gun.ooo', 'https://gunjs.herokuapp.com'],
+    peers: [`http://${address}:${port}/gun`],
     file: 'relays',
   });
 

@@ -1,6 +1,5 @@
 import {
   LoaderFunction,
-  Link,
   Links,
   LiveReload,
   Meta,
@@ -17,13 +16,7 @@ import globalStylesUrl from '~/styles/global.css';
 import darkStylesUrl from '~/styles/dark.css';
 import Header from './components/Header';
 import Logo from './components/Logo';
-// @ts-ignore
-import GunContextProvider from './lib/contexts/useGunContext.js';
-import { createContext, useEffect, useRef } from 'react';
-import { gun, user } from './lib/constants/Data';
-import Gun from 'gun';
-import { IGunChainReference } from 'gun/types/chain';
-import { IGunStatic } from 'gun/types/static';
+
 export let links: LinksFunction = () => {
   return [
     { rel: 'stylesheet', href: globalStylesUrl },
@@ -63,7 +56,6 @@ export const meta: MetaFunction = () => {
   return {
     title: 'Bresnow Design Studio',
     description: 'Remix/ GunDB/ Tailwind Boilerplate',
-    viewport: 'width=device-width, initial-scale=1, viewport-fit=cover',
     'format-detection': 'telephone=no',
     'apple-mobile-web-app-title': 'Bresnow',
     'apple-mobile-web-app-capable': 'yes',
@@ -150,7 +142,7 @@ function Document({
   children: React.ReactNode;
   title?: string;
 }) {
-  let data = useLoaderData();
+
 
   return (
     <html lang="en">
@@ -164,13 +156,6 @@ function Document({
       <body>
         {children}
         <ScrollRestoration />
-        {data && data.ENV && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `window.ENV = ${JSON.stringify(data.ENV)}`,
-            }}
-          />
-        )}
         <Scripts />
         {process.env.NODE_ENV === 'development' && <LiveReload />}
       </body>
@@ -206,7 +191,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           </main>
         </div>
       </div>
-      <div className="dark">{/* <FooterLight links={footerLink} /> */}</div>
+      <div className="dark"></div>
     </div>
   );
 }

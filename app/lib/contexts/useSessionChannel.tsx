@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 
-import useGunContext from './useGunContext';
 
 // sync session across tabs using a broadcast channel
 export default function useSessionChannel() {
