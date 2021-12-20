@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/alt-text */
-/* eslint-disable jsx-a11y/anchor-is-valid */
 // app/routes/login.tsx
 import {
   ActionFunction,
@@ -23,38 +21,40 @@ type Actions = {
   noEmail: string;
   noPassword: string;
 };
-
+export const joinOrSign = (email: string, password: string) => {
+  let gun = withGun();
+  return gun.login(email, password);
+};
 export let action: ActionFunction = async ({ request }) => {
   let form = await request.formData();
   let user = form.get('username')?.toString();
   let password = form.get('password')?.toString();
+  invariant(user && password, 'undefined');
+  let data = withGun().login(user, password);
 
-  invariant(user && password, 'string');
+  return null;
+};
 
- let data = withGun().login(user, password);
-
- if(data === undefined){
-   return null
- }
-    return data
+export let loader: LoaderFunction = async ({ request, params }) => {
+  // loader function
+  return null as any;
 };
 
 export default function Login() {
-
-let action = useActionData()
-
   return (
     <div className="flex flex-wrap w-full">
       <div className="flex flex-col w-full md:w-1/2">
         <div className="flex justify-center pt-12 md:justify-start md:pl-12 md:-mb-24">
-          <h1 className="p-4 text-xl font-bold text-white bg-black">Design.</h1>
+          <h1 className="p-4 text-xl font-bold text-white bg-black">
+            Design.
+          </h1>
         </div>
         <div className="flex flex-col justify-center px-8 pt-8 my-auto md:justify-start md:pt-0 md:px-24 lg:px-32">
           <p className="text-3xl text-center">Welcome.</p>
           <Form method="post" className="flex flex-col pt-3 md:pt-8">
             <div className="flex flex-col pt-4">
               <InputText
-                type="text"
+                type="email"
                 square={false}
                 icon={
                   <svg
@@ -67,8 +67,8 @@ let action = useActionData()
                     <path d="M1792 710v794q0 66-47 113t-113 47h-1472q-66 0-113-47t-47-113v-794q44 49 101 87 362 246 497 345 57 42 92.5 65.5t94.5 48 110 24.5h2q51 0 110-24.5t94.5-48 92.5-65.5q170-123 498-345 57-39 100-87zm0-294q0 79-49 151t-122 123q-376 261-468 325-10 7-42.5 30.5t-54 38-52 32.5-57.5 27-50 9h-2q-23 0-50-9t-57.5-27-52-32.5-54-38-42.5-30.5q-91-64-262-182.5t-205-142.5q-62-42-117-115.5t-55-136.5q0-78 41.5-130t118.5-52h1472q65 0 112.5 47t47.5 113z" />
                   </svg>
                 }
-                placeholder="Username"
-                name="username"
+                placeholder="Email"
+                name="email"
               />
             </div>
 
@@ -100,16 +100,10 @@ let action = useActionData()
             </button>
           </Form>
           <div className="pt-12 pb-12 text-center">
-            <h5>
-              {action ? (
-                action.result
-               
-              ) : ( <>
-              <p> New User?</p>
-                <a className="font-semibold underline">Register here.</a>
-                </>
-              )}
-            </h5>
+            <p>
+              Already Have Keys?
+              <a className="font-semibold underline">Register here.</a>
+            </p>
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ const morgan = require("morgan");
 const { createRequestHandler } = require("@remix-run/express");
 
 let Gun = require('gun');
-
+const http = require('http');
 const MODE = process.env.NODE_ENV;
 const BUILD_DIR = path.join(process.cwd(), "server/build");
 
@@ -34,7 +34,7 @@ app.all(
       }
 );
 
-let port = process.env.PORT || 3369;
+let port = process.env.PORT || 3333;
 app.listen(port, () => {
   console.log(`Express server listening on port ${port}`);
 });

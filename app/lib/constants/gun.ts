@@ -6,16 +6,16 @@ import 'gun/lib/store';
 import 'gun/lib/rindexed';
 import 'gun/lib/not.js';
 import { IGunConstructorOptions } from 'gun/types/options';
-import { json } from 'remix';
+import { json, redirect } from 'remix';
 import { Wallet } from 'ethers';
 
-let gunOpts = async() => {
- let relay = await Relays();
- let relayOpts: IGunConstructorOptions = {
-  peers: relay,
- localStorage: false 
-};
-return relayOpts
+let gunOpts = async () => {
+  let relay = await Relays();
+  let relayOpts: IGunConstructorOptions = {
+    peers: relay,
+    localStorage: false
+  };
+  return relayOpts
 }
 
 
@@ -31,9 +31,9 @@ export const getDate = () => {
 
 
 export type UseGunType = {
-  createUser: (email: string, password: string) => Promise<string | undefined>;
-  login: (email: string, password: string) => Promise<{ ok: boolean, result: any }>;
-  resetPassword: (email: string, oldPassword: string, newPassword: string) => Promise<{ ok: boolean, result: string }>;
+  createUser: (username: string, password: string) => Promise<string | undefined>;
+  login: (username: string, password: string) => Promise<{ ok: boolean, result: any }>;
+  resetPassword: (username: string, oldPassword: string, newPassword: string) => Promise<{ ok: boolean, result: string }>;
   getData: (document: string, key?: string, decryptionKey?: string) => Promise<any>;
   addData: (document: string, key: string, value: any, encryptionKey?: string) => Promise<string>;
   getKey: (alias: string, password: string) => Promise<{ ok: boolean, result: string }>;
@@ -45,10 +45,10 @@ export function withGun(): UseGunType {
   console.log('using gun')
   // set localStorage to false to use indexedDB (>10mb storage)
   const gun = Gun(gunOpts);
-  const user = gun.user().recall({sessionStorage: true});
+  const user = gun.user().recall({ sessionStorage: true });
 
-  const createUser = async (email: string, password: string): Promise<string | undefined> =>
-    new Promise((resolve) => user.create(email, password, (ack) => {
+  const createUser = async (username: string, password: string): Promise<string | undefined> =>
+    new Promise((resolve) => user.create(username, password, (ack) => {
       console.log(ack)
       if (Object.getOwnPropertyNames(ack).includes('ok')) {
         resolve(undefined)
@@ -57,11 +57,14 @@ export function withGun(): UseGunType {
       }
     }));
 
-  const login = (email: string, password: string): Promise<{ ok: boolean, result: any }> =>
-    new Promise((resolve) => user.auth(email, password, (ack) => {
-      console.log(ack)
+  const login = (username: string, password: string): Promise<{ ok: boolean, result: any }> =>
+    new Promise((resolve) => user.auth(username, password, (ack) => {
+      user.get('name').put({ data: username });
+      user.get('epub').put({ data: (ack as any).get })
+
       if (Object.getOwnPropertyNames(ack).includes('id')) {
-        resolve({ ok: true, result: 'Your public key is ' + (ack as any).get });
+        
+        resolve({ ok: true, result: 'Your public key is ' + (ack as any).get } )
       } else {
         resolve({ ok: false, result: JSON.parse(JSON.stringify(ack)).err })
       }
@@ -71,18 +74,22 @@ export function withGun(): UseGunType {
     if (encryptionKey) {
       value = await Gun.SEA.encrypt(value, encryptionKey);
     }
-    return new Promise((resolve) =>
-      user.get(document).get(key).put(value as never, (ack) => {
+    return new Promise((resolve) => {
+      const doc = user.get(document)
+      const set = user.get(key).put(value as never, (ack) => {
         resolve(ack.ok ? 'Added data!' : ack.err?.message ?? 'Could not add data');
       })
-    )
+      doc.set(set)
+      return set
+    })
   }
+  
 
   return {
     createUser,
     login,
-    resetPassword: (email: string, oldPassword: string, newPassword: string) =>
-      new Promise((resolve) => user.auth(email, oldPassword, (ack) => {
+    resetPassword: (username: string, oldPassword: string, newPassword: string) =>
+      new Promise((resolve) => user.auth(username, oldPassword, (ack) => {
         console.log(ack)
         if (Object.getOwnPropertyNames(ack).includes('ok')) {
           resolve({ ok: true, result: '' });

@@ -9,6 +9,7 @@ import {
   ScrollRestoration,
   useCatch,
   useLoaderData,
+  json,
 } from 'remix';
 import type { LinksFunction } from 'remix';
 import styles from '~/styles/tailwind.css';
@@ -48,7 +49,7 @@ export let links: LinksFunction = () => {
       sizes: '16x16',
       href: '/favicon-16x16.png',
     },
-    { rel: 'manifest', href: '/site.webmanifest' },
+    { rel: 'manifest', href: '/manifest.json' },
   ];
 };
 
@@ -135,6 +136,16 @@ export function CatchBoundary() {
   );
 }
 
+export let loader: LoaderFunction = async ({ params }) => {
+  // loader function
+  let data = {
+    links: [
+      { to: '/', label: 'Home' },
+      { to: '/login', label: 'Login' },
+    ],
+  };
+  return json(data)
+};
 function Document({
   children,
   title,
@@ -143,7 +154,7 @@ function Document({
   title?: string;
 }) {
 
-
+  let data = useLoaderData();
   return (
     <html lang="en">
       <head>
@@ -154,6 +165,7 @@ function Document({
         <Links />
       </head>
       <body>
+        <Header links={data.links} hideHelp={true} logo={<Logo />} />
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -163,32 +175,19 @@ function Document({
   );
 }
 
-export let loader: LoaderFunction = async ({ params }) => {
-  // loader function
-  return {
-    links: [
-      { to: '/', label: 'Home' },
-      { to: '/login', label: 'Login' },
-    ],
-  };
-};
 function Layout({ children }: { children: React.ReactNode }) {
-  let data = useLoaderData();
+
   return (
     <div className="relative">
       <div className="mx-auto h-full" style={{ minHeight: 85 + 'vh' }}>
         <div className="relative z-10 pb-8 overflow-hidden sm:pb-16 md:pb-20 lg:w-full lg:pb-28 xl:pb-32 h-full">
           <div className="dark">
-            <Header
-              links={data.links}
-              hideHelp={true}
-              logo={<Logo />}
-            />
+
           </div>
 
-          <main className={`mx-auto px-4 mt-8 sm:px-6  lg:px-8 h-full`}>
+          
             {children}
-          </main>
+     
         </div>
       </div>
       <div className="dark"></div>
