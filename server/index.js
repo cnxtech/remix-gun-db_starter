@@ -5,7 +5,6 @@ const morgan = require("morgan");
 const { createRequestHandler } = require("@remix-run/express");
 
 let Gun = require('gun');
-const http = require('http');
 const MODE = process.env.NODE_ENV;
 const BUILD_DIR = path.join(process.cwd(), "server/build");
 
@@ -46,6 +45,7 @@ const _server = app.listen(_port, () => {
 
 
 Gun({
+  file: `data${_port}.relay`,
   web: _server,
 });
 

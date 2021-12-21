@@ -1,28 +1,12 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 // app/routes/login.tsx
-import {
-  ActionFunction,
-  Form,
-  json,
-  LoaderFunction,
-  redirect,
-  useActionData,
-  useLoaderData,
-} from 'remix';
-import { authenticator } from '~/auth.server';
+import { ActionFunction, Form, Link, useActionData } from 'remix';
 import InputText from '~/components/InputText';
-import { withGun } from '~/lib/constants/Gun';
+import { Strapd } from '~/lib/constants/Gun';
 import invariant from 'tiny-invariant';
-import { GunCtxProvider } from '~/lib/contexts/useAuth';
-type LoginType = {
-  email: string;
-  password: string;
-};
-type Actions = {
-  noEmail: string;
-  noPassword: string;
-};
+
+
 
 export let action: ActionFunction = async ({ request }) => {
   let form = await request.formData();
@@ -31,17 +15,13 @@ export let action: ActionFunction = async ({ request }) => {
 
   invariant(user && password, 'string');
 
- let data = withGun().login(user, password);
+  let login = await Strapd().login(user, password);
 
- if(data === undefined){
-   return null
- }
-    return data
+  return login;
 };
 
 export default function Login() {
-
-let action = useActionData()
+  let action = useActionData();
 
   return (
     <div className="flex flex-wrap w-full">
@@ -103,11 +83,11 @@ let action = useActionData()
             <h5>
               {action ? (
                 action.result
-               
-              ) : ( <>
-              <p> New User?</p>
-                <a className="font-semibold underline">Register here.</a>
-                </>
+              ) : (
+                <Link to={'/signup'}>
+                  <p> New User?</p>
+                  <a className="font-semibold underline">Register here.</a>
+                </Link>
               )}
             </h5>
           </div>

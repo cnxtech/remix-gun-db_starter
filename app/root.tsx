@@ -136,16 +136,7 @@ export function CatchBoundary() {
   );
 }
 
-export let loader: LoaderFunction = async ({ params }) => {
-  // loader function
-  let data = {
-    links: [
-      { to: '/', label: 'Home' },
-      { to: '/login', label: 'Login' },
-    ],
-  };
-  return json(data)
-};
+
 function Document({
   children,
   title,
@@ -154,7 +145,13 @@ function Document({
   title?: string;
 }) {
 
-  let data = useLoaderData();
+let data = {
+  links: [
+    { to: '/', label: 'Home' },
+    { to: '/login', label: 'Login' },
+    { to: '/signup', label: 'Signup' },
+  ],
+};
   return (
     <html lang="en">
       <head>
@@ -164,8 +161,17 @@ function Document({
         <Meta />
         <Links />
       </head>
+      <Header
+        links={data.links.map((item: any) => {
+          return { label: item.label, to: item.to };
+        })}
+        ddmItems={data.links.map((item: any) => {
+          return { label: item.label, to: item.to };
+        })}
+        hideHelp={true}
+        logo={<Logo />}
+      />
       <body>
-        <Header links={data.links} hideHelp={true} logo={<Logo />} />
         {children}
         <ScrollRestoration />
         <Scripts />

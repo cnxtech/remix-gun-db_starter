@@ -6,13 +6,15 @@ import 'gun/lib/store';
 import 'gun/lib/rindexed';
 import 'gun/lib/not.js';
 import { IGunConstructorOptions } from 'gun/types/options';
-import { json, redirect } from 'remix';
-import { Wallet } from 'ethers';
+import { createWallet } from './Stellar/create-pair';
+import { IGunChainReference } from 'gun/types/chain';
+
 
 let gunOpts = async () => {
   let relay = await Relays();
   let relayOpts: IGunConstructorOptions = {
     peers: relay,
+      // set localStorage to false to use indexedDB (>10mb storage)
     localStorage: false
   };
   return relayOpts
@@ -31,6 +33,8 @@ export const getDate = () => {
 
 
 export type UseGunType = {
+  gun: IGunChainReference; // to load into client memory
+  user: IGunChainReference;// to load into client memory
   createUser: (username: string, password: string) => Promise<string | undefined>;
   login: (username: string, password: string) => Promise<{ ok: boolean, result: any }>;
   resetPassword: (username: string, oldPassword: string, newPassword: string) => Promise<{ ok: boolean, result: string }>;
@@ -40,10 +44,10 @@ export type UseGunType = {
   setKey: (alias: string, password: string) => Promise<any>;
 }
 
-export function withGun(): UseGunType {
+export function Strapd(): UseGunType {
 
   console.log('using gun')
-  // set localStorage to false to use indexedDB (>10mb storage)
+
   const gun = Gun(gunOpts);
   const user = gun.user().recall({ sessionStorage: true });
 
@@ -59,12 +63,8 @@ export function withGun(): UseGunType {
 
   const login = (username: string, password: string): Promise<{ ok: boolean, result: any }> =>
     new Promise((resolve) => user.auth(username, password, (ack) => {
-      user.get('name').put({ data: username });
-      user.get('epub').put({ data: (ack as any).get })
-
       if (Object.getOwnPropertyNames(ack).includes('id')) {
-        
-        resolve({ ok: true, result: 'Your public key is ' + (ack as any).get } )
+        resolve({ ok: true, result:(ack as any).get });
       } else {
         resolve({ ok: false, result: JSON.parse(JSON.stringify(ack)).err })
       }
@@ -83,9 +83,11 @@ export function withGun(): UseGunType {
       return set
     })
   }
-  
+
 
   return {
+    gun,
+    user,
     createUser,
     login,
     resetPassword: (username: string, oldPassword: string, newPassword: string) =>
@@ -128,9 +130,11 @@ export function withGun(): UseGunType {
             if (!data) {
               resolve({ ok: false, result: 'could not find key' })
             } else {
-              const decrypted = await Gun.SEA.decrypt(data, password);
-              const wallet = new Wallet(decrypted as string);
-              resolve({ ok: true, result: wallet.address });
+              const decrypted = await Gun.SEA.decrypt(data, password)
+              if (typeof decrypted === 'string') {
+                resolve({ ok: true, result: decrypted as string });
+              }
+
             }
           })
         })),
@@ -147,10 +151,10 @@ export function withGun(): UseGunType {
           if (!ok) {
             resolve({ ok, result })
           }
-          const wallet = Wallet.createRandom()
-          const res = await addData('keys', 'master', wallet.privateKey, password)
+const wallet = await createWallet()
+          const res = await addData('keys', 'master', wallet.secret, password)
           if (res === 'Added data!') {
-            resolve({ ok: true, result: wallet.address })
+            resolve({ ok: true, result: wallet.public })
           } else {
             resolve({ ok: false, result: res })
           }

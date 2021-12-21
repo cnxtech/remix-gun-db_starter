@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import type { MetaFunction, LoaderFunction } from "remix";
 import { json } from "remix";
 
