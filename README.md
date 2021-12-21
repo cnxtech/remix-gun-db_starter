@@ -1,6 +1,16 @@
-# Welcome to Remix!
+# Remix.Gun Boilerplate
 
-- [Remix Docs](https://remix.run/docs)
+![Remix/Gun](public/images/github/rmix-gun.png "Remix.Gun")
+
+This is my white-label boilerplate when building full stack apps. Using the Graph Universal Database, SEA authentication, and Remix's Express server adapter. Hopefuilly becomes an ongoging project as I learn more.
+
+## Goals
+
+- [x] Relay GunDB inside the Remix Express Server  
+- [x] Authorization with Gun.Sea/ Gun's user api
+  - [ ] Password-less authorization. 
+- [ ] Data writing / mapping with high level Gun function
+
 
 ## Development
 
@@ -36,24 +46,4 @@ npm start
 
 Now you'll need to pick a host to deploy it to.
 
-### DIY
 
-If you're familiar with deploying express applications you should be right at home just make sure to deploy the output of `remix build`
-
-- `server/build/`
-- `public/build/`
-
-### Using a Template
-
-When you ran `npx create-remix@latest` there were a few choices for hosting. You can run that again to create a new project, then copy over your `app/` folder to the new project that's pre-configured for your target server.
-
-```sh
-cd ..
-# create a new project, and pick a pre-configured host
-npx create-remix@latest
-cd my-new-remix-app
-# remove the new project's app (not the old one!)
-rm -rf app
-# copy your app over
-cp -R ../my-old-remix-app/app app
-```

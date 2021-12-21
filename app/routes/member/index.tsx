@@ -1,8 +1,7 @@
-import { ActionFunction, Form, Link, LoaderFunction, redirect, useActionData } from 'remix';
+import { Form, Link, redirect, useActionData } from 'remix';
 import InputText from '~/components/InputText';
 import { Strapd } from '~/lib/constants/Gun';
 import invariant from 'tiny-invariant';
-import {getHash} from '../../utils/hash'
 
 
 export async function action({ request }) {
