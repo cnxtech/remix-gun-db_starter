@@ -1,5 +1,4 @@
 import {
-  LoaderFunction,
   Links,
   LiveReload,
   Meta,
@@ -8,8 +7,7 @@ import {
   Scripts,
   ScrollRestoration,
   useCatch,
-  useLoaderData,
-  json,
+  useLocation,
 } from 'remix';
 import type { LinksFunction } from 'remix';
 import styles from '~/styles/tailwind.css';
@@ -17,6 +15,7 @@ import globalStylesUrl from '~/styles/global.css';
 import darkStylesUrl from '~/styles/dark.css';
 import Header from './components/Header';
 import Logo from './components/Logo';
+import React from 'react';
 
 export let links: LinksFunction = () => {
   return [
@@ -81,26 +80,24 @@ export default function App() {
 }
 
 // https://remix.run/docs/en/v1/api/conventions#errorboundary
-export function ErrorBoundary({ error }: { error: Error }) {
+export function ErrorBoundary({ error }) {
   console.error(error);
   return (
-    <Document title="Error!">
-      <Layout>
-        <div>
-          <h1>There was an error</h1>
-          <p>{error.message}</p>
-          <hr />
-          <p>
-            Hey, developer, you should replace this with what you want your
-            users to see.
-          </p>
-        </div>
-      </Layout>
-    </Document>
+    <html>
+      <head>
+        <title>Oh no!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        {/* add the UI you want your users to see */}
+        <Scripts />
+      </body>
+    </html>
   );
 }
 
-// https://remix.run/docs/en/v1/api/conventions#catchboundary
+// https://remix.run/docs/en/v1/api/conventions# catchboundary
 export function CatchBoundary() {
   let caught = useCatch();
 
@@ -136,7 +133,6 @@ export function CatchBoundary() {
   );
 }
 
-
 function Document({
   children,
   title,
@@ -144,14 +140,7 @@ function Document({
   children: React.ReactNode;
   title?: string;
 }) {
-
-let data = {
-  links: [
-    { to: '/', label: 'Home' },
-    { to: '/login', label: 'Login' },
-    { to: '/signup', label: 'Signup' },
-  ],
-};
+  
   return (
     <html lang="en">
       <head>
@@ -161,18 +150,10 @@ let data = {
         <Meta />
         <Links />
       </head>
-      <Header
-        links={data.links.map((item: any) => {
-          return { label: item.label, to: item.to };
-        })}
-        ddmItems={data.links.map((item: any) => {
-          return { label: item.label, to: item.to };
-        })}
-        hideHelp={true}
-        logo={<Logo />}
-      />
+
       <body>
         {children}
+        <RouteChangeAnnouncement />
         <ScrollRestoration />
         <Scripts />
         {process.env.NODE_ENV === 'development' && <LiveReload />}
@@ -181,22 +162,79 @@ let data = {
   );
 }
 
-function Layout({ children }: { children: React.ReactNode }) {
 
+
+function Layout({ children }: { children: React.ReactNode }) {
+  let data = {
+  links: [
+    { to: '/', label: 'Home' },
+    { to: '/member', label: 'SignUp/LogIn' },
+  ],
+};
   return (
     <div className="relative">
+      <Header
+        links={data.links}
+        hideHelp={true}
+        logo={<Logo />}
+      />
       <div className="mx-auto h-full" style={{ minHeight: 85 + 'vh' }}>
         <div className="relative z-10 pb-8 overflow-hidden sm:pb-16 md:pb-20 lg:w-full lg:pb-28 xl:pb-32 h-full">
-          <div className="dark">
-
-          </div>
-
-          
-            {children}
-     
+          <div className="dark">{children}</div>
         </div>
       </div>
-      <div className="dark"></div>
     </div>
   );
 }
+
+const RouteChangeAnnouncement = React.memo(() => {
+  let [hydrated, setHydrated] = React.useState(false);
+  let [innerHtml, setInnerHtml] = React.useState('');
+  let location = useLocation();
+
+  React.useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  let firstRenderRef = React.useRef(true);
+  React.useEffect(() => {
+    // Skip the first render because we don't want an announcement on the
+    // initial page load.
+    if (firstRenderRef.current) {
+      firstRenderRef.current = false;
+      return;
+    }
+
+    let pageTitle = location.pathname === '/' ? 'Home' : document.title;
+    setInnerHtml(`Navigated to ${pageTitle}`);
+  }, [location.pathname]);
+
+  // Render nothing on the server. The live region provides no value unless
+  // scripts are loaded and the browser takes over normal routing.
+  if (!hydrated) {
+    return null;
+  }
+
+  return (
+    <div
+      aria-live="assertive"
+      aria-atomic
+      id="route-change-region"
+      style={{
+        border: '0',
+        clipPath: 'inset(100%)',
+        clip: 'rect(0 0 0 0)',
+        height: '1px',
+        margin: '-1px',
+        overflow: 'hidden',
+        padding: '0',
+        position: 'absolute',
+        width: '1px',
+        whiteSpace: 'nowrap',
+        wordWrap: 'normal',
+      }}
+    >
+      {innerHtml}
+    </div>
+  );
+});

@@ -6,7 +6,6 @@ import 'gun/lib/store';
 import 'gun/lib/rindexed';
 import 'gun/lib/not.js';
 import { IGunConstructorOptions } from 'gun/types/options';
-import { createWallet } from './Stellar/create-pair';
 import { IGunChainReference } from 'gun/types/chain';
 
 
@@ -47,7 +46,6 @@ export type UseGunType = {
 export function Strapd(): UseGunType {
 
   console.log('using gun')
-
   const gun = Gun(gunOpts);
   const user = gun.user().recall({ sessionStorage: true });
 
@@ -75,12 +73,9 @@ export function Strapd(): UseGunType {
       value = await Gun.SEA.encrypt(value, encryptionKey);
     }
     return new Promise((resolve) => {
-      const doc = user.get(document)
-      const set = user.get(key).put(value as never, (ack) => {
+     user.get(document).get(key).put(value as never, (ack) => {
         resolve(ack.ok ? 'Added data!' : ack.err?.message ?? 'Could not add data');
       })
-      doc.set(set)
-      return set
     })
   }
 
@@ -142,6 +137,7 @@ export function Strapd(): UseGunType {
       new Promise((resolve) =>
         gun.get(`~@${alias}`).once(async (user) => {
           if (!user) {
+            
             const err = await createUser(alias, password);
             if (err) {
               resolve({ ok: false, result: err })
@@ -151,10 +147,10 @@ export function Strapd(): UseGunType {
           if (!ok) {
             resolve({ ok, result })
           }
-const wallet = await createWallet()
-          const res = await addData('keys', 'master', wallet.secret, password)
+
+          const res = await addData('keys', 'master',  result, password)
           if (res === 'Added data!') {
-            resolve({ ok: true, result: wallet.public })
+            resolve({ ok: true, result: res })
           } else {
             resolve({ ok: false, result: res })
           }

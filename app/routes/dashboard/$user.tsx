@@ -1,7 +1,9 @@
 import { LoaderFunction, useLoaderData, json } from 'remix';
 
 export let loader: LoaderFunction = async({params}) => {
-  let user = {}
+  let user = {
+    param: params.user
+  }
 return json(user)
 };
 
@@ -13,7 +15,7 @@ let data = useLoaderData()
     <>
       <div>
       </div>
-      <aside>{data}</aside>
+      <aside>{data.param}</aside>
     </>
   );
 }
