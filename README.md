@@ -10,6 +10,11 @@ This is my white-label boilerplate when building full stack apps. Using the Grap
 - [x] Authorization with Gun.Sea/ Gun's user api
   - [ ] Password-less authorization. 
 - [ ] Data writing / mapping with high level Gun function
+- [ ] Dynamic relay database peers
+- [ ] Docker Swarm deployment
+- [ ] Cryptographic ledger 
+- [ ] Data Encrytion
+- [ ] Data Compression
 
 
 ## Development

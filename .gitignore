@@ -5,3 +5,4 @@ radata
 /.cache
 /server/build
 /public/build
+.DS_Store

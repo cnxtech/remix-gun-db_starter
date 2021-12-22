@@ -7,7 +7,7 @@ import 'gun/lib/rindexed';
 import 'gun/lib/not.js';
 import { IGunConstructorOptions } from 'gun/types/options';
 import { IGunChainReference } from 'gun/types/chain';
-
+import invariant from 'tiny-invariant';
 
 let gunOpts = async () => {
   let relay = await Relays();
@@ -31,19 +31,21 @@ export const getDate = () => {
 }
 
 
-export type UseGunType = {
+export type StrapdType = {
   gun: IGunChainReference; // to load into client memory
   user: IGunChainReference;// to load into client memory
   createUser: (username: string, password: string) => Promise<string | undefined>;
   login: (username: string, password: string) => Promise<{ ok: boolean, result: any }>;
   resetPassword: (username: string, oldPassword: string, newPassword: string) => Promise<{ ok: boolean, result: string }>;
   getData: (document: string, key?: string, decryptionKey?: string) => Promise<any>;
-  addData: (document: string, key: string, value: any, encryptionKey?: string) => Promise<string>;
+  putData: (document: string, key: string, value: any, encryptionKey?: string) => Promise<string>;
+  // mapData: (document: string, key?: string, decryptionKey?: string) => Promise<any>;
+  // setData: (document: string, key: string, value: any, encryptionKey?: string) => Promise<string>;
   getKey: (alias: string, password: string) => Promise<{ ok: boolean, result: string }>;
   setKey: (alias: string, password: string) => Promise<any>;
 }
 
-export function Strapd(): UseGunType {
+export function Strapd(): StrapdType {
 
   console.log('using gun')
   const gun = Gun(gunOpts);
@@ -68,7 +70,7 @@ export function Strapd(): UseGunType {
       }
     }))
 
-  const addData = async (document: string, key: string, value: any, encryptionKey?: string): Promise<string> => {
+  const putData = async (document: string, key: string, value: any, encryptionKey?: string): Promise<string> => {
     if (encryptionKey) {
       value = await Gun.SEA.encrypt(value, encryptionKey);
     }
@@ -106,7 +108,7 @@ export function Strapd(): UseGunType {
           : user.get(document).once(resolve)
       )
     },
-    addData,
+    putData,
     getKey: (alias: string, password: string) =>
       new Promise((resolve) =>
         gun.get(`~@${alias}`).once(async (exists) => {
@@ -133,26 +135,26 @@ export function Strapd(): UseGunType {
             }
           })
         })),
-    setKey: async (alias: string, password: string) =>
+    setKey: async (username: string, password: string) =>
       new Promise((resolve) =>
-        gun.get(`~@${alias}`).once(async (user) => {
+        gun.get(`~@${username}`).once(async (user) => {
+          invariant(username && password, 'string');
           if (!user) {
-            
-            const err = await createUser(alias, password);
+            const err = await createUser(username, password);
             if (err) {
-              resolve({ ok: false, result: err })
+              resolve({ ok: false, result: err });
             }
           }
-          const { ok, result } = await login(alias, password);
+          const { ok, result } = await login(username, password);
           if (!ok) {
-            resolve({ ok, result })
+            resolve({ ok, result });
           }
 
-          const res = await addData('keys', 'master',  result, password)
+          const res = await putData('keys', 'master', result, password);
           if (res === 'Added data!') {
-            resolve({ ok: true, result: res })
+            resolve({ ok: true, result: result });
           } else {
-            resolve({ ok: false, result: res })
+            resolve({ ok: false, result: res });
           }
         })
       )
