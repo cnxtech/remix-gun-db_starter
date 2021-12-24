@@ -27,7 +27,6 @@ module.exports = withAnimations({
   },
   plugins: [
     require('@tailwindcss/typography'),
-    require('@tailwindcss/aspect-ratio')
   ],
   future: {
     purgeLayersByDefault: true,

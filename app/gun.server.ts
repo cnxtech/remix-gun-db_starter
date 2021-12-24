@@ -6,7 +6,7 @@ let gunOpts = async () => {
     let relayOpts: IGunConstructorOptions = {
         peers: relay,
         // set localStorage to false to use indexedDB (>10mb storage)
-        localStorage: false
+        // localStorage: false
     };
     return relayOpts
 }

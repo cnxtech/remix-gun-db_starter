@@ -18,9 +18,9 @@ export let meta: MetaFunction = () => {
 export default function Index() {
 
   return (
-    <div className="remix__page">
+    <div className="mt-10 px-5">
       <main>
-      <Display title="Remix" /> 
+      <Display title="Remix/ GunDb" span="App Starter" description="Application boilerplate with authentication && sessionStorage, data encryption, and tailwind styling. " /> 
       </main>
       <aside>
        

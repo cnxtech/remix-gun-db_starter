@@ -13,7 +13,7 @@ This is my white-label boilerplate when building full stack apps. Using the Grap
 - [ ] Dynamic relay database peers
 - [ ] Docker Swarm deployment
 - [ ] Cryptographic ledger 
-- [ ] Data Encrytion
+- [x] Data Encrytion
 - [ ] Data Compression
 
 

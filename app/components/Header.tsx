@@ -129,7 +129,7 @@ const Header = (props: HeaderProps) => {
                   </a>
                 )}
                 {props.ddmItems && (
-                  <div className="ml-3 relative">
+                  <div className="ml-3 z-50 relative">
                     <Ddm
                       icon={
                         <svg
