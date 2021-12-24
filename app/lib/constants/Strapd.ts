@@ -55,6 +55,7 @@ let user = gun.user().recall({ sessionStorage: true })
   const login = (username: string, password: string): Promise<{ ok: boolean, result: any }> =>
     new Promise((resolve) => user.auth(username, password, (ack) => {
       if (Object.getOwnPropertyNames(ack).includes('id')) {
+
         resolve({ ok: true, result:(ack as any).get });
       } else {
         resolve({ ok: false, result: JSON.parse(JSON.stringify(ack)).err })
@@ -72,9 +73,9 @@ let user = gun.user().recall({ sessionStorage: true })
     })
   }
  
-  const mapData = async (document: string , decryptionKey?: string): Promise<any> => {
+  const mapData = async (document: string , key:string, decryptionKey?: string): Promise<any> => {
     return new Promise((resolve) =>
-  user.get(document).map().open(async (data:any) => {
+  user.get(document).get(key).once(async (data:any) => {
     Object.keys(data).forEach(async(data)=> {
       console.log('data:', data) 
           decryptionKey ? 
@@ -99,7 +100,7 @@ let user = gun.user().recall({ sessionStorage: true })
     getData: (document: string , key?: string, decryptionKey?: string) => {
       return new Promise((resolve) =>
         key
-          ? user.get(document).get(key).load(async (data) => {
+          ? user.get(document).get(key).once(async (data) => {
             console.log('data:', data)
             decryptionKey
               ? resolve(await Gun.SEA.decrypt(data, decryptionKey))

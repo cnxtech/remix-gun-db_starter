@@ -1,7 +1,7 @@
-import bcrypt from "bcrypt";
+
 import Gun from "gun";
 import { createCookieSessionStorage, redirect } from "remix";
-import {Strapd} from '~/lib/constants/Strapd';
+import {getDate, Strapd} from '~/lib/constants/Strapd';
 import { gun} from "./gun.server";
 import 'dotenv'
 const sea = Gun.SEA
@@ -9,13 +9,26 @@ type LoginForm = {
   username: string;
   password: string;
 };
-const {createUser, setKey, getKey,} = Strapd()
+const {createUser, setKey, putData, getKey,} = Strapd()
 export async function register({ username, password }: LoginForm) {
   let err = await createUser(username, password);
   if (err) {
     return {ok: false, result: err}
   }
+  
   let { ok, result } = await setKey(username, password);
+  const userInfo = {
+    alias: username,
+    id: result.slice(0, 10),
+    createdAt: getDate,
+    updatedAt: getDate
+
+  }
+
+  const res = await putData('user/info', username, userInfo);
+  if (res !== 'Added data!') {
+    return { ok: false, result: 'Could not create user info' };
+  } 
   return {ok:ok, result:result}
 }
 
@@ -27,6 +40,8 @@ export async function login({ username, password }: LoginForm) {
       result: result
     };
   }
+
+
   return {ok:ok, result: result}
 }
 

@@ -42,7 +42,7 @@ export async function action({ request }) {
         };
       }
 
-      return createUserSession(result, `/profile/${username}}`);
+      return createUserSession(result, `/dashboard`);
     }
     case 'register': {
       let { ok, result } = await register({ username, password });
@@ -52,7 +52,7 @@ export async function action({ request }) {
           formError: `${result}`,
         };
       }
-      return createUserSession(result, `/profile/${username}}`);
+      return createUserSession(result, `/dashboard`);
     }
     default: {
       return { fields, formError: `Login type invalid` };
