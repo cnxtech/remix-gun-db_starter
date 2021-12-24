@@ -50,10 +50,12 @@ const InputText = (props: Props) => {
                 type={props.type || 'text'}
                 name={props.name}
                 placeholder={props.placeholder}
+                aria-invalid={props.error? true : false}
+                aria-describedby={props.error}
             />
             {props.withForceIndications && (
                 <>
-                    <div className="grid w-full h-1 grid-cols-12 gap-4 mt-3">
+                    <div className="grid w-full h-1 grid-cols-12 gap-4 mt-12">
                         <div className="h-full col-span-3 bg-green-500 rounded"></div>
                         <div className="h-full col-span-3 bg-green-500 rounded"></div>
                         <div className="h-full col-span-3 bg-green-500 rounded"></div>
@@ -62,7 +64,7 @@ const InputText = (props: Props) => {
                     <div className="mt-2 text-green-500">Valid password</div>
                 </>
             )}
-            {props.error && (
+            {/* {props.error && (
                 <>
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -77,7 +79,7 @@ const InputText = (props: Props) => {
 
                     <p className="absolute text-sm text-red-500 -bottom-6">{props.error}</p>
                 </>
-            )}
+            )} */}
         </div>
     );
 };

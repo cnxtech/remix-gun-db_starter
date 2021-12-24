@@ -1,11 +1,10 @@
 type SVG = {
   fill?: string;
   path: string;
-  size: number;
-  viewBox: Array<Viewbox>;
+  size: string;
+  viewBox?: string;
 };
 
-type Viewbox = [minX: number, minY: number, height: number, width: number];
 
 export let paths = {
   email:
@@ -26,10 +25,10 @@ export let paths = {
 export default function SvgIcon({ path, fill, size, viewBox }: SVG) {
   return (
     <svg
-      width={size.toString() || '15'}
-      height={size.toString() || '15'}
+      width={size || '15'}
+      height={size || '15'}
       fill={fill || 'currentColor'}
-      viewBox={viewBox.toString() || '0 0 1792 1792'}
+      viewBox={viewBox || '0 0 1792 1792'}
       xmlns="http://www.w3.org/2000/svg"
     >
       <path d={path || paths.email} />

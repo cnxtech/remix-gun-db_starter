@@ -1,8 +1,7 @@
 const defaultTheme = require('tailwindcss/defaultTheme')
-
-module.exports = {
+const withAnimations = require('animated-tailwindcss');
+module.exports = withAnimations({
   important: true,
-  // Active dark mode on class basis
   darkMode: "class",
   i18n: {
     locales: ["en-US"],
@@ -10,8 +9,6 @@ module.exports = {
   },
   content: [
     "./app/**/*.tsx",
-    "./app/**/*.jsx",
-    "./app/**/*.js",
     "./app/**/*.ts"
   ],
   theme: {
@@ -30,10 +27,9 @@ module.exports = {
   },
   plugins: [
     require('@tailwindcss/typography'),
-    require('@tailwindcss/line-clamp'),
-    require('@tailwindcss/aspect-ratio'),
+    require('@tailwindcss/aspect-ratio')
   ],
   future: {
     purgeLayersByDefault: true,
   },
-};
+});

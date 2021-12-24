@@ -166,11 +166,11 @@ function Document({
 
 function Layout({ children }: { children: React.ReactNode }) {
   let data = {
-  links: [
-    { to: '/', label: 'Home' },
-    { to: '/member', label: 'SignUp/LogIn' },
-  ],
-};
+    links: [
+      { to: '/', label: 'Home' },
+      { to: '/auth', label: 'SignUp/LogIn' },
+    ],
+  };
   return (
     <div className="relative">
       <Header

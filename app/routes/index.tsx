@@ -1,5 +1,6 @@
 import type { MetaFunction, LoaderFunction } from "remix";
 import { json } from "remix";
+import Display from "~/components/DisplayHeading";
 
 
 export let loader: LoaderFunction = () => {
@@ -19,7 +20,7 @@ export default function Index() {
   return (
     <div className="remix__page">
       <main>
-       
+      <Display title="Remix" /> 
       </main>
       <aside>
        

@@ -1,23 +1,18 @@
-import Gun from 'gun';
-import Relays from '~/lib/constants/relay-peers';
+
 import 'gun/lib/radix';
 import 'gun/lib/radisk';
 import 'gun/lib/store';
 import 'gun/lib/rindexed';
 import 'gun/lib/not.js';
-import { IGunConstructorOptions } from 'gun/types/options';
-import { IGunChainReference } from 'gun/types/chain';
+import 'gun/lib/open'
+import 'gun/lib/load'
+import 'gun/lib/path'
+import 'gun/lib/then'
 import invariant from 'tiny-invariant';
+import { gun} from '~/gun.server';
+import Gun from 'gun';
 
-let gunOpts = async () => {
-  let relay = await Relays();
-  let relayOpts: IGunConstructorOptions = {
-    peers: relay,
-      // set localStorage to false to use indexedDB (>10mb storage)
-    localStorage: false
-  };
-  return relayOpts
-}
+
 
 
 // Date function
@@ -32,24 +27,20 @@ export const getDate = () => {
 
 
 export type StrapdType = {
-  gun: IGunChainReference; // to load into client memory
-  user: IGunChainReference;// to load into client memory
   createUser: (username: string, password: string) => Promise<string | undefined>;
   login: (username: string, password: string) => Promise<{ ok: boolean, result: any }>;
   resetPassword: (username: string, oldPassword: string, newPassword: string) => Promise<{ ok: boolean, result: string }>;
-  getData: (document: string, key?: string, decryptionKey?: string) => Promise<any>;
-  putData: (document: string, key: string, value: any, encryptionKey?: string) => Promise<string>;
-  // mapData: (document: string, key?: string, decryptionKey?: string) => Promise<any>;
-  // setData: (document: string, key: string, value: any, encryptionKey?: string) => Promise<string>;
+  getData: (path: string, key?: string, decryptionKey?: string) => Promise<any>;
+  putData: (path: string, key: string, value: any, encryptionKey?: string) => Promise<string>;
+  mapData: (path: string, decryptionKey?: string) => Promise<any>;
+  // setData: (path: string, key: string, value: any, encryptionKey?: string) => Promise<string>;
   getKey: (alias: string, password: string) => Promise<{ ok: boolean, result: string }>;
   setKey: (alias: string, password: string) => Promise<any>;
 }
 
 export function Strapd(): StrapdType {
 
-  console.log('using gun')
-  const gun = Gun(gunOpts);
-  const user = gun.user().recall({ sessionStorage: true });
+let user = gun.user().recall({ sessionStorage: true })
 
   const createUser = async (username: string, password: string): Promise<string | undefined> =>
     new Promise((resolve) => user.create(username, password, (ack) => {
@@ -70,7 +61,7 @@ export function Strapd(): StrapdType {
       }
     }))
 
-  const putData = async (document: string, key: string, value: any, encryptionKey?: string): Promise<string> => {
+  const putData = async (document: string , key: string, value: any, encryptionKey?: string): Promise<string> => {
     if (encryptionKey) {
       value = await Gun.SEA.encrypt(value, encryptionKey);
     }
@@ -80,11 +71,20 @@ export function Strapd(): StrapdType {
       })
     })
   }
+ 
+  const mapData = async (document: string , decryptionKey?: string): Promise<any> => {
+    return new Promise((resolve) =>
+  user.get(document).map().open(async (data:any) => {
+    Object.keys(data).forEach(async(data)=> {
+      console.log('data:', data) 
+          decryptionKey ? 
+          resolve(await Gun.SEA.decrypt(data, decryptionKey))
+        : resolve(data)}) 
+  }))}
+
 
 
   return {
-    gun,
-    user,
     createUser,
     login,
     resetPassword: (username: string, oldPassword: string, newPassword: string) =>
@@ -96,10 +96,10 @@ export function Strapd(): StrapdType {
           resolve({ ok: false, result: JSON.parse(JSON.stringify(ack)).err })
         }
       }, { change: newPassword })),
-    getData: (document: string, key?: string, decryptionKey?: string) => {
+    getData: (document: string , key?: string, decryptionKey?: string) => {
       return new Promise((resolve) =>
         key
-          ? user.get(document).get(key).once(async (data) => {
+          ? user.get(document).get(key).load(async (data) => {
             console.log('data:', data)
             decryptionKey
               ? resolve(await Gun.SEA.decrypt(data, decryptionKey))
@@ -108,6 +108,7 @@ export function Strapd(): StrapdType {
           : user.get(document).once(resolve)
       )
     },
+    mapData,
     putData,
     getKey: (alias: string, password: string) =>
       new Promise((resolve) =>
