@@ -18,15 +18,12 @@ import Gun from 'gun';
 // Date function
 export const getDate = () => {
   const newDate = new Date();
-  var dd = String(newDate.getDate()).padStart(2, 'O');
-  var mm = String(newDate.getMonth() + 1).padStart(2, 'O');
-  var yyyy = newDate.getFullYear();
-  var timestamp = mm + '-' + dd + '-' + yyyy + ':' + newDate;
+  var timestamp = newDate;
   return timestamp;
 }
 
 
-export type StrapdType = {
+export type GunClientType = {
   createUser: (username: string, password: string) => Promise<string | undefined>;
   login: (username: string, password: string) => Promise<{ ok: boolean, result: any }>;
   resetPassword: (username: string, oldPassword: string, newPassword: string) => Promise<{ ok: boolean, result: string }>;
@@ -38,7 +35,7 @@ export type StrapdType = {
   setKey: (alias: string, password: string) => Promise<any>;
 }
 
-export function Strapd(): StrapdType {
+export function GunClient(): GunClientType {
 
 let user = gun.user().recall({ sessionStorage: true })
 
@@ -106,7 +103,7 @@ let user = gun.user().recall({ sessionStorage: true })
               ? resolve(await Gun.SEA.decrypt(data, decryptionKey))
               : resolve(data)
           })
-          : user.get(document).once(resolve)
+          : user.get(document).once(async(data) => resolve(data))
       )
     },
     mapData,

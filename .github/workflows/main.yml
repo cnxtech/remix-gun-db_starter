@@ -1,0 +1,51 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Check for exisiting directory
+        run: '(test -d ~/clone && rm -rf ~/clone) || echo app does not exist, skipping step'
+
+      - name: Clone Repository
+        run: |
+          mkdir -p ~/clone
+          git clone https://github.com/bresnow/remix-gun-db_starter ~/clone/app
+          cd ~/clone/app
+
+      - name: Yarn
+        run: |
+          yarn
+          yarn build
+
+      - name: Build Docker Image & Push to Github Registry
+        env:
+          VERSION: latest
+          
+        run: |
+         cd ~/clone
+         mv app/Dockerfile . && mv app/cnxt-dev-deploy.yml .
+         docker build -t bresnow/cnxt:${{ env.VERSION }} .
+         docker push bresnow/cnxt:${{ env.VERSION }}
+
+
+      - name: Deploy Docker Swarm Script
+        run: |
+         docker stack rm dev
+         docker stack deploy -c cnxt-dev-deploy.yml dev
+         
+      - name: Clean Up
+        run: rm -rf ~/clone

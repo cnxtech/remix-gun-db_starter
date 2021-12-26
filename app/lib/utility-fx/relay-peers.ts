@@ -13,7 +13,7 @@ const Relays = async () => {
 
   let gun = new Gun({
     peers: [`http://${address}:${port}/gun`],
-    file: 'relays',
+
   });
 
   // check gun first

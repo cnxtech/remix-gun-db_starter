@@ -1,7 +1,7 @@
 
 import Gun from "gun";
 import { createCookieSessionStorage, redirect } from "remix";
-import {getDate, Strapd} from '~/lib/constants/Strapd';
+import {getDate, GunClient} from '~/lib/utility-fx/GunClient';
 import { gun} from "./gun.server";
 import 'dotenv'
 const sea = Gun.SEA
@@ -9,7 +9,7 @@ type LoginForm = {
   username: string;
   password: string;
 };
-const {createUser, setKey, putData, getKey,} = Strapd()
+const {createUser, setKey, putData, getKey,} = GunClient()
 export async function register({ username, password }: LoginForm) {
   let err = await createUser(username, password);
   if (err) {
@@ -17,15 +17,9 @@ export async function register({ username, password }: LoginForm) {
   }
   
   let { ok, result } = await setKey(username, password);
-  const userInfo = {
-    alias: username,
-    id: result.slice(0, 10),
-    createdAt: getDate,
-    updatedAt: getDate
+ 
 
-  }
-
-  const res = await putData('user/info', username, userInfo);
+  const res = await putData('user/info', username, 'testData');
   if (res !== 'Added data!') {
     return { ok: false, result: 'Could not create user info' };
   } 

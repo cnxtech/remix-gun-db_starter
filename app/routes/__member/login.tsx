@@ -2,8 +2,9 @@ import { Form, useActionData } from 'remix';
 import InputText from '~/components/InputText';
 import SvgIcon from '~/components/SvgIcon';
 import { paths } from '~/components/SvgIcon';
+import Toggle from '~/components/Toggle';
 
-import { validateUsername, validatePassword } from '~/lib/constants/models';
+import { validateUsername, validatePassword } from '~/lib/utility-fx/validate-strings';
 import { createUserSession, login, register } from '~/session.server';
 
 type ActionData = {
@@ -42,7 +43,7 @@ export async function action({ request }) {
         };
       }
 
-      return createUserSession(result, `/dashboard`);
+      return createUserSession(result, `/dashboard/${username}`);
     }
     case 'register': {
       let { ok, result } = await register({ username, password });
@@ -52,7 +53,7 @@ export async function action({ request }) {
           formError: `${result}`,
         };
       }
-      return createUserSession(result, `/dashboard`);
+      return createUserSession(result, `/dashboard/${username}`);
     }
     default: {
       return { fields, formError: `Login type invalid` };
@@ -71,9 +72,22 @@ export default function Login() {
         aria-describedby={action?.formError ? 'form-error-message' : undefined}
         className="flex flex-col pt-3 md:pt-8"
       >
+        
         <fieldset>
           <legend className="sr-only">Login or Register?</legend>
-          <label>
+  
+           <div className="flex items-center gap-8">
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              name="loginType"
+              value="register"
+              defaultChecked={action?.fields?.loginType === 'register'}
+              className="h-5 w-5 bg-green-400"
+            />
+            <span className="ml-2 text-gray-300">Register</span>
+          </label>
+          <label className="inline-flex items-center">
             <input
               type="radio"
               name="loginType"
@@ -82,18 +96,11 @@ export default function Login() {
                 !action?.fields?.loginType ||
                 action?.fields?.loginType === 'login'
               }
-            />{' '}
-            Login
+              className="h-5 w-5 bg-green-400"
+            />
+            <span className="ml-2 text-gray-300">Login</span>
           </label>
-          <label>
-            <input
-              type="radio"
-              name="loginType"
-              value="register"
-              defaultChecked={action?.fields?.loginType === 'register'}
-            />{' '}
-            Register
-          </label>
+        </div>
         </fieldset>
         <div className="flex flex-col pt-4 mb-4">
           <InputText

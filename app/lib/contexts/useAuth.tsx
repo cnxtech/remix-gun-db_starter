@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext } from 'react';
 import { useGunKeys, useGunKeyAuth } from '@altrx/gundb-react-hooks';
-import Relays from '~/lib/constants/relay-peers';
+import Relays from '~/lib/utility-fx/relay-peers';
 import Gun from 'gun';
 import 'gun/lib/radix';
 import 'gun/lib/radisk';

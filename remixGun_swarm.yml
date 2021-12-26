@@ -1,0 +1,110 @@
+version: '3.3'
+
+services:
+# traefik 
+  traefik:
+    image: traefik:v2.5
+    command:
+      - --providers.docker # tells traefik to use docker
+      - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`) # any service not on the 'traefik-public' network will not be exposed 
+      - --providers.docker.exposedbydefault=false # would kinda ruin the point if true
+      - --providers.docker.swarmmode # beautiful relic
+      - --entrypoints.http.address=:80 # 80 && 443 for http >> https redirects
+      - --entrypoints.https.address=:443
+      - --pilot.token=4f869d98-2658-48e6-9405-c97c9183d932
+      - --certificatesresolvers.http.acme.email=${EMAIL:-bresnow@xdesk.app}
+      - --certificatesresolvers.http.acme.storage=/certificates/acme.json
+      - --certificatesresolvers.http.acme.tlschallenge=true
+      - --accesslog
+      - --log
+      - --api
+      - --api.dashboard
+      - --api.insecure
+    ports:
+      - 80:80
+      - 443:443
+    deploy:
+      placement:
+        constraints:
+          - node.labels.traefik-public.traefik-public-certificates == true
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.middlewares.admin-auth.basicauth.users=${BASIC_AUTH:-pardo:$$2y$$05$$aMssq8PGBLJtldP5l6zHpO7FtClPCkQDpp.FAwZyI2cLbDkpn..XW,bresnow:$$2y$$05$$SaGrMs06FYtov8OQe8pcve6EEvhkSpd0rscFkDrZiHqgfnJPlCGJi}
+        - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+        - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+        - traefik.http.routers.traefik-public-http.rule=Host(`${TRAEFIK_HOST:-sys-proxy.xdesk.app}`)
+        - traefik.http.routers.traefik-public-http.entrypoints=http
+        - traefik.http.routers.traefik-public-http.middlewares=https-redirect
+        - traefik.http.routers.traefik-public-https.rule=Host(`${TRAEFIK_HOST:-sys-proxy.xdesk.app}`)
+        - traefik.http.routers.traefik-public-https.entrypoints=https
+        - traefik.http.routers.traefik-public-https.tls=true
+        - traefik.http.routers.traefik-public-https.service=api@internal
+        - traefik.http.routers.traefik-public-https.tls.certresolver=http
+        - traefik.http.services.traefik-public.loadbalancer.server.port=8080
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-public-certificates1:/certificates
+    
+    networks:
+      - traefik-public
+
+# FRONTEND
+
+  cnxt:
+    image: bresnow/cnxt:latest
+    deploy:
+      placement:
+        constraints:
+          - node.labels.traefik-public.traefik-public-certificates == true
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.cnxt-http.rule=Host(`dev.xdesk.app`)
+        - traefik.http.routers.cnxt-http.entrypoints=http
+        - traefik.http.routers.cnxt-http.middlewares=https-redirect
+        - traefik.http.routers.cnxt-https.rule=Host(`dev.xdesk.app`)
+        - traefik.http.routers.cnxt-https.entrypoints=https
+        - traefik.http.routers.cnxt-https.tls.certresolver=http
+        - traefik.http.services.cnxt.loadbalancer.server.port=3369
+        
+    networks:
+      - traefik-public
+
+
+      
+  n8n:
+    image: n8nio/n8n
+    volumes: 
+      - n8n:/home/node/n8n
+    deploy:
+      placement:
+        constraints:
+          - node.labels.traefik-public == true
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.n8n-http.rule=Host(`${N8N_HOST:-workflow.xdesk.app}`)
+        - traefik.http.routers.n8n-http.entrypoints=http
+        - traefik.http.routers.n8n-http.middlewares=https-redirect
+        - traefik.http.routers.n8n-https.rule=Host(`${N8N_HOST:-workflow.xdesk.app}`)
+        - traefik.http.routers.n8n-https.entrypoints=https
+        - traefik.http.routers.n8n-https.tls=true
+        - traefik.http.routers.n8n-https.tls.certresolver=http
+        - traefik.http.services.n8n.loadbalancer.server.port=5678
+    networks:
+      - traefik-public
+ 
+volumes:
+  traefik-public-certificates1:
+  n8n: 
+
+networks:
+  traefik-public:
+    external: true
+      
+
