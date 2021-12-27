@@ -1,0 +1,10 @@
+{
+  "name": "peer-node",
+  "version": "1.0.0",
+  "description": "gun peer server node for email auth",
+  "main": "index.js",
+  "repository": "https://github.com/bresnow/email-auth-gun-server.git",
+  "author": "bresnow",
+  "license": "MIT",
+  "private": true
+}
