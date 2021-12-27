@@ -69,7 +69,7 @@ services:
         - traefik.http.routers.cnxt-https.rule=Host(`dev.xdesk.app`)
         - traefik.http.routers.cnxt-https.entrypoints=https
         - traefik.http.routers.cnxt-https.tls.certresolver=http
-        - traefik.http.services.cnxt.loadbalancer.server.port=3369
+        - traefik.http.services.cnxt.loadbalancer.server.port=3333
         
     networks:
       - traefik-public
