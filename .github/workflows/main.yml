@@ -45,7 +45,7 @@ jobs:
       - name: Deploy Docker Swarm Script
         run: |
          docker stack rm dev
-         docker stack deploy -c cnxt-dev-deploy.yml dev
+         docker stack deploy -c remixGun_swarm.yml dev
          
       - name: Clean Up
         run: rm -rf ~/clone
