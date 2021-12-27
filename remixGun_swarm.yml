@@ -31,13 +31,13 @@ services:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        - traefik.http.middlewares.admin-auth.basicauth.users=${BASIC_AUTH:-pardo:$$2y$$05$$aMssq8PGBLJtldP5l6zHpO7FtClPCkQDpp.FAwZyI2cLbDkpn..XW,bresnow:$$2y$$05$$SaGrMs06FYtov8OQe8pcve6EEvhkSpd0rscFkDrZiHqgfnJPlCGJi}
+        - traefik.http.middlewares.admin-auth.basicauth.users=${BASIC_AUTH:-bresnow:$$2y$$05$$SaGrMs06FYtov8OQe8pcve6EEvhkSpd0rscFkDrZiHqgfnJPlCGJi}
         - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
         - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
-        - traefik.http.routers.traefik-public-http.rule=Host(`${TRAEFIK_HOST:-sys-proxy.xdesk.app}`)
+        - traefik.http.routers.traefik-public-http.rule=Host(`${TRAEFIK_HOST:-sudo.proxy.fltngmmth.com}`)
         - traefik.http.routers.traefik-public-http.entrypoints=http
         - traefik.http.routers.traefik-public-http.middlewares=https-redirect
-        - traefik.http.routers.traefik-public-https.rule=Host(`${TRAEFIK_HOST:-sys-proxy.xdesk.app}`)
+        - traefik.http.routers.traefik-public-https.rule=Host(`${TRAEFIK_HOST:-sudo.proxy.fltngmmth.com}`)
         - traefik.http.routers.traefik-public-https.entrypoints=https
         - traefik.http.routers.traefik-public-https.tls=true
         - traefik.http.routers.traefik-public-https.service=api@internal
@@ -53,7 +53,7 @@ services:
 
 # FRONTEND
 
-  remix-gun:
+  cnxt:
     image: bresnow/remix-gun:latest
     deploy:
       placement:
@@ -76,32 +76,11 @@ services:
 
 
       
-  n8n:
-    image: n8nio/n8n
-    volumes: 
-      - n8n:/home/node/n8n
-    deploy:
-      placement:
-        constraints:
-          - node.labels.traefik-public == true
-      labels:
-        - traefik.enable=true
-        - traefik.docker.network=traefik-public
-        - traefik.constraint-label=traefik-public
-        - traefik.http.routers.n8n-http.rule=Host(`${N8N_HOST:-workflow.xdesk.app}`)
-        - traefik.http.routers.n8n-http.entrypoints=http
-        - traefik.http.routers.n8n-http.middlewares=https-redirect
-        - traefik.http.routers.n8n-https.rule=Host(`${N8N_HOST:-workflow.xdesk.app}`)
-        - traefik.http.routers.n8n-https.entrypoints=https
-        - traefik.http.routers.n8n-https.tls=true
-        - traefik.http.routers.n8n-https.tls.certresolver=http
-        - traefik.http.services.n8n.loadbalancer.server.port=5678
-    networks:
-      - traefik-public
+
  
 volumes:
   traefik-public-certificates1:
-  n8n: 
+
 
 networks:
   traefik-public:

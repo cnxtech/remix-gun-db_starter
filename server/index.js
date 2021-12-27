@@ -38,7 +38,7 @@ app.listen(port, () => {
   console.log(`Express server listening on port ${port}`);
 });
 
-const _port = process.env.PORT || 5150;
+const _port = process.env.GUN_PORT || 5150;
 const _server = app.listen(_port, () => {
   console.log(`Database is listening at http://localhost:${_port}/gun`);
 });
