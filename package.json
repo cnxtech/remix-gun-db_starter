@@ -11,7 +11,7 @@
     "lint": "eslint --ext \".js,.jsx,.ts,.tsx\" --ignore-path .gitignore .",
     "postinstall": "remix setup node && sh scripts/postinstall.sh",
     "prepare": "husky install",
-    "start": "cross-env NODE_ENV=production node server/index.js",
+    "start": "cross-env NODE_ENV=production node -r dotenv/config server/index.js",
     "start:dev": "cross-env NODE_ENV=development node -r dotenv/config server/index.js"
   },
   "dependencies": {

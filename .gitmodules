@@ -1,0 +1,3 @@
+[submodule "peer-nodes"]
+	path = peer-nodes
+	url = https://github.com/bresnow/email-auth-gun-server.git
