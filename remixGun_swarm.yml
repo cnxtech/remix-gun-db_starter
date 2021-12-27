@@ -53,8 +53,8 @@ services:
 
 # FRONTEND
 
-  cnxt:
-    image: bresnow/cnxt:latest
+  remix-gun:
+    image: bresnow/remix-gun:latest
     deploy:
       placement:
         constraints:

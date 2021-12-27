@@ -4,9 +4,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
   pull_request:
-    branches: [main]
+    branches: [dev]
 
   workflow_dispatch:
 
@@ -37,9 +37,9 @@ jobs:
           
         run: |
          cd ~/clone
-         mv app/Dockerfile . && mv app/cnxt-dev-deploy.yml .
-         docker build -t bresnow/cnxt:${{ env.VERSION }} .
-         docker push bresnow/cnxt:${{ env.VERSION }}
+         mv app/Dockerfile . && mv app/remixGun_swarm.yml .
+         docker build -t bresnow/remix-gun:${{ env.VERSION }} .
+         docker push bresnow/remix-gun:${{ env.VERSION }}
 
 
       - name: Deploy Docker Swarm Script
