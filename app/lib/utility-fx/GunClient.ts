@@ -94,6 +94,8 @@ let user = gun.user()
           resolve({ ok: false, result: JSON.parse(JSON.stringify(ack)).err })
         }
       }, { change: newPassword })),
+
+      
     getData: (document: string , key?: string, decryptionKey?: string) => {
       return new Promise((resolve) =>
         key

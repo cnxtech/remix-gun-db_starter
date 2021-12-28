@@ -10,11 +10,15 @@ let gunOpts = async () => {
     };
     return relayOpts
 }
-console.log('using gun')
+const ports = {
+    RELAY: process.env.GUN_PORT || 5150,
+    CLIENT: process.env.CLIENT_PORT || 3333
+}
+
 // gun instances that link to some peers-no peers
 const gun = Gun(gunOpts);
-const localStorj = Gun('http://localhost:5150/gun')
+const localStorj = Gun({ peers: [`http://localhost:${ports.CLIENT}/gun`, `http://localhost:${ports.RELAY}/gun`]})
+const privateStorj = Gun({peers:[`http://localhost:${ports.RELAY}/gun`], localStorage:false})
 
 
-
-export { gun, gunOpts, localStorj } 
+export { gun, gunOpts, localStorj, privateStorj } 

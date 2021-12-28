@@ -6,6 +6,7 @@ import { ActionFunction, LoaderFunction, useLoaderData } from 'remix';
 import { GunClient } from '~/lib/utility-fx/GunClient';
 import { getUserId } from '~/session.server';
 import invariant from 'tiny-invariant';
+import ProfileHeader from '~/components/ProfileHeader';
 
 interface LoaderData {
   ok: boolean;
@@ -35,9 +36,9 @@ export let loader: LoaderFunction = async ({ request, params }) => {
   let userId = await getUserId(request);
   let user = gun.user(userId);
 let test = gun.get('name').get('test')
-test.put({alias: `${alias}`, id: userId.slice(1,12), test: 'This is a test Put'})
-  let data =  test.on((data: any) =>{ return {alias: data.alias , id: data.id,test: data.test}})
-  
+test.put({alias: `${alias}`, id: userId.slice(1,12), job: 'Job Title', description: 'This is where description will go ... Edit mode in process'})
+  let data =  test.on((data: any, key: string) => { return {alias: data.alias , id: data.id,job: data.job, description: data.description}})
+
  return data
 };
 
@@ -48,13 +49,11 @@ test.put({alias: `${alias}`, id: userId.slice(1,12), test: 'This is a test Put'}
 // }
 ///////////////
 export default function User() {
-  let {alias, id, test} = useLoaderData();
+  let {alias,job, id, description, } = useLoaderData();
 
   return (
     <div className="mt-5">
-      <p> alias : {alias}</p>
-      <p>id: {id}</p>
-      <p> Put : {test}</p>
+      <ProfileHeader img='/images/person/3.jpg' name={alias} size="monster" job={job} desc={'User Id:  ' + id} />
     </div>
   );
 }
@@ -65,7 +64,7 @@ export function CatchBoundary() {
   if (caught.status === 404) {
     return (
       <div className="error-container">
-        <p>There are no jokes to display.</p>
+        <p>No Profile to display.</p>
         <Link to="new">Add your own</Link>
       </div>
     );
