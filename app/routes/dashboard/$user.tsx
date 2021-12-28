@@ -48,14 +48,13 @@ test.put({alias: `${alias}`, id: userId.slice(1,12), test: 'This is a test Put'}
 // }
 ///////////////
 export default function User() {
-  let data = useLoaderData();
+  let {alias, id, test} = useLoaderData();
 
-  console.log(data.result);
   return (
     <div className="mt-5">
-      <p> alias : {data.alias}</p>
-      <p>id: {data.id}</p>
-      <p> Put : {data.test}</p>
+      <p> alias : {alias}</p>
+      <p>id: {id}</p>
+      <p> Put : {test}</p>
     </div>
   );
 }

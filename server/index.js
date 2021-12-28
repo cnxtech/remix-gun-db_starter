@@ -9,36 +9,76 @@ const { createRequestHandler } = require("@remix-run/express");
  */
 
 let Gun = require('gun');
-const i = process.env.GUN_NODE;
 
 const ports = {
-  '0': {
-    RELAY: process.env.GUN_PORT || 5150,
-    NODE: process.env.CLIENT_PORT || 8081,
-    CLIENT: 3333
-  },
-  '1': {
-    RELAY: 8090,
-    NODE: 8091,
-    CLIENT: 3001
-  }
+  RELAY: process.env.GUN_PORT || 5150,
+  CLIENT: process.env.CLIENT_PORT || 3333
 }
 
-if (!ports[i]) {
-  throw Error('GUN_NODE must be 0 or 1')
+
+if (!ports) {
+  throw Error('Set your environment variables ya dingus!')
 }
 
 
 const http = require('http');
-// runs full relay peer (will sync all data)
+// runs full relay peer while not being exposed as a http service in docker deployment. 
+// secret data storage? fingers crossed...
+
 const relay = Gun({
-  file: `data_${ports[i].RELAY}`,
+  file: `${ports.RELAY}.private_relay`,
   web: http.createServer(function (req, res) {
     res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.write(req.url);
+    res.write(`
+    <!DOCTYPE html> \n
+<html> \n
+<head>\n
+  <meta charset="utf-8"> \n
+  <meta name="viewport" content="width=device-width"> \n
+  <title>PRIVATE DB RELAY</title> \n
+  <script src="http://rawgit.com/amark/gun/master/gun.js"></script> \n
+</head> \n
+<body> \n
+<h1>Graph Universal Private DB</h1> \n
+<h3>If you are seeing this page then you better know what the fuck you are doing.</h3> \n
+    <div class="editor">
+        <div class="editor__wrapper">
+            <div class="editor__body">
+                <div id="editorCode" class="editor__code"></div>
+            </div>
+            <div class="editor__footer">
+                <div class="editor__footer--left">
+                    <button class="editor__btn editor__run">Run ></button>
+                    <button class="editor__btn editor__reset">Reset ></button>
+                </div>
+                <div class="editor__footer--right">
+                    <div class="editor__console">
+                        <ul class="editor__console-logs"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Required Ace Libraries -->
+    <script src="lib/js/ace-editor/src-min/ace.js"></script>
+    <script src="lib/js/ace-editor/src-min/mode-javascript.js"></script>
+    <script src="lib/js/ace-editor/src-min/ext-language_tools.js"></script>
+
+    <!-- Custom Scripts -->
+    <script src="lib/js/editor.js"></script>
+    <script src="lib/js/editor-console.js"></script>
+</body> \n
+</html>`);
     res.end()
-  }).listen(ports[i].RELAY, () => console.log('GUN relay peer running on :' + ports[i].RELAY))
+
+  }).listen(ports.RELAY, () => console.log('private relay peer running on :' + ports.RELAY)
+  )
 });
+
+
+
+
+
 
 /**
  * REMIX APP
@@ -64,16 +104,16 @@ app.all(
   MODE === "production"
     ? createRequestHandler({ build: require("./build") })
     : (req, res, next) => {
-        purgeRequireCache();
-        let build = require("./build");
-        return createRequestHandler({ build, mode: MODE })(req, res, next);
-      }
+      purgeRequireCache();
+      let build = require("./build");
+      return createRequestHandler({ build, mode: MODE })(req, res, next);
+    }
 );
 
 Gun({
-  file: `data${ports[i].CLIENT}.relay`,
-  web: app.listen(ports[i].CLIENT, () => {
-    console.log(`Express server listening on port ${ports[i].CLIENT}`);
+  file: `${ports.CLIENT}.public_relay`,
+  web: app.listen(ports.CLIENT, () => {
+    console.log(`Express server listening on port ${ports.CLIENT}`);
   }),
 });
 
