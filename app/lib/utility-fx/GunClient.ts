@@ -37,7 +37,7 @@ export type GunClientType = {
 
 export function GunClient(): GunClientType {
 
-let user = gun.user().recall({ sessionStorage: true })
+let user = gun.user()
 
   const createUser = async (username: string, password: string): Promise<string | undefined> =>
     new Promise((resolve) => user.create(username, password, (ack) => {
@@ -64,7 +64,7 @@ let user = gun.user().recall({ sessionStorage: true })
       value = await Gun.SEA.encrypt(value, encryptionKey);
     }
     return new Promise((resolve) => {
-     user.get(document).get(key).put(value as never, (ack) => {
+     user.get(document).get(key).put(value, (ack) => {
         resolve(ack.ok ? 'Added data!' : ack.err?.message ?? 'Could not add data');
       })
     })
@@ -124,7 +124,7 @@ let user = gun.user().recall({ sessionStorage: true })
 
           user.get('keys').get('master').once(async (data) => {
             if (!data) {
-              resolve({ ok: false, result: 'could not find key' })
+              resolve({ ok: false, result: 'Could Not Find Key Associated With This User' });
             } else {
               const decrypted = await Gun.SEA.decrypt(data, password)
               if (typeof decrypted === 'string') {

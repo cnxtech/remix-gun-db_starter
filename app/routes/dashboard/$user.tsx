@@ -1,11 +1,11 @@
-import { Link, useCatch } from "remix";
+import { json, Link, useCatch } from 'remix';
 import Gun from 'gun';
-import { gun, } from "~/gun.server";
+import { gun } from '~/gun.server';
 import { ActionFunction, LoaderFunction, useLoaderData } from 'remix';
 
 import { GunClient } from '~/lib/utility-fx/GunClient';
-import { getUserId } from "~/session.server";
-import invariant from "tiny-invariant";
+import { getUserId } from '~/session.server';
+import invariant from 'tiny-invariant';
 
 interface LoaderData {
   ok: boolean;
@@ -15,35 +15,31 @@ interface LoaderData {
 type UserData = {
   id: string;
   alias: string;
-}
+};
 
 type Socials = {
-  facebook: SocialData
-  twitter: SocialData
-  linkedIn: SocialData
-  github: SocialData
-}
+  facebook: SocialData;
+  twitter: SocialData;
+  linkedIn: SocialData;
+  github: SocialData;
+};
 
 type SocialData = {
   brand: string;
   url: string;
   color?: string;
-}
+};
 export let loader: LoaderFunction = async ({ request, params }) => {
-  let {  putData } = GunClient();
+  let { putData, getData } = await GunClient();
+  let alias = params.user;
   let userId = await getUserId(request);
-if (!userId) {
-  return {ok: false, result: 'public key not found. Please allow cookies'}
-}
-let user = gun.user().recall({ sessionStorage: true })
-user.get('name').get('test').put({test:'testyteststs' })
-return {
-  ok: true, 
-  result:userId
-  }
-
-}
-      
+  let user = gun.user(userId);
+let test = gun.get('name').get('test')
+test.put({alias: `${alias}`, id: userId.slice(1,12), test: 'This is a test Put'})
+  let data =  test.on((data: any) =>{ return {alias: data.alias , id: data.id,test: data.test}})
+  
+ return data
+};
 
 ///////////////
 // export let action: ActionFunction = async({request}) => {
@@ -54,11 +50,12 @@ return {
 export default function User() {
   let data = useLoaderData();
 
-console.log(data.result)
+  console.log(data.result);
   return (
-    <div className='mt-5'>
-
-      <p> Your PublicKey is : {data.result}</p>
+    <div className="mt-5">
+      <p> alias : {data.alias}</p>
+      <p>id: {data.id}</p>
+      <p> Put : {data.test}</p>
     </div>
   );
 }
