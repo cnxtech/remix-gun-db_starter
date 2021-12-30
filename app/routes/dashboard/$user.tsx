@@ -7,10 +7,12 @@ import { GunClient } from '~/lib/utility-fx/GunClient';
 import { getUserId } from '~/session.server';
 import invariant from 'tiny-invariant';
 import ProfileHeader from '~/components/ProfileHeader';
+import BlogList from '~/components/blog/BlogList';
 
 interface LoaderData {
   ok: boolean;
-  result: string;
+  result: UserData;
+
 }
 
 type UserData = {
@@ -37,10 +39,24 @@ export let loader: LoaderFunction = async ({ request, params }) => {
   let user = gun.user(userId);
 let test = gun.get('name').get('test')
 test.put({alias: `${alias}`, id: userId.slice(1,12), job: 'Job Title', description: 'This is where description will go ... Edit mode in process'})
-  let data =  test.on((data: any, key: string) => { return {alias: data.alias , id: data.id,job: data.job, description: data.description}})
+ 
+function profile(){
+test.on((data: any) => {  json({alias: data.alias , id: data.id,job: data.job, description: data.description})})
+}
 
- return data
-};
+ return {
+   
+   profile: test.on((data: any) => {
+     json({
+       alias: data.alias,
+       id: data.id,
+       job: data.job,
+       description: data.description,
+     });
+   }),
+ };
+}
+
 
 ///////////////
 // export let action: ActionFunction = async({request}) => {
@@ -49,11 +65,12 @@ test.put({alias: `${alias}`, id: userId.slice(1,12), job: 'Job Title', descripti
 // }
 ///////////////
 export default function User() {
-  let {alias,job, id, description, } = useLoaderData();
+  let profile = useLoaderData();
 
   return (
     <div className="mt-5">
-      <ProfileHeader img='/images/person/3.jpg' name={alias} size="monster" job={job} desc={'User Id:  ' + id} />
+      <ProfileHeader img='/images/person/3.jpg' name={profile.alias} size="monster" job={profile.job} desc={'User Id:  ' + profile.id} />
+      <BlogList />
     </div>
   );
 }

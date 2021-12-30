@@ -9,7 +9,7 @@ import 'gun/lib/load'
 import 'gun/lib/path'
 import 'gun/lib/then'
 import invariant from 'tiny-invariant';
-import { gun} from '~/gun.server';
+import { gun } from '~/gun.server';
 import Gun from 'gun';
 
 
@@ -27,17 +27,20 @@ export type GunClientType = {
   createUser: (username: string, password: string) => Promise<string | undefined>;
   login: (username: string, password: string) => Promise<{ ok: boolean, result: any }>;
   resetPassword: (username: string, oldPassword: string, newPassword: string) => Promise<{ ok: boolean, result: string }>;
-  getData: (path: string, key?: string, decryptionKey?: string) => Promise<any>;
-  putData: (path: string, key: string, value: any, encryptionKey?: string) => Promise<string>;
-  mapData: (path: string, decryptionKey?: string) => Promise<any>;
-  // setData: (path: string, key: string, value: any, encryptionKey?: string) => Promise<string>;
+  getData: (document: string, key?: string, decryptionKey?: string) => Promise<any>;
+  putData: (document: string, key: string, value: any, encryptionKey?: string, set?: boolean, path?: string) => Promise<string>;
+  setArray: (document: string, key: string, set: Array<any>) => Promise<string>
   getKey: (alias: string, password: string) => Promise<{ ok: boolean, result: string }>;
   setKey: (alias: string, password: string) => Promise<any>;
 }
 
+type SetOptions = {
+  set?: boolean;
+  path?: string;
+}
 export function GunClient(): GunClientType {
 
-let user = gun.user()
+  let user = gun.user()
 
   const createUser = async (username: string, password: string): Promise<string | undefined> =>
     new Promise((resolve) => user.create(username, password, (ack) => {
@@ -53,38 +56,55 @@ let user = gun.user()
     new Promise((resolve) => user.auth(username, password, (ack) => {
       if (Object.getOwnPropertyNames(ack).includes('id')) {
 
-        resolve({ ok: true, result:(ack as any).get });
+        resolve({ ok: true, result: (ack as any).get });
       } else {
         resolve({ ok: false, result: JSON.parse(JSON.stringify(ack)).err })
       }
     }))
 
-  const putData = async (document: string , key: string, value: any, encryptionKey?: string): Promise<string> => {
+  const putData = async (document: string, key: string, value: any, encryptionKey?: string, set?: boolean, path?: string): Promise<string> => {
     if (encryptionKey) {
       value = await Gun.SEA.encrypt(value, encryptionKey);
     }
+    
+    if (set === true) {
+      let _set = user.path(path)
+      let _document = user.get(document).get(key).put(value)
+      return new Promise((resolve) => {
+        _set.set(_document, (ack) => {
+          resolve(ack.ok ? 'Added data as a set!' : ack.err?.message ?? 'Could not add data');
+        })
+      })
+    } 
+    let _document = user.get(document).get(key)
     return new Promise((resolve) => {
-     user.get(document).get(key).put(value, (ack) => {
+      _document.put(value, (ack) => {
         resolve(ack.ok ? 'Added data!' : ack.err?.message ?? 'Could not add data');
       })
     })
   }
- 
-  const mapData = async (document: string , key:string, decryptionKey?: string): Promise<any> => {
-    return new Promise((resolve) =>
-  user.get(document).get(key).once(async (data:any) => {
-    Object.keys(data).forEach(async(data)=> {
-      console.log('data:', data) 
-          decryptionKey ? 
-          resolve(await Gun.SEA.decrypt(data, decryptionKey))
-        : resolve(data)}) 
-  }))}
+
+
+  const setArray = (document: string, key: string, set: Array<any>): Promise<string> => {
+    let _document
+    if (key) {
+      _document = gun.get(document).get(key)
+    } _document = gun.get(document)
+    return new Promise((resolve) => {
+      set.forEach((ref: any) => {
+        _document.set(ref, (ack) => {
+          resolve(ack.ok ? 'Added set!' : ack.err?.message ?? 'Could not add data');
+        })
+      })
+    })
+  }
 
 
 
   return {
     createUser,
     login,
+    setArray,
     resetPassword: (username: string, oldPassword: string, newPassword: string) =>
       new Promise((resolve) => user.auth(username, oldPassword, (ack) => {
         console.log(ack)
@@ -95,8 +115,8 @@ let user = gun.user()
         }
       }, { change: newPassword })),
 
-      
-    getData: (document: string , key?: string, decryptionKey?: string) => {
+
+    getData: (document: string, key?: string, decryptionKey?: string) => {
       return new Promise((resolve) =>
         key
           ? user.get(document).get(key).once(async (data) => {
@@ -105,10 +125,9 @@ let user = gun.user()
               ? resolve(await Gun.SEA.decrypt(data, decryptionKey))
               : resolve(data)
           })
-          : user.get(document).once(async(data) => resolve(data))
+          : user.get(document).once(async (data) => resolve(data))
       )
     },
-    mapData,
     putData,
     getKey: (alias: string, password: string) =>
       new Promise((resolve) =>

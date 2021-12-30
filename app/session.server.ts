@@ -15,14 +15,7 @@ export async function register({ username, password }: LoginForm) {
   if (err) {
     return {ok: false, result: err}
   }
-  
   let { ok, result } = await setKey(username, password);
- 
-
-  const res = await putData('user/info', username, 'testData');
-  if (res !== 'Added data!') {
-    return { ok: false, result: 'Could not create user info' };
-  } 
   return {ok:ok, result:result}
 }
 
@@ -39,7 +32,7 @@ export async function login({ username, password }: LoginForm) {
   return {ok:ok, result: result}
 }
 
-let sessionSecret = process.env.SESSION_SECRET as string || 'abcdefghijklmnopqrstuvwxyz';
+let sessionSecret = process.env.SESSION_SECRET as string //|| 'abcdefghijklmnopqrstuvwxyz';
 if (typeof sessionSecret !== 'string') {
   throw new Error("SESSION_SECRET must be set");
 }

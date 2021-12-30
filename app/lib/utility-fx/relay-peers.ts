@@ -7,14 +7,16 @@ require('gun/lib/then.js')
 let cl = console.log;
 console.log = () => {};
 const port = '5150'
-const address = '0.0.0.0'
+const host = process.env.DOMAIN || '0.0.0.0'
+const ports = {
+  RELAY: process.env.GUN_PORT || 5150,
+  CLIENT: process.env.CLIENT_PORT || 3333
+}
 const Relays = async () => {
   let gunRelays:Array<string> = [];
 
   let gun = new Gun({
-    peers: [`http://${address}:${port}/gun`],
-
-  });
+    peers: [`http://${host}:${ports.CLIENT}/gun`, `http://${host}:${ports.RELAY}/gun`]})
 
   // check gun first
   let results = await gun
