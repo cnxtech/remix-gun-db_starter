@@ -30,44 +30,17 @@ const relay = Gun({
   web: http.createServer(function (req, res) {
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.write(`
-    <!DOCTYPE html> \n
-<html> \n
-<head>\n
-  <meta charset="utf-8"> \n
-  <meta name="viewport" content="width=device-width"> \n
-  <title>PRIVATE DB RELAY</title> \n
-  <script src="http://rawgit.com/amark/gun/master/gun.js"></script> \n
-</head> \n
-<body> \n
-<h1>Graph Universal Private DB</h1> \n
-<h3>If you are seeing this page then you better know what the fuck you are doing.</h3> \n
-    <div class="editor">
-        <div class="editor__wrapper">
-            <div class="editor__body">
-                <div id="editorCode" class="editor__code"></div>
-            </div>
-            <div class="editor__footer">
-                <div class="editor__footer--left">
-                    <button class="editor__btn editor__run">Run ></button>
-                    <button class="editor__btn editor__reset">Reset ></button>
-                </div>
-                <div class="editor__footer--right">
-                    <div class="editor__console">
-                        <ul class="editor__console-logs"></ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Required Ace Libraries -->
-    <script src="lib/js/ace-editor/src-min/ace.js"></script>
-    <script src="lib/js/ace-editor/src-min/mode-javascript.js"></script>
-    <script src="lib/js/ace-editor/src-min/ext-language_tools.js"></script>
-
-    <!-- Custom Scripts -->
-    <script src="lib/js/editor.js"></script>
-    <script src="lib/js/editor-console.js"></script>
-</body> \n
+    <!DOCTYPE html> 
+<html> 
+<head>
+  <meta charset="utf-8"> 
+  <meta name="viewport" content="width=device-width"> 
+  <title>PRIVATE DB RELAY</title> 
+  <script src="http://rawgit.com/amark/gun/master/gun.js"></script> 
+</head> 
+<body> 
+<h1>Graph Universal Private DB</h1> 
+</body> 
 </html>`);
     res.end()
 

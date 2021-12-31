@@ -11,7 +11,7 @@ type LoginForm = {
 };
 const {createUser, setKey, putData, getKey,} = GunClient()
 export async function register({ username, password }: LoginForm) {
-  let err = await createUser(username, password);
+  let err = await createUser({username, password});
   if (err) {
     return {ok: false, result: err}
   }

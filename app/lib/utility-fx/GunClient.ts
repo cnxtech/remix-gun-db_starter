@@ -11,8 +11,10 @@ import 'gun/lib/then'
 import invariant from 'tiny-invariant';
 import { gun } from '~/gun.server';
 import Gun from 'gun';
+import { IGunCryptoKeyPair } from 'gun/types/types';
+import { IGunChainReference } from 'gun/types/chain';
 
-
+const sea = Gun.SEA
 
 
 // Date function
@@ -22,27 +24,78 @@ export const getDate = () => {
   return timestamp;
 }
 
+export interface IUserCred {
+  username: string,
+  password: string
+}
+
 
 export type GunClientType = {
-  createUser: (username: string, password: string) => Promise<string | undefined>;
-  login: (username: string, password: string) => Promise<{ ok: boolean, result: any }>;
-  resetPassword: (username: string, oldPassword: string, newPassword: string) => Promise<{ ok: boolean, result: string }>;
-  getData: (document: string, key?: string, decryptionKey?: string) => Promise<any>;
-  putData: (document: string, key: string, value: any, encryptionKey?: string, set?: boolean, path?: string) => Promise<string>;
-  setArray: (document: string, key: string, set: Array<any>) => Promise<string>
-  getKey: (alias: string, password: string) => Promise<{ ok: boolean, result: string }>;
-  setKey: (alias: string, password: string) => Promise<any>;
+  encryptData: (data: any, keys: undefined | string | IGunCryptoKeyPair) => any
+  decryptData: (data: any, keys: undefined | string | IGunCryptoKeyPair) => any
+  createUser: ({ username, password }: IUserCred) => Promise<string | undefined>;
+  login: ({ username, password }: IUserCred) => Promise<{ ok: boolean, result: any }>;
+  resetPassword: ({ username, oldPassword, newPassword }: IResetCred) => Promise<{ ok: boolean, result: string }>;
+  getData: ({ document, key, opt }: IGetData) => Promise<any>;
+  putData: ({ document, key, value, opt }: IPutData) => Promise<string>;
+  setArray: ({ document, key, set }: SetArr) => Promise<string>
+  getKey: (username: string, password: string) => Promise<{ ok: boolean, result: string }>;
+  setKey: (username: string, password: string) => Promise<any>;
+}
+export interface IGetData {
+  document: string,
+  key?: string,
+  opt?: GetOptions
+}
+export interface IPutData {
+  document: string,
+  key: string,
+  value: any
+  opt?: PutOptions
+}
+export interface IResetCred {
+  username: string,
+  oldPassword: string,
+  newPassword: string
+}
+export interface GetOptions {
+  map?: boolean
+  path?: string
+  decryptionKey?: string
+}
+export interface PutOptions {
+  setPath?: string
+  encryptionKey?: string;
 }
 
-type SetOptions = {
-  set?: boolean;
-  path?: string;
+export interface SetArr {
+  document: string,
+  key: string,
+  set: Array<Partial<string | number | null | IGunChainReference>>
 }
+
+
 export function GunClient(): GunClientType {
+  const encryptData = async (
+    data: any,
+    keys: undefined | string | IGunCryptoKeyPair
+  ) => {
+    console.log('Encrypting data...')
+    return keys && sea.encrypt(data, keys)
+  };
 
+  const decryptData = async (
+    data: any,
+    keys: undefined | string | IGunCryptoKeyPair,
+  ) => {
+    console.log('Decrypting data...')
+    return keys && sea.decrypt(data, keys);
+  };
   let user = gun.user()
 
-  const createUser = async (username: string, password: string): Promise<string | undefined> =>
+
+
+  const createUser = async ({ username, password }: IUserCred): Promise<string | undefined> =>
     new Promise((resolve) => user.create(username, password, (ack) => {
       console.log(ack)
       if (Object.getOwnPropertyNames(ack).includes('ok')) {
@@ -52,7 +105,7 @@ export function GunClient(): GunClientType {
       }
     }));
 
-  const login = (username: string, password: string): Promise<{ ok: boolean, result: any }> =>
+  const login = ({ username, password }): Promise<{ ok: boolean, result: any }> =>
     new Promise((resolve) => user.auth(username, password, (ack) => {
       if (Object.getOwnPropertyNames(ack).includes('id')) {
 
@@ -62,20 +115,25 @@ export function GunClient(): GunClientType {
       }
     }))
 
-  const putData = async (document: string, key: string, value: any, encryptionKey?: string, set?: boolean, path?: string): Promise<string> => {
-    if (encryptionKey) {
-      value = await Gun.SEA.encrypt(value, encryptionKey);
+  const putData = async ({ document, key, value, opt }: IPutData): Promise<string> => {
+    if (opt?.encryptionKey && value !== Array) {
+      value = await encryptData(value, opt?.encryptionKey);
     }
-    
-    if (set === true) {
-      let _set = user.path(path)
+
+    if (opt?.setPath != null) {
+
+      if (value === Array) {
+
+      }
+
+      let _set = user.get(opt.setPath)
       let _document = user.get(document).get(key).put(value)
       return new Promise((resolve) => {
         _set.set(_document, (ack) => {
           resolve(ack.ok ? 'Added data as a set!' : ack.err?.message ?? 'Could not add data');
         })
       })
-    } 
+    }
     let _document = user.get(document).get(key)
     return new Promise((resolve) => {
       _document.put(value, (ack) => {
@@ -85,11 +143,11 @@ export function GunClient(): GunClientType {
   }
 
 
-  const setArray = (document: string, key: string, set: Array<any>): Promise<string> => {
+  const setArray = ({ document, key, set }: SetArr): Promise<string> => {
     let _document
     if (key) {
-      _document = gun.get(document).get(key)
-    } _document = gun.get(document)
+      _document = user.get(document).get(key)
+    } _document = user.get(document)
     return new Promise((resolve) => {
       set.forEach((ref: any) => {
         _document.set(ref, (ack) => {
@@ -102,10 +160,12 @@ export function GunClient(): GunClientType {
 
 
   return {
+    encryptData,
+    decryptData,
     createUser,
     login,
     setArray,
-    resetPassword: (username: string, oldPassword: string, newPassword: string) =>
+    resetPassword: ({ username, oldPassword, newPassword }) =>
       new Promise((resolve) => user.auth(username, oldPassword, (ack) => {
         console.log(ack)
         if (Object.getOwnPropertyNames(ack).includes('ok')) {
@@ -116,29 +176,47 @@ export function GunClient(): GunClientType {
       }, { change: newPassword })),
 
 
-    getData: (document: string, key?: string, decryptionKey?: string) => {
+    getData: ({ document, key, opt }) => {
+      let { decryptionKey } = opt
       return new Promise((resolve) =>
         key
-          ? user.get(document).get(key).once(async (data) => {
-            console.log('data:', data)
+          ? user.get(document).get(key).once(async (data, key) => {
+            console.log({ [key]: data })
+            let _decrypted = await decryptData(data, decryptionKey)
+
             decryptionKey
-              ? resolve(await Gun.SEA.decrypt(data, decryptionKey))
-              : resolve(data)
+              ? Object.entries(_decrypted).forEach(([key, value]) => {
+                // eslint-disable-next-line eqeqeq
+                if (value != '[object Object]') {
+                  resolve(`${key}: ${value}`)
+                }
+              })
+              : Object.entries(data).forEach(([key, value]) => {
+                // eslint-disable-next-line eqeqeq
+                if (value != '[object Object]') {
+                  resolve(`${key}: ${value}`)
+                }})
           })
-          : user.get(document).once(async (data) => resolve(data))
+          : user.get(document).once((data) =>
+            Object.entries(data).forEach(([key, value]) => {
+              // eslint-disable-next-line eqeqeq
+              if (value != '[object Object]') {
+                resolve(`${key}: ${value}`)
+              }
+            }))
       )
     },
     putData,
-    getKey: (alias: string, password: string) =>
+    getKey: (username: string, password: string) =>
       new Promise((resolve) =>
-        gun.get(`~@${alias}`).once(async (exists) => {
+        gun.get(`~@${username}`).once(async (exists) => {
           if (!exists) {
-            const err = await createUser(alias, password);
+            const err = await createUser({ username, password });
             if (err) {
               resolve({ ok: false, result: err })
             }
           }
-          const { ok, result } = await login(alias, password);
+          const { ok, result } = await login({ username, password });
           if (!ok) {
             resolve({ ok, result })
           }
@@ -147,7 +225,7 @@ export function GunClient(): GunClientType {
             if (!data) {
               resolve({ ok: false, result: 'Could Not Find Key Associated With This User' });
             } else {
-              const decrypted = await Gun.SEA.decrypt(data, password)
+              const decrypted = await decryptData(data, password)
               if (typeof decrypted === 'string') {
                 resolve({ ok: true, result: decrypted as string });
               }
@@ -160,17 +238,30 @@ export function GunClient(): GunClientType {
         gun.get(`~@${username}`).once(async (user) => {
           invariant(username && password, 'string');
           if (!user) {
-            const err = await createUser(username, password);
+            const err = await createUser({ username, password });
             if (err) {
               resolve({ ok: false, result: err });
             }
           }
-          const { ok, result } = await login(username, password);
+          const { ok, result } = await login({ username, password });
           if (!ok) {
             resolve({ ok, result });
           }
 
-          const res = await putData('keys', 'master', result, password);
+
+
+          /**
+           * Key Document && Node Path
+           */
+
+          let _put: IPutData = {
+            document: 'keys',
+            key: 'master',
+            value: result,
+            opt: { setPath: 'keys', encryptionKey: password }
+          }
+
+          const res = await putData(_put);
           if (res === 'Added data!') {
             resolve({ ok: true, result: result });
           } else {
@@ -179,4 +270,5 @@ export function GunClient(): GunClientType {
         })
       )
   }
+
 }
