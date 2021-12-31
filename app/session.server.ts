@@ -32,7 +32,7 @@ export async function login({ username, password }: LoginForm) {
   return {ok:ok, result: result}
 }
 
-let sessionSecret = process.env.SESSION_SECRET as string //|| 'abcdefghijklmnopqrstuvwxyz';
+let sessionSecret = process.env.SESSION_SECRET as string || 'abcdefghijklmnopqrstuvwxyz';
 if (typeof sessionSecret !== 'string') {
   throw new Error("SESSION_SECRET must be set");
 }
