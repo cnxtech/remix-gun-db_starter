@@ -58,7 +58,7 @@ export interface IResetCred {
   oldPassword: string,
   newPassword: string
 }
-export interface GetOptions {
+export interface GetOptions { // TODO: Add Mapping Options to getData()
   map?: boolean
   path?: string
   decryptionKey?: string
