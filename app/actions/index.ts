@@ -1,8 +1,11 @@
+import { gun } from "~/gun.server";
 import { GunClient } from "~/lib/utility-fx/GunClient";
 import { validateUsername, validatePassword } from "~/lib/utility-fx/validate-strings";
 import { login, createUserSession, register } from "~/session.server";
 
 export async function loginAction(request: any) {
+    let { putData, setArray } = GunClient()
+    let user = gun.user()
     let { loginType, username, password } = Object.fromEntries(
         await request.formData()
     );
@@ -31,7 +34,10 @@ export async function loginAction(request: any) {
                     formError: `${result}`,
                 };
             }
-
+            const res = await putData(`public/@${username}`, `profile`, { updatedAt: `${new Date().getTime}` }, result)
+            if (res !== 'Added data!') {
+                return { ok: false, result: console.log(res) };
+            }
             return createUserSession(result, `/dashboard/${username}`);
         }
         case 'register': {
@@ -42,11 +48,11 @@ export async function loginAction(request: any) {
                     formError: `${result}`,
                 };
             }
-            let profile = { id: result.slice(1, 12), alias: username, createdAt: `${new Date().getTime}`, updatedAt: `${new Date().getTime}` }
-            const res = await GunClient().putData(`public/@${username}`, `profile`, profile );
+            let registerInfo = { id: result.slice(1, 12), alias: username, createdAt: `${new Date().getTime}`, updatedAt: `${new Date().getTime}` }
+            const res = await putData(`public/@${username}`, `profile`, registerInfo, result);
             if (res !== 'Added data!') {
-                return { ok: false, result: res };
-            } 
+                return { ok: false, result: console.log(res) };
+            }
             return createUserSession(result, `/dashboard/${username}`);
         }
         default: {
