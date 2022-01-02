@@ -38,7 +38,6 @@ export default function Login() {
               type="radio"
               name="loginType"
               value="register"
-              hidden
               defaultChecked={action?.fields?.loginType === 'register'}
               className="h-5 w-5 bg-green-400"
             />
