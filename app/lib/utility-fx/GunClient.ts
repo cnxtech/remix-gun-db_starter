@@ -116,16 +116,11 @@ export function GunClient(): GunClientType {
     }))
 
   const putData = async ({ document, key, value, opt }: IPutData): Promise<string> => {
-    if (opt?.encryptionKey && value !== Array) {
+    if (opt?.encryptionKey ) {
       value = await encryptData(value, opt?.encryptionKey);
     }
 
     if (opt?.setPath != null) {
-
-      if (value === Array) {
-
-      }
-
       let _set = user.get(opt.setPath)
       let _document = user.get(document).get(key).put(value)
       return new Promise((resolve) => {
