@@ -1,29 +1,25 @@
 
 import Gun from "gun";
 import { createCookieSessionStorage, redirect } from "remix";
-import {getDate, GunClient} from '~/lib/utility-fx/GunClient';
-import { gun} from "./gun.server";
+import {getDate, GunClient} from '~/lib/GunClient';
+import { getKey, gun, putDoc, setKey} from "./gun.server";
 import 'dotenv'
+import { validateUsername, validatePassword } from "./lib/utils/validate-strings";
 const sea = Gun.SEA
 type LoginForm = {
   username: string;
   password: string;
 };
-const {createUser, setKey, putData, getKey,} = GunClient()
-export async function register({ username, password }: LoginForm) {
-  let err = await createUser(username, password);
-  if (err) {
-    return {ok: false, result: err}
-  }
-  
-  let { ok, result } = await setKey(username, password);
- 
+type UserInfo ={
+  id: string;
+  alias: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-  const res = await putData('user/info', username, 'testData');
-  if (res !== 'Added data!') {
-    return { ok: false, result: 'Could not create user info' };
-  } 
-  return {ok:ok, result:result}
+export async function register({ username, password }: LoginForm) {
+  let { ok, result } = await setKey(username, password);
+  return { ok: ok, result: result }
 }
 
 export async function login({ username, password }: LoginForm) {
@@ -34,10 +30,9 @@ export async function login({ username, password }: LoginForm) {
       result: result
     };
   }
-
-
-  return {ok:ok, result: result}
+  return { ok: ok, result: result }
 }
+
 
 let sessionSecret = process.env.SESSION_SECRET as string || 'abcdefghijklmnopqrstuvwxyz';
 if (typeof sessionSecret !== 'string') {
@@ -79,7 +74,7 @@ export async function getUser(request: Request) {
   if (typeof userId !== "string") return null;
 
   try {
-    const user = gun.user(userId).recall({ sessionStorage: true });
+    const user = gun.user(userId)
     return user;
   } catch {
     throw logout(request);
@@ -100,4 +95,66 @@ export async function createUserSession(userId: string, redirectTo: string) {
   return redirect(redirectTo, {
     headers: { "Set-Cookie": await commitSession(session) },
   });
+}
+
+export async function authAction(request) {
+  let { loginType, username, password } = Object.fromEntries(
+    await request.formData()
+  );
+  if (
+    typeof loginType !== 'string' ||
+    typeof username !== 'string' ||
+    typeof password !== 'string'
+  ) {
+    return { formError: `Form not submitted correctly.` };
+  }
+
+  let fields = { loginType, username, password };
+  let fieldErrors = {
+    username: validateUsername(username),
+    password: validatePassword(password),
+  };
+  if (Object.values(fieldErrors).some(Boolean)) return { fieldErrors, fields };
+
+  switch (loginType) {
+    case 'login': {
+      let { ok, result } = await login({ username, password });
+      if (!ok) {
+        return {
+          fields,
+          formError: `${result}`,
+        };
+      }
+
+      return createUserSession(result, `/dashboard/${username}`);
+    }
+    case 'register': {
+      let { ok, result } = await register({ username, password });
+      if (!ok) {
+        return {
+          fields,
+          formError: `${result}`,
+        };
+      }
+
+      const _userInfo: UserInfo = {
+        id: result,
+        alias: username,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+      
+      let info = await putDoc('user/info', _userInfo, result)
+      if (info) {
+        return {
+          fields,
+          formError: info }
+      }
+
+      return createUserSession(result, `/dashboard/${username}`);
+    }
+    default: {
+      return { fields, formError: `Login type invalid` };
+    }
+  }
 }

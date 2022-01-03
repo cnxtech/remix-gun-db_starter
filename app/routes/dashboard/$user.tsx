@@ -3,13 +3,15 @@ import Gun from 'gun';
 import { gun } from '~/gun.server';
 import { ActionFunction, LoaderFunction, useLoaderData } from 'remix';
 
-import { GunClient } from '~/lib/utility-fx/GunClient';
-import { getUserId } from '~/session.server';
+import { GunClient } from '~/lib/GunClient';
+import { getUser, getUserId } from '~/session.server';
 import invariant from 'tiny-invariant';
+import ProfileHeader from '~/components/ProfileHeader';
+import BlogList from '~/components/blog/BlogList';
 
 interface LoaderData {
   ok: boolean;
-  result: string;
+  result: UserData;
 }
 
 type UserData = {
@@ -29,16 +31,12 @@ type SocialData = {
   url: string;
   color?: string;
 };
+
 export let loader: LoaderFunction = async ({ request, params }) => {
-  let { putData, getData } = await GunClient();
   let alias = params.user;
   let userId = await getUserId(request);
-  let user = gun.user(userId);
-let test = gun.get('name').get('test')
-test.put({alias: `${alias}`, id: userId.slice(1,12), test: 'This is a test Put'})
-  let data =  test.on((data: any) =>{ return {alias: data.alias , id: data.id,test: data.test}})
-  
- return data
+  // let user = await getUser(request);
+  return json({ ok: true, result: { id: userId, alias: alias } });
 };
 
 ///////////////
@@ -48,13 +46,18 @@ test.put({alias: `${alias}`, id: userId.slice(1,12), test: 'This is a test Put'}
 // }
 ///////////////
 export default function User() {
-  let {alias, id, test} = useLoaderData();
+  let { ok, result } = useLoaderData<LoaderData>();
 
   return (
     <div className="mt-5">
-      <p> alias : {alias}</p>
-      <p>id: {id}</p>
-      <p> Put : {test}</p>
+      <ProfileHeader
+        img="/images/person/3.jpg"
+        name={result.alias}
+        size="monster"
+        job={'Job Not Set'}
+        desc={'User Id:  ' + result.id}
+      />
+      <BlogList />
     </div>
   );
 }
@@ -65,7 +68,7 @@ export function CatchBoundary() {
   if (caught.status === 404) {
     return (
       <div className="error-container">
-        <p>There are no jokes to display.</p>
+        <p>No Profile to display.</p>
         <Link to="new">Add your own</Link>
       </div>
     );

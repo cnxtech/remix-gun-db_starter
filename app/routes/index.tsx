@@ -1,15 +1,10 @@
-import { MetaFunction, LoaderFunction, Link } from 'remix';
+import { MetaFunction, LoaderFunction, Link, useLoaderData } from 'remix';
 import { json } from 'remix';
 import Display from '~/components/DisplayHeading';
+import { GunClient } from '~/lib/GunClient';
 
 export let loader: LoaderFunction = () => {
-  return {
-    display: {
-      title: '',
-      span: '',
-      description: '',
-    },
-  };
+
 };
 
 export let meta: MetaFunction = () => {
@@ -20,6 +15,8 @@ export let meta: MetaFunction = () => {
 };
 
 export default function Index() {
+  let {data} = useLoaderData()
+  console.log(data)
   return (
     <div className="bg-white dark:bg-gray-800 flex relative z-20 items-center overflow-hidden">
       <div className="container mx-auto px-6 flex relative py-16">

@@ -4,8 +4,8 @@ import SvgIcon from '~/components/SvgIcon';
 import { paths } from '~/components/SvgIcon';
 import Toggle from '~/components/Toggle';
 
-import { validateUsername, validatePassword } from '~/lib/utility-fx/validate-strings';
-import { createUserSession, login, register } from '~/session.server';
+import { validateUsername, validatePassword } from '~/lib/utils/validate-strings';
+import { authAction} from '~/session.server';
 
 type ActionData = {
   formError?: string;
@@ -13,52 +13,11 @@ type ActionData = {
   fields?: { loginType: string; username: string; password: string };
 };
 
+
+
 export async function action({ request }) {
 
-  let { loginType, username, password } = Object.fromEntries(
-    await request.formData()
-  );
-  if (
-    typeof loginType !== 'string' ||
-    typeof username !== 'string' ||
-    typeof password !== 'string'
-  ) {
-    return { formError: `Form not submitted correctly.` };
-  }
-
-  let fields = { loginType, username, password };
-  let fieldErrors = {
-    username: validateUsername(username),
-    password: validatePassword(password),
-  };
-  if (Object.values(fieldErrors).some(Boolean)) return { fieldErrors, fields };
-
-  switch (loginType) {
-    case 'login': {
-      let { ok, result } = await login({ username, password });
-      if (!ok) {
-        return {
-          fields,
-          formError: `${result}`,
-        };
-      }
-
-      return createUserSession(result, `/dashboard/${username}`);
-    }
-    case 'register': {
-      let { ok, result } = await register({ username, password });
-      if (!ok) {
-        return {
-          fields,
-          formError: `${result}`,
-        };
-      }
-      return createUserSession(result, `/dashboard/${username}`);
-    }
-    default: {
-      return { fields, formError: `Login type invalid` };
-    }
-  }
+return await authAction(request)
 }
 
 ///////////////

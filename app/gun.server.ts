@@ -1,6 +1,7 @@
 import Gun from 'gun';
 import { IGunConstructorOptions } from 'gun/types/options';
-import Relays from '~/lib/utility-fx/relay-peers';
+import Relays from '~/lib/GunClient/relay-peers';
+import { GunClient, GunClientType } from './lib/GunClient';
 let gunOpts = async () => {
     let relay = await Relays();
     let relayOpts: IGunConstructorOptions = {
@@ -16,5 +17,5 @@ const gun = Gun(gunOpts);
 const localStorj = Gun('http://localhost:5150/gun')
 
 
-
-export { gun, gunOpts, localStorj } 
+const { createUser, login, setKey,resetPassword,getVal, putVal, getKey, putDoc, getDoc }:GunClientType = GunClient()
+export { gun, createUser, login, setKey, resetPassword, getVal, putVal, getKey, putDoc, getDoc } 
