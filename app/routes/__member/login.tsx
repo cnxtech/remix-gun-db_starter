@@ -1,5 +1,5 @@
 import { Form, useActionData } from 'remix';
-import { loginAction } from '~/actions';
+import { loginAction } from '~/actions/auth';
 import InputText from '~/components/InputText';
 import SvgIcon from '~/components/SvgIcon';
 import { paths } from '~/components/SvgIcon';

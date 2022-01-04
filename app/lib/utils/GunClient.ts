@@ -9,7 +9,7 @@ import 'gun/lib/load'
 import 'gun/lib/path'
 import 'gun/lib/then'
 import invariant from 'tiny-invariant';
-import { gun } from '~/gun.server';
+import { gun } from '~/lib/GunCtx';
 import Gun from 'gun';
 import { IGunCryptoKeyPair } from 'gun/types/types';
 import { IGunChainReference } from 'gun/types/chain';

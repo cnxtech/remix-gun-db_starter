@@ -1,36 +1,18 @@
 
 import Gun from "gun";
 import { createCookieSessionStorage, redirect } from "remix";
-import {getDate, GunClient} from '~/lib/utility-fx/GunClient';
-import { gun} from "./gun.server";
+import { GunCtx } from '~/lib/GunCtx/models';
+import { getKey, gun, putVal, setKey } from "./lib/GunCtx";
 import 'dotenv'
-const sea = Gun.SEA
+import { validateUsername, validatePassword } from "./lib/utils/validate-strings";
+
 type LoginForm = {
   username: string;
   password: string;
 };
-const {createUser, setKey, putData, getKey,} = GunClient()
-export async function register({ username, password }: LoginForm) {
-  let err = await createUser({username, password});
-  if (err) {
-    return {ok: false, result: err}
-  }
-  let { ok, result } = await setKey(username, password);
-  return {ok:ok, result:result}
-}
-
-export async function login({ username, password }: LoginForm) {
-  let { ok, result } = await getKey(username, password);
-  if (!ok) {
-    return {
-      ok: false,
-      result: result
-    };
-  }
 
 
-  return {ok:ok, result: result}
-}
+
 
 let sessionSecret = process.env.SESSION_SECRET as string || 'abcdefghijklmnopqrstuvwxyz';
 if (typeof sessionSecret !== 'string') {
@@ -72,7 +54,7 @@ export async function getUser(request: Request) {
   if (typeof userId !== "string") return null;
 
   try {
-    const user = gun.user(userId).recall({ sessionStorage: true });
+    const user = gun.user(userId)
     return user;
   } catch {
     throw logout(request);
@@ -82,7 +64,7 @@ export async function getUser(request: Request) {
 export async function logout(request: Request) {
   gun.user().leave();
   let session = await getSession(request.headers.get("Cookie"));
-  return redirect("/login", {
+  return redirect("/", { 
     headers: { "Set-Cookie": await destroySession(session) },
   });
 }
@@ -93,4 +75,92 @@ export async function createUserSession(userId: string, redirectTo: string) {
   return redirect(redirectTo, {
     headers: { "Set-Cookie": await commitSession(session) },
   });
+}
+
+
+export async function loginAction(request: Request) {
+
+  let { loginType, username, password } = Object.fromEntries(
+    await request.formData()
+  );
+  if (
+    typeof loginType !== 'string' ||
+    typeof username !== 'string' ||
+    typeof password !== 'string'
+  ) {
+    return { formError: `Form not submitted correctly.` };
+  }
+
+  let fields = { loginType, username, password };
+  let fieldErrors = {
+    username: validateUsername(username),
+    password: validatePassword(password),
+  };
+  if (Object.values(fieldErrors).some(Boolean))
+    return { fieldErrors, fields };
+
+  switch (loginType) {
+    case 'login': {
+      let { ok, result } = await getKey(username, password);
+      if (!ok) {
+        return {
+          fields,
+          formError: `${result}`,
+        };
+      }
+      let user = gun.user(result)
+      let _put = {
+        document: `users.info.@${username}`,
+      }
+
+      const res = user.get(_put.document).on(({ lastLogin }) => {
+
+        if (!lastLogin) {
+          console.log('Key Last Login Failed')
+          return false
+        }
+        lastLogin = `${new Date().getTime}`
+
+      })
+      if (!res) {
+        console.log(res)
+        return { ok: false, result: 'Err updating lastLogin' };
+      }
+
+      return createUserSession(result, `/dashboard/${username}`);
+    }
+    case 'register': {
+      let { ok, result } = await setKey(username, password);
+      if (!ok) {
+        return {
+          fields,
+          formError: `${result}`,
+        };
+      }
+      let user = gun.user(result)
+      let _put = {
+        id: result.slice(1, 12) as string,
+        alias: username,
+        createdAt: `${new Date().getTime}`,
+        lastLogin: `${new Date().getTime}`
+      }
+      const res = user.get(`users.info.@${username}`,).put(_put, ({ err, ok }) => {
+
+        if (ok) {
+          return true
+        }
+        console.error(err)
+        return false
+
+      })
+      if (!res) {
+        console.log(res)
+        return { ok: false, result: 'Err updating lastLogin' };
+      }
+      return createUserSession(result, `/dashboard/${username}`);
+    }
+    default: {
+      return { fields, formError: `Login type invalid` };
+    }
+  }
 }

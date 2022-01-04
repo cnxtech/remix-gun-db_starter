@@ -1,13 +1,9 @@
-import { json, Link, useCatch } from 'remix';
-import Gun from 'gun';
-import { gun } from '~/gun.server';
-import { ActionFunction, LoaderFunction, useLoaderData } from 'remix';
-
-import { GunClient } from '~/lib/utility-fx/GunClient';
-import { getUser, getUserId } from '~/session.server';
-import invariant from 'tiny-invariant';
-import ProfileHeader from '~/components/ProfileHeader';
+import { Link, useCatch } from 'remix';
+import {  getUserInfo, getVal } from '~/lib/GunCtx';
+import { LoaderFunction, useLoaderData } from 'remix';
+import { getUserId } from '~/session.server';
 import BlogList from '~/components/blog/BlogList';
+import ProfileHeader from '~/components/ProfileHeader';
 
 interface LoaderData {
   ok: boolean;
@@ -17,26 +13,20 @@ interface LoaderData {
 type UserData = {
   id: string;
   alias: string;
-};
-
-type Socials = {
-  facebook: SocialData;
-  twitter: SocialData;
-  linkedIn: SocialData;
-  github: SocialData;
-};
-
-type SocialData = {
-  brand: string;
-  url: string;
-  color?: string;
+  createdAt: string;
+  lastLogin: string;
 };
 
 export let loader: LoaderFunction = async ({ request, params }) => {
   let alias = params.user;
   let userId = await getUserId(request);
-  // let user = await getUser(request);
-  return json({ ok: true, result: { id: userId, alias: alias } });
+
+              let _put = {
+                document: `users.info.@${alias}`,
+              };
+
+  // let {ok, result} = await getUserInfo(alias)
+  return {ok:true, result: {alias: alias , id: userId}}
 };
 
 ///////////////
@@ -46,8 +36,8 @@ export let loader: LoaderFunction = async ({ request, params }) => {
 // }
 ///////////////
 export default function User() {
-  let { ok, result } = useLoaderData<LoaderData>();
-
+  let {result} = useLoaderData<LoaderData>();
+  console.log(result.id);
   return (
     <div className="mt-5">
       <ProfileHeader
@@ -57,7 +47,7 @@ export default function User() {
         job={'Job Not Set'}
         desc={'User Id:  ' + result.id}
       />
-      <BlogList />
+      {/* <BlogList /> */}
     </div>
   );
 }
