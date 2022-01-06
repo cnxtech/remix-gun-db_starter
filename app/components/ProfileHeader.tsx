@@ -28,7 +28,7 @@ const ProfileHeader = (props: Props) => {
           <p className="text-xl text-gray-500 dark:text-gray-200 font-light">
             {props.job}
           </p>
-          <p className="text-md text-gray-500 dark:text-gray-400 max-w-xs py-4 font-light">
+          <p className="text-md text-gray-500 dark:text-gray-400 max-w-l py-4 font-light">
             {props.desc}
           </p>
         </div>

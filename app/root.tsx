@@ -67,7 +67,8 @@ export default function App() {
   let data = {
     links: [
       { to: '/', label: 'Home' },
-      { to: '/login', label: 'SignUp/LogIn' },
+      { to: '/login', label: 'LogIn' },
+      { to: '/logout', label: 'LogOut' },
     ],
   };
   return (

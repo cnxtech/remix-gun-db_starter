@@ -1,7 +1,7 @@
 
 import Gun from "gun";
 import { createCookieSessionStorage, redirect } from "remix";
-import { encrypt, GunCtx } from '~/lib/GunDb/auth';
+import { encrypt, GunCtx } from '~/lib/GunDb/client';
 import { getKey, gun, putVal, setKey } from "./lib/GunDb";
 import { validateUsername, validatePassword } from "./lib/utils/validate-strings";
 

@@ -84,6 +84,19 @@ export function GunCtx( ): GunCtxType {
     })
   }
 
+  const setArray = ( document:string, key:string, set: Array<any>): Promise<string> => {
+    let _document
+    if (key) {
+      _document = user.get(document).get(key)
+    } _document = user.get(document)
+    return new Promise((resolve) => {
+      set.forEach((ref: any) => {
+        _document.set(ref, (ack) => {
+          resolve(ack.ok ? 'Added set!' : ack.err?.message ?? undefined);
+        })
+      })
+    })
+  }
 
   return {
     createUser,

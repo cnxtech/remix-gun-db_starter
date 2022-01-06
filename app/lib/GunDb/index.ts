@@ -3,7 +3,7 @@ import { IGunChainReference } from 'gun/types/chain';
 import { IGunConstructorOptions } from 'gun/types/options';
 import Relays from '~/lib/GunDb/relay-peers';
 import { getUser } from '~/session.server';
-import { GunCtx } from './auth';
+import { GunCtx } from './client';
 
 let gunOpts = async () => {
     let relay = await Relays();

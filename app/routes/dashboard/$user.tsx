@@ -11,9 +11,9 @@ import { getUser, getUserId } from '~/session.server';
 import BlogList from '~/components/blog/BlogList';
 import ProfileHeader from '~/components/ProfileHeader';
 import { IGunChainReference } from 'gun/types/chain';
-import { gun, putVal, user } from '~/lib/GunDb';
+import { getVal, gun, putVal, user } from '~/lib/GunDb';
 import Display from '~/components/DisplayHeading';
-import { decrypt, encrypt } from '~/lib/GunDb/auth';
+import { decrypt, encrypt } from '~/lib/GunDb/client';
 
 interface LoaderPromise {
   alias: string;
@@ -37,23 +37,20 @@ export let loader: LoaderFunction = async ({ request, params }) => {
   let data = {
     alias: params.user,
     id: userId.slice(1, 12),
-    avatar: 'Put in the action',
-    job: 'Interface Designer',
+    avatar: 'newStuff',
+    job: 'Interface Illustratoe',
     description: 'New Description',
   };
 
   let test = gun.get('test');
-let put = await putVal('lalal', 'lala2', data)
+let put =  await putVal('test1234', 'lala2', data, userId);
 
 if (!put) {
 throw new Error('Didnt Put The Value')
 }
 
 
-  return gun
-    .get('lalal')
-    .get('lala2')
-    .once((data) =>   Object.keys(data).forEach(async (key, value) => { json({[key]: value}) }));
+  return getVal('test1234', 'lala2', userId); 
 };
 
 /////////////
@@ -65,19 +62,18 @@ export let action: ActionFunction = async ({ request, params }) => {
 };
 /////////////
 export default function User() {
-  let data = useLoaderData();
+  let {alias, avatar, job, description, id} = useLoaderData();
   let user = useActionData();
 
-  console.log(data);
   return (
     <div className="mt-5">
-      {/* <ProfileHeader
-        img={`https://avatars.dicebear.com/api/micah/${data.id}}.svg`}
-        name={data.alias}
+      <ProfileHeader
+        img={`https://avatars.dicebear.com/api/micah/${id}}.svg`}
+        name={alias}
         size="monster"
-        job={data.job}
-        desc={data.description}
-      /> */}
+        job={job}
+        desc={description}
+      />
       <Outlet />
       {/* <BlogList /> */}
     </div>
