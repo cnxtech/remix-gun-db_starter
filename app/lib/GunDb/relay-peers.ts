@@ -15,7 +15,7 @@ const ports = {
 const Relays = async () => {
   let gunRelays:Array<string> = [];
 
-  let gun = new Gun({
+  const gun = new Gun({
     peers: [`http://${host}:${ports.CLIENT}/gun`, `http://${host}:${ports.RELAY}/gun`]})
 
   // check gun first

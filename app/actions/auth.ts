@@ -1,4 +1,4 @@
-import { putVal, getKey, setKey, gun } from "~/lib/GunCtx";
+import { putVal, getKey, setKey, gun } from "~/lib/GunDb";
 import { validateUsername, validatePassword } from "~/lib/utils/validate-strings";
 import { createUserSession } from "~/session.server";
 export async function loginAction(request: Request) {

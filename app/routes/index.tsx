@@ -26,6 +26,8 @@ export default function Index() {
         <div className="sm:w-2/3 lg:w-2/5 flex flex-col relative z-20">
           <Display
             title="Remix/ GunDb"
+            titleColor="white"
+            spanColor="pink-500"
             span="App Starter"
             description="Application boilerplate with authentication && sessionStorage, data encryption, and tailwind styling. "
           />

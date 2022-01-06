@@ -1,9 +1,8 @@
 
 import Gun from "gun";
 import { createCookieSessionStorage, redirect } from "remix";
-import { GunCtx } from '~/lib/GunCtx/models';
-import { getKey, gun, putVal, setKey } from "./lib/GunCtx";
-import 'dotenv'
+import { encrypt, GunCtx } from '~/lib/GunDb/auth';
+import { getKey, gun, putVal, setKey } from "./lib/GunDb";
 import { validateUsername, validatePassword } from "./lib/utils/validate-strings";
 
 type LoginForm = {
@@ -52,19 +51,14 @@ export async function requireUserId(request: Request) {
 export async function getUser(request: Request) {
   let userId = await getUserId(request);
   if (typeof userId !== "string") return null;
-
-  try {
-    const user = gun.user(userId)
-    return user;
-  } catch {
-    throw logout(request);
-  }
+  let user = gun.user(userId)
+  return user
 }
 
 export async function logout(request: Request) {
   gun.user().leave();
   let session = await getSession(request.headers.get("Cookie"));
-  return redirect("/", { 
+  return redirect("/", {
     headers: { "Set-Cookie": await destroySession(session) },
   });
 }
@@ -108,24 +102,8 @@ export async function loginAction(request: Request) {
           formError: `${result}`,
         };
       }
-      let user = gun.user(result)
-      let _put = {
-        document: `users.info.@${username}`,
-      }
 
-      const res = user.get(_put.document).on(({ lastLogin }) => {
-
-        if (!lastLogin) {
-          console.log('Key Last Login Failed')
-          return false
-        }
-        lastLogin = `${new Date().getTime}`
-
-      })
-      if (!res) {
-        console.log(res)
-        return { ok: false, result: 'Err updating lastLogin' };
-      }
+// Update Login Time
 
       return createUserSession(result, `/dashboard/${username}`);
     }
@@ -137,26 +115,7 @@ export async function loginAction(request: Request) {
           formError: `${result}`,
         };
       }
-      let user = gun.user(result)
-      let _put = {
-        id: result.slice(1, 12) as string,
-        alias: username,
-        createdAt: `${new Date().getTime}`,
-        lastLogin: `${new Date().getTime}`
-      }
-      const res = user.get(`users.info.@${username}`,).put(_put, ({ err, ok }) => {
 
-        if (ok) {
-          return true
-        }
-        console.error(err)
-        return false
-
-      })
-      if (!res) {
-        console.log(res)
-        return { ok: false, result: 'Err updating lastLogin' };
-      }
       return createUserSession(result, `/dashboard/${username}`);
     }
     default: {

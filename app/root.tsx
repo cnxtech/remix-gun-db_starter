@@ -7,6 +7,9 @@ import styles from '~/styles/tailwind.css';
 import globalStylesUrl from '~/styles/global.css';
 import darkStylesUrl from '~/styles/dark.css';
 import Layout from './components/remix/Layout';
+import Display from './components/DisplayHeading';
+import Header from './components/Header';
+import Logo from './components/Logo';
 
 export let links: LinksFunction = () => {
   return [
@@ -60,9 +63,17 @@ export const meta: MetaFunction = () => {
 // https://remix.run/api/conventions#default-export
 // https://remix.run/api/conventions#route-filenames
 export default function App() {
+
+  let data = {
+    links: [
+      { to: '/', label: 'Home' },
+      { to: '/login', label: 'SignUp/LogIn' },
+    ],
+  };
   return (
     <Document>
       <Layout>
+        <Header links={data.links}  hideHelp={true} hideGitHubLink={true} logo={<Logo />} />
         <Outlet />
       </Layout>
     </Document>
@@ -73,17 +84,17 @@ export default function App() {
 export function ErrorBoundary({ error }) {
   console.error(error);
   return (
-    <html>
-      <head>
-        <title>Oh no!</title>
-        <Meta />
-        <Links />
-      </head>
-      <body>
-        {/* add the UI you want your users to see */}
-        <Scripts />
-      </body>
-    </html>
+    <Document title={`Uh-oh! ${error}`}>
+      <div className="min-h-screen py-4 flex flex-col justify-center items-center">
+        <Display
+          title="F#@k!"
+          titleColor="white"
+          span={error.message}
+          spanColor="red-500"
+          description={`${error}`}
+        />
+      </div>
+    </Document>
   );
 }
 
@@ -91,34 +102,27 @@ export function ErrorBoundary({ error }) {
 export function CatchBoundary() {
   let caught = useCatch();
 
-  let message;
   switch (caught.status) {
     case 401:
-      message = (
-        <p>
-          Oops! Looks like you tried to visit a page that you do not have access
-          to.
-        </p>
-      );
-      break;
+    case 403:
     case 404:
-      message = (
-        <p>Oops! Looks like you tried to visit a page that does not exist.</p>
+      return (
+        <Document title={`${caught.status} ${caught.statusText}`}>
+          <div className="min-h-screen py-4 flex flex-col justify-center items-center">
+            <Display
+              title={`${caught.status}`}
+              titleColor="white"
+              span={`${caught.statusText}`}
+              spanColor="pink-500"
+              description={`${caught.statusText}`}
+            />
+          </div>
+        </Document>
       );
-      break;
 
     default:
-      throw new Error(caught.data || caught.statusText);
+      throw new Error(
+        `Unexpected caught response with status: ${caught.status}`
+      );
   }
-
-  return (
-    <Document title={`${caught.status} ${caught.statusText}`}>
-      <Layout>
-        <h1>
-          {caught.status}: {caught.statusText}
-        </h1>
-        {message}
-      </Layout>
-    </Document>
-  );
 }

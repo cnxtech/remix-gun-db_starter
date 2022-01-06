@@ -1,52 +1,84 @@
-import { Link, useCatch } from 'remix';
-import {  getUserInfo, getVal } from '~/lib/GunCtx';
+import {
+  ActionFunction,
+  json,
+  Link,
+  Outlet,
+  useActionData,
+  useCatch,
+} from 'remix';
 import { LoaderFunction, useLoaderData } from 'remix';
-import { getUserId } from '~/session.server';
+import { getUser, getUserId } from '~/session.server';
 import BlogList from '~/components/blog/BlogList';
 import ProfileHeader from '~/components/ProfileHeader';
+import { IGunChainReference } from 'gun/types/chain';
+import { gun, putVal, user } from '~/lib/GunDb';
+import Display from '~/components/DisplayHeading';
+import { decrypt, encrypt } from '~/lib/GunDb/auth';
 
-interface LoaderData {
-  ok: boolean;
-  result: UserData;
+interface LoaderPromise {
+  alias: string;
+  userId: string;
 }
 
-type UserData = {
-  id: string;
-  alias: string;
-  createdAt: string;
-  lastLogin: string;
-};
-
 export let loader: LoaderFunction = async ({ request, params }) => {
-  let alias = params.user;
   let userId = await getUserId(request);
+  if (!userId) {
+    throw new Response(`Forbidden`, { status: 403 });
+  }
+ let isAlias =  gun.get(`~@${params.user}`).once(async (exist) => {
+    if (!exist) return false
+    return true
+  });
 
-              let _put = {
-                document: `users.info.@${alias}`,
-              };
+  if (!isAlias){
+    throw new Response(`Alias Not Found`, { status: 404 });
+  }
 
-  // let {ok, result} = await getUserInfo(alias)
-  return {ok:true, result: {alias: alias , id: userId}}
+  let data = {
+    alias: params.user,
+    id: userId.slice(1, 12),
+    avatar: 'Put in the action',
+    job: 'Interface Designer',
+    description: 'New Description',
+  };
+
+  let test = gun.get('test');
+let put = await putVal('lalal', 'lala2', data)
+
+if (!put) {
+throw new Error('Didnt Put The Value')
+}
+
+
+  return gun
+    .get('lalal')
+    .get('lala2')
+    .once((data) =>   Object.keys(data).forEach(async (key, value) => { json({[key]: value}) }));
 };
 
-///////////////
-// export let action: ActionFunction = async({request}) => {
-//  //action function
-//   return null
-// }
-///////////////
+/////////////
+export let action: ActionFunction = async ({ request, params }) => {
+  let userId = await getUserId(request);
+  let user = await getUser(request);
+
+  return null;
+};
+/////////////
 export default function User() {
-  let {result} = useLoaderData<LoaderData>();
-  console.log(result.id);
+  let data = useLoaderData();
+  let user = useActionData();
+
+  console.log(data);
   return (
     <div className="mt-5">
-      <ProfileHeader
-        img="/images/person/3.jpg"
-        name={result.alias}
+      {/* <ProfileHeader
+        img={`https://avatars.dicebear.com/api/micah/${data.id}}.svg`}
+        name={data.alias}
         size="monster"
-        job={'Job Not Set'}
-        desc={'User Id:  ' + result.id}
-      />
+        job={data.job}
+        desc={data.description}
+      /> */}
+      <Outlet />
       {/* <BlogList /> */}
     </div>
   );
@@ -55,18 +87,36 @@ export default function User() {
 export function CatchBoundary() {
   let caught = useCatch();
 
-  if (caught.status === 404) {
-    return (
-      <div className="error-container">
-        <p>No Profile to display.</p>
-        <Link to="new">Add your own</Link>
-      </div>
-    );
+  switch (caught.status) {
+    case 401:
+    case 403:
+    case 404:
+      return (
+        <div className="min-h-screen py-4 flex flex-col justify-center items-center">
+          <Display
+            title={`${caught.status}`}
+            titleColor="white"
+            span={`${caught.statusText}`}
+            spanColor="pink-500"
+            description={`${caught.statusText}`}
+          />
+        </div>
+      );
   }
   throw new Error(`Unexpected caught response with status: ${caught.status}`);
 }
 
 export function ErrorBoundary({ error }: { error: Error }) {
   console.error(error);
-  return <div className="error-container">I did a whoopsies.</div>;
+  return (
+    <div className="min-h-screen py-4 flex flex-col justify-center items-center">
+      <Display
+        title="Error:"
+        titleColor="white"
+        span={error.message}
+        spanColor="red-500"
+        description={`${error}`}
+      />
+    </div>
+  );
 }

@@ -9,6 +9,7 @@ interface Props {
     job: string;
     desc: string;
     social?: Array<Social>;
+    editMode?: boolean;
 }
 interface Social {
     svgPath?: string

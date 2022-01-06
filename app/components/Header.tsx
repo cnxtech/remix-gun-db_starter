@@ -181,6 +181,7 @@ const Header = (props: HeaderProps) => {
         {(isMenuOpen || props.forceMenuOpenInMobile) && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              
               {props.links &&
                 props.links.map((link) => {
                   return (
@@ -198,11 +199,11 @@ const Header = (props: HeaderProps) => {
                   );
                 })}
             </div>
-            {props.withSearchBar && (
+            
               <div className="p-2 flex">
                 <FormSubscribe label="Search" placeholder="Search" />
               </div>
-            )}
+        
           </div>
         )}
       </nav>
