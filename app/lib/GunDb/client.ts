@@ -5,6 +5,7 @@ import 'gun/lib/store';
 import 'gun/lib/rindexed';
 import 'gun/lib/not.js';
 import 'gun/lib/then'
+import 'gun/lib/path'
 import invariant from 'tiny-invariant';
 import { IGunCryptoKeyPair } from 'gun/types/types'
 import Gun from 'gun';
@@ -78,7 +79,7 @@ export function GunCtx( ): GunCtxType {
       value = await encrypt(value, encryptionKey);
     }
     return new Promise((resolve) => {
-      gun.get(document).get(key).put(value, (ack) => {
+      gun.get(document).path(key).put(value, (ack) => {
         resolve(ack.ok ? 'Added data!' : ack.err?.message ?? undefined);
       })
     })
@@ -87,7 +88,7 @@ export function GunCtx( ): GunCtxType {
   const setArray = ( document:string, key:string, set: Array<any>): Promise<string> => {
     let _document
     if (key) {
-      _document = user.get(document).get(key)
+      _document = user.get(document).path(key)
     } _document = user.get(document)
     return new Promise((resolve) => {
       set.forEach((ref: any) => {
@@ -113,7 +114,7 @@ export function GunCtx( ): GunCtxType {
     getVal: (document: string, key?: string, decryptionKey?: string) => {
       return new Promise((resolve) =>
         key
-          ? gun.get(document).get(key).once(async (data) => {
+          ? gun.get(document).path(key).once(async (data) => {
             console.log('data:', data)
             decryptionKey
               ? resolve(await decrypt(data, decryptionKey))

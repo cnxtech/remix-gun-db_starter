@@ -38,19 +38,19 @@ export let loader: LoaderFunction = async ({ request, params }) => {
     alias: params.user,
     id: userId.slice(1, 12),
     avatar: 'newStuff',
-    job: 'Interface Illustratoe',
-    description: 'New Description',
+    job: 'Interface Designer',
+    description: 'The Description is the bvest',
   };
 
   let test = gun.get('test');
-let put =  await putVal('test1234', 'lala2', data, userId);
+let put =  await putVal(`${data.id}/${data.alias}`, 'info', data, userId);
 
 if (!put) {
 throw new Error('Didnt Put The Value')
 }
 
 
-  return getVal('test1234', 'lala2', userId); 
+  return getVal(`${data.id}/${data.alias}`, 'info', userId); 
 };
 
 /////////////
