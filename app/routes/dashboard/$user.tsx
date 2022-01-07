@@ -8,10 +8,6 @@ import ProfileHeader from '~/components/ProfileHeader';
 import { getVal, gun,  } from '~/lib/GunDb';
 import Display from '~/components/DisplayHeading';
 
-interface LoaderPromise {
-  alias: string;
-  userId: string;
-}
 
 
 

@@ -6,7 +6,6 @@ require('gun/lib/then.js')
 // Suppress extraneous GUN logging
 let cl = console.log;
 console.log = () => {};
-const port = '5150'
 const host = process.env.DOMAIN || '0.0.0.0'
 const ports = {
   RELAY: process.env.GUN_PORT || 5150,

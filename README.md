@@ -8,14 +8,18 @@ This is my white-label boilerplate when building full stack apps. Using the Grap
 
 - [x] Relay GunDB inside the Remix Express Server  
 - [x] Authorization with Gun.Sea/ Gun's user api
-  - [ ] Password-less authorization. CURRENTLY IN PROGRESS
-- [ ] Data writing / mapping with high level Gun function
-- [ ] Dynamic relay database peers
-- [ ] Docker Swarm deployment
+  - [ ] Password-less authorization. IN PROGRESS
+- [x] Data writing / mapping with high level Gun function
+- [x] Dynamic relay database peers
+- [x] Docker Swarm deployment
 - [ ] Cryptographic ledger 
 - [x] Data Encrytion
 - [ ] Data Compression
+- [ ] Session Storage (needs improvment)
 
+![radix-encryption](public/images/github/radix.png "Radix Storage with fully encrypted data")
+
+Radix Storage with fully encrypted data. Each registered user has public/ private encryption credentials.
 
 ## Development
 

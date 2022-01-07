@@ -1,14 +1,9 @@
 
-import Gun from "gun";
 import { createCookieSessionStorage, redirect } from "remix";
-import { encrypt, GunCtx } from '~/lib/GunDb/client';
 import { getKey, gun, putVal, setKey } from "./lib/GunDb";
+import { blogs, loadDummy } from "./lib/utils/data/helpers";
 import { validateUsername, validatePassword } from "./lib/utils/validate-strings";
 
-type LoginForm = {
-  username: string;
-  password: string;
-};
 
 
 export const APP_KEY_PAIR = process.env.APP_KEY_PAIR
@@ -128,6 +123,7 @@ export async function loginAction(request: Request) {
         throw new Error('Didnt Put The Value')
       }
 
+      loadDummy(result, blogs)
 
       return createUserSession(result, `/dashboard/${username}`);
     }

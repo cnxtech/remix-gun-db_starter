@@ -36,7 +36,7 @@ export const blogs = [
 export const loadDummy = (userId: string, blogs: Array<any>) => {
     blogs.forEach(async (blog) => {
         blog.tags.forEach(async (tag) => {
-            let set = await setArray(`${userId}/articles/${blog.title}/tags`, [
+            let set = setArray(`${userId}/articles/${blog.title}/tags`, [
                 tag,
             ]);
             if (!set) {
@@ -46,7 +46,7 @@ export const loadDummy = (userId: string, blogs: Array<any>) => {
 
         delete blog.tags;
 
-        let put = await putVal(
+        let put = putVal(
             `${userId}/articles`,
             blog.title,
             blog,

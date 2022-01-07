@@ -1,8 +1,6 @@
 import Gun from 'gun';
-import { IGunChainReference } from 'gun/types/chain';
 import { IGunConstructorOptions } from 'gun/types/options';
 import Relays from '~/lib/GunDb/relay-peers';
-import { getUser } from '~/session.server';
 import { GunCtx } from './client';
 
 let gunOpts = async () => {
@@ -24,7 +22,7 @@ export const db = new Gun({
     peers: [`http://${host}:${ports.CLIENT}/gun`, `http://${host}:${ports.RELAY}/gun`]
 })
 
- export const { putVal, getVal,  getKey, setKey, resetPassword, setArray } = GunCtx()
+ export const { putVal, getVal,  getKey, setKey, resetPassword, setArray } = GunCtx(gun)
 
 
 export type UserData = {

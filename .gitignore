@@ -1,10 +1,11 @@
 node_modules
 .env
 radata
+*.tmp
 .vscode
-3333.public_relay
+*.public_relay
 /.cache
 /server/build
 /public/build
-5150.private_relay
+*.private_relay
 .DS_Store

@@ -1,20 +1,18 @@
 import React from 'react';
-import { gun, putVal, setArray } from '~/lib/GunDb';
-import { APP_KEY_PAIR } from '~/session.server';
 import BlogCard from './BlogCard';
-import {blogs, loadDummy} from '~/lib/utils/data/helpers'
+import {blogs} from '~/lib/utils/data/helpers'
 
 interface Props {
   withSearch?: boolean;
   userId: string;
   alias?: string;
+ 
 }
 
 
 
 
 const BlogList = (props: Props) => {
-    loadDummy(props.userId, blogs)
 
   return (
     <div className="w-full  p-12">

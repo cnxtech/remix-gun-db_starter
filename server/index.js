@@ -42,7 +42,7 @@ const relay = Gun({
 <h1>Graph Universal Private DB</h1> 
 </body>
 <script>
-var gun = Gun({peers:['http://${host}:${ports.CLIENT}/gun', 'http://${host}:${ports.RELAY}/gun']})
+var gun = Gun({peers:['http://localhost:${ports.CLIENT}/gun', 'http://localhost:${ports.RELAY}/gun']})
 </script> 
 </html>`);
     res.end()

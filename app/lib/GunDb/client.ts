@@ -43,17 +43,8 @@ export type GunCtxType = {
 }
 
 type AuthKeys = { soul: string, get: string, sea: IGunCryptoKeyPair, epub: string }
-const host = process.env.DOMAIN || '0.0.0.0'
-const ports = {
-  RELAY: process.env.GUN_PORT || 5150,
-  CLIENT: process.env.CLIENT_PORT || 3333
-}
 
-export function GunCtx(): GunCtxType {
-  const gun = new Gun({
-    peers: [`http://${host}:${ports.CLIENT}/gun`, `http://${host}:${ports.RELAY}/gun`]
-  })
-
+export function GunCtx( gun: IGunChainReference): GunCtxType {
   const user = gun.user().recall({sessionStorage:true})
 
   const createUser = async (username: string, password: string): Promise<{ ok: boolean, result: string | undefined }> =>
