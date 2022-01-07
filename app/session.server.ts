@@ -11,7 +11,7 @@ type LoginForm = {
 };
 
 
-
+export const APP_KEY_PAIR = process.env.APP_KEY_PAIR
 
 let sessionSecret = process.env.SESSION_SECRET as string || 'abcdefghijklmnopqrstuvwxyz';
 if (typeof sessionSecret !== 'string') {
@@ -56,9 +56,8 @@ export async function getUser(request: Request) {
 }
 
 export async function logout(request: Request) {
-  gun.user().leave();
   let session = await getSession(request.headers.get("Cookie"));
-  return redirect("/", {
+  return redirect("/login", {
     headers: { "Set-Cookie": await destroySession(session) },
   });
 }
@@ -115,6 +114,20 @@ export async function loginAction(request: Request) {
           formError: `${result}`,
         };
       }
+      let data = {
+        alias: username,
+        id: result,
+        job: 'What is your job?',
+        description: 'Write a description...',
+        created: `${new Date().getTime}`
+      };
+
+      let put = await putVal(`${data.id}`, 'info', data, APP_KEY_PAIR);
+
+      if (!put) {
+        throw new Error('Didnt Put The Value')
+      }
+
 
       return createUserSession(result, `/dashboard/${username}`);
     }

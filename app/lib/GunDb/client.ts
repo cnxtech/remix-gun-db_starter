@@ -20,7 +20,7 @@ export const encrypt = async (
   keys: undefined | string | IGunCryptoKeyPair
 ) => {
   console.log('Encrypting data...')
- return Gun.SEA.encrypt(data, keys)
+  return Gun.SEA.encrypt(data, keys)
 };
 
 export const decrypt = async (
@@ -28,31 +28,33 @@ export const decrypt = async (
   keys: undefined | string | IGunCryptoKeyPair,
 ) => {
   console.log('Decrypting data...')
- return Gun.SEA.decrypt(data, keys);
+  return Gun.SEA.decrypt(data, keys);
 };
 export type GunCtxType = {
   createUser: (username: string, password: string) => Promise<{ ok: boolean, result: string | undefined }>;
-  login: (username: string, password: string) => Promise<{ ok: boolean, result: any }>;
+  login: (username: string, password: string) => Promise<{ ok: boolean, result: AuthKeys}>;
   resetPassword: (username: string, oldPassword: string, newPassword: string) => Promise<{ ok: boolean, result: string }>;
   getVal: (document: string, key?: string, decryptionKey?: string) => Promise<any>;
-  putVal: (document: string, key: string, value: any, encryptionKey?: string) => Promise<string>;
-  getKey: (alias: string, password: string) => Promise<{ ok: boolean, result: string }>;
-  setKey: (alias: string, password: string) => Promise<any>;
-  user: IGunChainReference
+  putVal: (document: string, key: string, value: any, encryptionKey?: string, set?: string) => Promise<string>;
+  getKey: (alias: string, password: string) => Promise<{ ok: boolean, result: string | keyof  AuthKeys}>;
+  setKey: (alias: string, password: string) => Promise<{ ok: boolean, result: string | keyof  AuthKeys }>;
+  setArray:(document: string, set: Array<any>) => Promise<string>
 
 }
+
+type AuthKeys = { soul: string, get: string, sea: IGunCryptoKeyPair, epub: string }
 const host = process.env.DOMAIN || '0.0.0.0'
 const ports = {
   RELAY: process.env.GUN_PORT || 5150,
   CLIENT: process.env.CLIENT_PORT || 3333
 }
 
-export function GunCtx( ): GunCtxType {
+export function GunCtx(): GunCtxType {
   const gun = new Gun({
     peers: [`http://${host}:${ports.CLIENT}/gun`, `http://${host}:${ports.RELAY}/gun`]
   })
 
-  const user = gun.user()
+  const user = gun.user().recall({sessionStorage:true})
 
   const createUser = async (username: string, password: string): Promise<{ ok: boolean, result: string | undefined }> =>
     new Promise((resolve) => user.create(username, password, (ack) => {
@@ -68,28 +70,41 @@ export function GunCtx( ): GunCtxType {
     new Promise((resolve) => user.auth(username, password, (ack) => {
       if (Object.getOwnPropertyNames(ack).includes('id')) {
 
-        resolve({ ok: true, result: (ack as any).get });
+        resolve({ ok: true, result: { soul: (ack as any).soul, get: (ack as any).get, sea: (ack as any).sea, epub: (ack as any).epub} });
       } else {
         resolve({ ok: false, result: JSON.parse(JSON.stringify(ack)).err })
       }
     }))
 
-  const putVal = async (document: string, key: string, value: any, encryptionKey?: string): Promise<string> => {
+    /**
+     * 
+     * @param document 
+     * Uses gun/lib/path library... separate nodes with full tops or slashes
+     * @param key 
+     * another node record
+     * @param value 
+     * 
+     * @param encryptionKey 
+     * @param set 
+     * @returns 
+     */
+  const putVal = async (document: string, key: string, value: any, encryptionKey?: string, set?: string): Promise<string> => {
     if (encryptionKey) {
       value = await encrypt(value, encryptionKey);
     }
     return new Promise((resolve) => {
-      gun.get(document).path(key).put(value, (ack) => {
+      if (typeof set === 'string') {
+        let _set = gun.path(document).get(key).put(value)
+        resolve(setArray(set, [_set]))
+      }
+      gun.path(document).get(key).put(value, (ack) => {
         resolve(ack.ok ? 'Added data!' : ack.err?.message ?? undefined);
       })
     })
   }
 
-  const setArray = ( document:string, key:string, set: Array<any>): Promise<string> => {
-    let _document
-    if (key) {
-      _document = user.get(document).path(key)
-    } _document = user.get(document)
+  const setArray = (document: string, set: Array<any>): Promise<string> => {
+    let _document = gun.path(document)
     return new Promise((resolve) => {
       set.forEach((ref: any) => {
         _document.set(ref, (ack) => {
@@ -114,13 +129,13 @@ export function GunCtx( ): GunCtxType {
     getVal: (document: string, key?: string, decryptionKey?: string) => {
       return new Promise((resolve) =>
         key
-          ? gun.get(document).path(key).once(async (data) => {
+          ? gun.path(document).get(key).once(async (data) => {
             console.log('data:', data)
             decryptionKey
               ? resolve(await decrypt(data, decryptionKey))
               : resolve(data)
           })
-          : gun.get(document).once(async (data) => resolve(data))
+          : user.get(document).once(async (data) => resolve(data))
       )
     },
     putVal,
@@ -134,18 +149,8 @@ export function GunCtx( ): GunCtxType {
           if (!ok) {
             resolve({ ok, result })
           }
-
-          gun.get('keys').get('master').once(async (data) => {
-            if (!data) {
-              resolve({ ok: false, result: 'Could Not Find Key Associated With This User' });
-            } else {
-              const decrypted = await decrypt(data, password)
-              if (typeof decrypted === 'string') {
-                resolve({ ok: true, result: decrypted as string });
-              }
-
-            }
-          })
+          resolve({ ok: true, result: result.get})
+             
         })),
     setKey: async (username: string, password: string) =>
       new Promise((resolve) =>
@@ -161,13 +166,13 @@ export function GunCtx( ): GunCtxType {
           if (!ok) {
             resolve({ ok, result });
           }
-          const res = await putVal('keys', 'master', result, password);
+          const res = await putVal('keys', 'master', result, result.sea);
           if (res === 'Added data!') {
-            resolve({ ok: true, result: result });
-          } 
+            resolve({ ok: true, result: result.get });
+          }
         })
       ),
-      user
+    setArray
 
   }
 }

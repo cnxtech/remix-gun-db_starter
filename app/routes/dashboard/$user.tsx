@@ -1,24 +1,19 @@
 import {
-  ActionFunction,
-  json,
-  Link,
   Outlet,
-  useActionData,
   useCatch,
 } from 'remix';
 import { LoaderFunction, useLoaderData } from 'remix';
-import { getUser, getUserId } from '~/session.server';
-import BlogList from '~/components/blog/BlogList';
+import { APP_KEY_PAIR, getUserId } from '~/session.server';
 import ProfileHeader from '~/components/ProfileHeader';
-import { IGunChainReference } from 'gun/types/chain';
-import { getVal, gun, putVal, user } from '~/lib/GunDb';
+import { getVal, gun,  } from '~/lib/GunDb';
 import Display from '~/components/DisplayHeading';
-import { decrypt, encrypt } from '~/lib/GunDb/client';
 
 interface LoaderPromise {
   alias: string;
   userId: string;
 }
+
+
 
 export let loader: LoaderFunction = async ({ request, params }) => {
   let userId = await getUserId(request);
@@ -33,37 +28,12 @@ export let loader: LoaderFunction = async ({ request, params }) => {
   if (!isAlias){
     throw new Response(`Alias Not Found`, { status: 404 });
   }
-
-  let data = {
-    alias: params.user,
-    id: userId.slice(1, 12),
-    avatar: 'newStuff',
-    job: 'Interface Designer',
-    description: 'The Description is the bvest',
-  };
-
-  let test = gun.get('test');
-let put =  await putVal(`${data.id}/${data.alias}`, 'info', data, userId);
-
-if (!put) {
-throw new Error('Didnt Put The Value')
-}
-
-
-  return getVal(`${data.id}/${data.alias}`, 'info', userId); 
+  return getVal(`${userId}`, 'info', APP_KEY_PAIR); 
 };
 
-/////////////
-export let action: ActionFunction = async ({ request, params }) => {
-  let userId = await getUserId(request);
-  let user = await getUser(request);
 
-  return null;
-};
-/////////////
 export default function User() {
-  let {alias, avatar, job, description, id} = useLoaderData();
-  let user = useActionData();
+  let {alias,job, description, id} = useLoaderData();
 
   return (
     <div className="mt-5">
@@ -75,7 +45,7 @@ export default function User() {
         desc={description}
       />
       <Outlet />
-      {/* <BlogList /> */}
+   
     </div>
   );
 }

@@ -24,7 +24,7 @@ export const db = new Gun({
     peers: [`http://${host}:${ports.CLIENT}/gun`, `http://${host}:${ports.RELAY}/gun`]
 })
 
- export const { putVal, getVal,  getKey, setKey, resetPassword, user } = GunCtx()
+ export const { putVal, getVal,  getKey, setKey, resetPassword, setArray } = GunCtx()
 
 
 export type UserData = {

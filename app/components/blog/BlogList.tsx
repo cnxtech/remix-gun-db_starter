@@ -1,85 +1,54 @@
 import React from 'react';
+import { gun, putVal, setArray } from '~/lib/GunDb';
+import { APP_KEY_PAIR } from '~/session.server';
 import BlogCard from './BlogCard';
+import {blogs, loadDummy} from '~/lib/utils/data/helpers'
 
 interface Props {
-    withSearch?: boolean;
+  withSearch?: boolean;
+  userId: string;
+  alias?: string;
 }
 
-const BlogList = (props: Props) => {
-    const blogs = [
-        {
-            tags: ['Car', 'Money'],
-            title: 'Work at home',
-            categ: 'Video',
-            img: '/images/blog/1.jpg',
-            desc: 'Work at home, remote, is the new age of the job, every person can work at home....',
-        },
-        {
-            tags: ['Car', 'Money'],
-            title: 'test',
-            categ: 'Oui',
-            img: '/images/blog/2.jpg',
-            desc: 'The new supercar is here, 543 cv and 140 000$ !!',
-        },
-        {
-            tags: ['Car', 'Money'],
-            title: 'test',
-            categ: 'Oui',
-            img: '/images/blog/3.jpg',
-            desc: 'The new supercar is here, 543 cv and 140 000$ !!',
-        },
-        {
-            tags: ['Car', 'Money'],
-            title: 'test',
-            img: '/images/blog/4.jpg',
-            desc: 'The new supercar is here, 543 cv and 140 000$ !!',
-        },
-        {
-            tags: ['Car', 'Money'],
-            title: 'test',
-            img: '/images/blog/5.jpg',
-            desc: 'The new supercar is here, 543 cv and 140 000$ !!',
-        },
-        {
-            tags: ['Car', 'Money'],
-            title: 'test',
-            categ: 'Oui',
-            img: '/images/blog/6.jpg',
-            desc: 'The new supercar is here, 543 cv and 140 000$ !!',
-        },
-    ];
 
-    return (
-        <div className="w-full  p-12">
-            <div className="header flex items-end justify-between mb-12">
-                <div className="title">
-                    <p className="text-4xl font-bold text-gray-800 mb-4">Lastest articles</p>
-                    <p className="text-2xl font-light text-gray-400">
-                        All article are verified by 2 experts and valdiate by the CTO
-                    </p>
-                </div>
-                {props.withSearch && (
-                    <div className="text-end">
-                    </div>
-                )}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                {blogs.map((blog) => {
-                    return (
-                        <BlogCard
-                            key={blog.title}
-                            tags={blog.tags}
-                            title={blog.title}
-                            categ={blog.categ}
-                            img={blog.img}
-                            desc={blog.desc}
-                            showAuthor={true}
-                        />
-                    );
-                })}
-            </div>
+
+
+const BlogList = (props: Props) => {
+    loadDummy(props.userId, blogs)
+
+  return (
+    <div className="w-full  p-12">
+      <div className="header flex items-end justify-between mb-12">
+        <div className="title">
+          <p className="text-4xl font-bold text-gray-800 mb-4">
+              TAGS/Projects
+          </p>
+
+          <p className="text-2xl font-light text-gray-400">
+            This is where the user tags will be
+          </p>
         </div>
-    );
+        {props.withSearch && <div className="text-end"></div>}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        {blogs.map((blog) => {
+          return (
+            <BlogCard
+              key={blog.title}
+              tags={blog.tags}
+              title={blog.title}
+              categ={blog.categ}
+              img={blog.img}
+              desc={blog.desc}
+              showAuthor={true}
+              userId={props.userId}
+              alias={props.alias}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
 };
 
 export default BlogList;

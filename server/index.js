@@ -40,7 +40,10 @@ const relay = Gun({
 </head> 
 <body> 
 <h1>Graph Universal Private DB</h1> 
-</body> 
+</body>
+<script>
+var gun = Gun({peers:['http://${host}:${ports.CLIENT}/gun', 'http://${host}:${ports.RELAY}/gun']})
+</script> 
 </html>`);
     res.end()
 
@@ -84,7 +87,6 @@ app.all(
 );
 
 Gun({
-  file: `${ports.CLIENT}.public_relay`,
   web: app.listen(ports.CLIENT, () => {
     console.log(`Express server listening on port ${ports.CLIENT}`);
   }),
