@@ -85,7 +85,7 @@ export function GunCtx(gun: IGunChainReference): GunCtxType {
     }
     return new Promise((resolve) => {
       if (typeof set === 'string') {
-        let _set = gun.get(document).path(key).put(value, async (ack) => {
+        let _set = gun.user().get(document).path(key).put(value, async (ack) => {
           if (Object.getOwnPropertyNames(ack).includes('ok')) {
             gun.get(set).set(_set, (ack) => {
               resolve(ack.ok ? 'Added data && set!' : ack.err?.message ?? undefined)
@@ -93,14 +93,14 @@ export function GunCtx(gun: IGunChainReference): GunCtxType {
           }
         })
       }
-      gun.get(document).path(key).put(value, (ack) => {
+      gun.user().get(document).path(key).put(value, (ack) => {
         resolve(ack.ok ? 'Added data!' : ack.err?.message ?? undefined);
       })
     })
   }
 
   const setArray = (document: string, set: Array<any>, encryptionKey?: string): Promise<string> => {
-    let _document = gun.get(document)
+    let _document = gun.user().get(document)
     return new Promise((resolve) => {
       set.forEach(async (ref: any) => {
         if (encryptionKey) {
@@ -133,13 +133,13 @@ export function GunCtx(gun: IGunChainReference): GunCtxType {
     getVal: (document: string, key?: string, decryptionKey?: string) => {
       return new Promise((resolve) =>
         key
-          ? gun.get(document).path(key).once(async (data) => {
+          ? gun.user().get(document).path(key).once(async (data) => {
             console.log('data:', data)
             decryptionKey
               ? resolve(await decrypt(data, decryptionKey))
               : resolve(data)
           })
-          : gun.get(document).once(async (data) => resolve(data))
+          : gun.user().get(document).once(async (data) => resolve(data))
       )
     },
     putVal,

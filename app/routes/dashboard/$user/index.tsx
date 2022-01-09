@@ -8,11 +8,10 @@ import {
 } from 'remix';
 import Button from '~/components/buttons/Button';
 import Wee from '~/components/Wee';
-import { getVal,putVal, setArray } from '~/lib/GunDb';
+import { getVal,putVal, setArray ,gun} from '~/lib/GunDb';
 import { blogs } from '~/lib/utils/data/helpers';
 import { getUserId, APP_KEY_PAIR } from '~/session.server';
-import Gun from 'gun';
-let gun = Gun();
+
 
 
 

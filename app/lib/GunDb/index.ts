@@ -1,25 +1,16 @@
 import Gun from 'gun';
-import { IGunConstructorOptions } from 'gun/types/options';
 import Relays from '~/lib/GunDb/relay-peers';
 import { GunCtx } from './GunCtx';
 
-let gunOpts = async () => {
-    let relay = await Relays();
-    let relayOpts: IGunConstructorOptions = {
-        peers: relay,
-        localStorage: false
-    };
-    return relayOpts
-}
+
 const host = process.env.DOMAIN || '0.0.0.0'
 const ports = {
     RELAY: process.env.GUN_PORT || 5150,
     CLIENT: process.env.CLIENT_PORT || 3333
 }
 
-export const gun = Gun(gunOpts);
-export const db = new Gun({
-    peers: [`http://${host}:${ports.CLIENT}/gun`, `http://${host}:${ports.RELAY}/gun`]
+export const gun = Gun({
+    peers: await Relays() || [`http://${host}:${ports.CLIENT}/gun`, `http://${host}:${ports.RELAY}/gun`]
 })
 
  export const { putVal, getVal,  getKey, setKey, resetPassword, setArray } = GunCtx(gun)
