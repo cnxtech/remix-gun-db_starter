@@ -1,9 +1,11 @@
-import { ActionFunction, LoaderFunction, useCatch } from 'remix';
+import { ActionFunction, json, LoaderFunction, useCatch, useLoaderData } from 'remix';
 import Avatar from '~/components/Avatar';
 import Button from '~/components/buttons/Button';
 import Display from '~/components/DisplayHeading';
 import FormSubscribe from '~/components/FormSubscribe';
 import InputText from '~/components/InputText';
+import { gun, mapDocument, setArray } from '~/lib/GunDb';
+import { blogs } from '~/lib/utils/data/helpers';
 
 type ActionData = {
   formError?: string;
@@ -12,8 +14,7 @@ type ActionData = {
 };
 
 export let loader: LoaderFunction = async ({ params }) => {
-  // loader function
-  return null;
+return null
 };
 ///////////////
 export type Fields = {
@@ -25,12 +26,13 @@ export type Fields = {
 };
 
 export let action: ActionFunction = async ({ request }) => {
-  //action function
+  
   return null;
 };
 ///////////////
 export default function Edit() {
-  // main function
+  let data = useLoaderData()
+  console.log(data)
   return (
     <>
       <section className="h-screen bg-opacity-50">
@@ -47,7 +49,7 @@ export default function Edit() {
             <div className="items-center w-full p-4 space-y-4 text-gray-500 md:inline-flex md:space-y-0">
               <h2 className="max-w-sm mx-auto md:w-1/3">Account</h2>
               <div className="max-w-sm mx-auto md:w-2/3">
-                <InputText placeholder="Email" id="user-info-email" />
+                <InputText placeholder="Email" name='' id="user-info-email" />
               </div>
             </div>
 

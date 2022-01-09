@@ -22,32 +22,11 @@ if (!ports) {
 
 
 const http = require('http');
-// runs full relay peer while not being exposed as a http service in docker deployment. 
-// secret data storage? fingers crossed...
+
 
 const relay = Gun({
   file: `${ports.RELAY}.private_relay`,
-  web: http.createServer(function (req, res) {
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.write(`
-    <!DOCTYPE html> 
-<html> 
-<head>
-  <meta charset="utf-8"> 
-  <meta name="viewport" content="width=device-width"> 
-  <title>PRIVATE DB RELAY</title> 
-  <script src="http://rawgit.com/amark/gun/master/gun.js"></script> 
-</head> 
-<body> 
-<h1>Graph Universal Private DB</h1> 
-</body>
-<script>
-var gun = Gun({peers:['http://localhost:${ports.CLIENT}/gun', 'http://localhost:${ports.RELAY}/gun']})
-</script> 
-</html>`);
-    res.end()
-
-  }).listen(ports.RELAY, () => console.log('private relay peer running on :' + ports.RELAY)
+  web: http.createServer().listen(ports.RELAY, () => console.log('private relay peer running on :' + ports.RELAY)
   )
 });
 
@@ -90,6 +69,7 @@ Gun({
   web: app.listen(ports.CLIENT, () => {
     console.log(`Express server listening on port ${ports.CLIENT}`);
   }),
+  localStorage:true
 });
 
 

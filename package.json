@@ -12,7 +12,8 @@
     "postinstall": "remix setup node && sh scripts/postinstall.sh",
     "prepare": "husky install",
     "start": "cross-env NODE_ENV=production node -r dotenv/config server/index.js",
-    "start:dev": "cross-env NODE_ENV=development node -r dotenv/config server/index.js"
+    "start:dev": "cross-env NODE_ENV=development node -r dotenv/config server/index.js",
+    "purge": "rm -rf radata *.private_relay"
   },
   "dependencies": {
     "@mdx-js/react": "^2.0.0-rc.2",

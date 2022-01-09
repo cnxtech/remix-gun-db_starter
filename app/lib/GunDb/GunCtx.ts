@@ -10,6 +10,7 @@ import invariant from 'tiny-invariant';
 import { IGunCryptoKeyPair } from 'gun/types/types'
 import Gun from 'gun';
 import { IGunChainReference } from 'gun/types/chain';
+import React from 'react';
 
 
 
@@ -32,20 +33,19 @@ export const decrypt = async (
 };
 export type GunCtxType = {
   createUser: (username: string, password: string) => Promise<{ ok: boolean, result: string | undefined }>;
-  login: (username: string, password: string) => Promise<{ ok: boolean, result: AuthKeys}>;
+  login: (username: string, password: string) => Promise<{ ok: boolean, result: AuthKeys }>;
   resetPassword: (username: string, oldPassword: string, newPassword: string) => Promise<{ ok: boolean, result: string }>;
   getVal: (document: string, key?: string, decryptionKey?: string) => Promise<any>;
   putVal: (document: string, key: string, value: any, encryptionKey?: string, set?: string) => Promise<string>;
-  getKey: (alias: string, password: string) => Promise<{ ok: boolean, result: string | keyof  AuthKeys}>;
-  setKey: (alias: string, password: string) => Promise<{ ok: boolean, result: string | keyof  AuthKeys }>;
-  setArray:(document: string, set: Array<any>) => Promise<string>
-
+  getKey: (alias: string, password: string) => Promise<{ ok: boolean, result: string | keyof AuthKeys }>;
+  setKey: (alias: string, password: string) => Promise<{ ok: boolean, result: string | keyof AuthKeys }>;
+  setArray: (document: string, set: Array<any>, encryptionKey?: string) => Promise<string>
 }
 
 type AuthKeys = { soul: string, get: string, sea: IGunCryptoKeyPair, epub: string }
 
-export function GunCtx( gun: IGunChainReference): GunCtxType {
-  const user = gun.user().recall({sessionStorage:true})
+export function GunCtx(gun: IGunChainReference): GunCtxType {
+  const user = gun.user().recall({ sessionStorage: true })
 
   const createUser = async (username: string, password: string): Promise<{ ok: boolean, result: string | undefined }> =>
     new Promise((resolve) => user.create(username, password, (ack) => {
@@ -61,49 +61,62 @@ export function GunCtx( gun: IGunChainReference): GunCtxType {
     new Promise((resolve) => user.auth(username, password, (ack) => {
       if (Object.getOwnPropertyNames(ack).includes('id')) {
 
-        resolve({ ok: true, result: { soul: (ack as any).soul, get: (ack as any).get, sea: (ack as any).sea, epub: (ack as any).epub} });
+        resolve({ ok: true, result: { soul: (ack as any).soul, get: (ack as any).get, sea: (ack as any).sea, epub: (ack as any).epub } });
       } else {
         resolve({ ok: false, result: JSON.parse(JSON.stringify(ack)).err })
       }
     }))
 
-    /**
-     * 
-     * @param document 
-     * Uses gun/lib/path library... separate nodes with full tops or slashes
-     * @param key 
-     * another node record
-     * @param value 
-     * 
-     * @param encryptionKey 
-     * @param set 
-     * @returns 
-     */
+  /**
+   * 
+   * @param document 
+   * Uses gun/lib/path library... separate nodes with full tops or slashes
+   * @param key 
+   * another node record
+   * @param value 
+   * 
+   * @param encryptionKey 
+   * @param set 
+   * @returns 
+   */
   const putVal = async (document: string, key: string, value: any, encryptionKey?: string, set?: string): Promise<string> => {
     if (encryptionKey) {
       value = await encrypt(value, encryptionKey);
     }
     return new Promise((resolve) => {
       if (typeof set === 'string') {
-        let _set = gun.path(document).get(key).put(value)
-        resolve(setArray(set, [_set]))
+        let _set = gun.get(document).path(key).put(value, async (ack) => {
+          if (Object.getOwnPropertyNames(ack).includes('ok')) {
+            gun.get(set).set(_set, (ack) => {
+              resolve(ack.ok ? 'Added data && set!' : ack.err?.message ?? undefined)
+            })
+          }
+        })
       }
-      gun.path(document).get(key).put(value, (ack) => {
+      gun.get(document).path(key).put(value, (ack) => {
         resolve(ack.ok ? 'Added data!' : ack.err?.message ?? undefined);
       })
     })
   }
 
-  const setArray = (document: string, set: Array<any>): Promise<string> => {
-    let _document = gun.path(document)
+  const setArray = (document: string, set: Array<any>, encryptionKey?: string): Promise<string> => {
+    let _document = gun.get(document)
     return new Promise((resolve) => {
-      set.forEach((ref: any) => {
+      set.forEach(async (ref: any) => {
+        if (encryptionKey) {
+          ref = await encrypt(ref, encryptionKey)
+        }
         _document.set(ref, (ack) => {
           resolve(ack.ok ? 'Added set!' : ack.err?.message ?? undefined);
         })
       })
     })
   }
+
+
+
+
+
 
   return {
     createUser,
@@ -120,13 +133,13 @@ export function GunCtx( gun: IGunChainReference): GunCtxType {
     getVal: (document: string, key?: string, decryptionKey?: string) => {
       return new Promise((resolve) =>
         key
-          ? gun.path(document).get(key).once(async (data) => {
+          ? gun.get(document).path(key).once(async (data) => {
             console.log('data:', data)
             decryptionKey
               ? resolve(await decrypt(data, decryptionKey))
               : resolve(data)
           })
-          : user.get(document).once(async (data) => resolve(data))
+          : gun.get(document).once(async (data) => resolve(data))
       )
     },
     putVal,
@@ -140,8 +153,8 @@ export function GunCtx( gun: IGunChainReference): GunCtxType {
           if (!ok) {
             resolve({ ok, result })
           }
-          resolve({ ok: true, result: result.get})
-             
+          resolve({ ok: true, result: result.get })
+
         })),
     setKey: async (username: string, password: string) =>
       new Promise((resolve) =>
@@ -163,7 +176,8 @@ export function GunCtx( gun: IGunChainReference): GunCtxType {
           }
         })
       ),
-    setArray
+    setArray,
+    
 
   }
 }

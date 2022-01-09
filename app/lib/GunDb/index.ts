@@ -1,7 +1,7 @@
 import Gun from 'gun';
 import { IGunConstructorOptions } from 'gun/types/options';
 import Relays from '~/lib/GunDb/relay-peers';
-import { GunCtx } from './client';
+import { GunCtx } from './GunCtx';
 
 let gunOpts = async () => {
     let relay = await Relays();

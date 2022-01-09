@@ -1,36 +1,27 @@
-import {
-  Outlet,
-  useCatch,
-} from 'remix';
+import { Outlet, useCatch } from 'remix';
 import { LoaderFunction, useLoaderData } from 'remix';
 import { APP_KEY_PAIR, getUserId } from '~/session.server';
 import ProfileHeader from '~/components/ProfileHeader';
-import { getVal, gun,  } from '~/lib/GunDb';
+import { getVal, gun, putVal } from '~/lib/GunDb';
 import Display from '~/components/DisplayHeading';
-
-
-
 
 export let loader: LoaderFunction = async ({ request, params }) => {
   let userId = await getUserId(request);
-  if (!userId) {
+  let username = params.user;
+  let isAlias = gun.get(`${userId}//${username}`).once(async (exist) => {
+    if (!exist) return false;
+    return true;
+  });
+  if (!isAlias) {
     throw new Response(`Forbidden`, { status: 403 });
   }
- let isAlias =  gun.get(`~@${params.user}`).once(async (exist) => {
-    if (!exist) return false
-    return true
-  });
-
-  if (!isAlias){
-    throw new Response(`Alias Not Found`, { status: 404 });
-  }
-  return getVal(`${userId}`, 'info', APP_KEY_PAIR); 
+  return getVal(`${userId}//${username}`, 'info', APP_KEY_PAIR);
 };
 
-
 export default function User() {
-  let {alias,job, description, id} = useLoaderData();
-
+ let data = useLoaderData();
+ console.log(data)
+let  { alias, job, description, id } = data
   return (
     <div className="mt-5">
       <ProfileHeader
@@ -40,8 +31,9 @@ export default function User() {
         job={job}
         desc={description}
       />
+      <h1>Get Function ◊</h1>
+      <p>{JSON.stringify(data)}</p>
       <Outlet />
-   
     </div>
   );
 }

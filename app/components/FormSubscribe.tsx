@@ -9,6 +9,16 @@ interface FormProps {
   onSubmit():any
 }
 
+const inputs: Array<InputTextProps> = [
+    {
+        type: 'text',
+        label: 'Name',
+        required: true,
+        name: 'alias'
+
+    }
+]
+
 const FormSubscribe = ({ submitLabel, ariaDescribed, input, onSubmit }: FormProps) => {
   return (
     <Form

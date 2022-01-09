@@ -5,7 +5,15 @@ import { blogs, loadDummy } from "./lib/utils/data/helpers";
 import { validateUsername, validatePassword } from "./lib/utils/validate-strings";
 
 
-
+export function getDate() {
+  const newDate = new Date();
+  var dd = String(newDate.getDate()).padStart(2, 'O');
+  var mm = String(newDate.getMonth() + 1).padStart(2, 'O');
+  var yyyy = newDate.getFullYear();
+  var sec = String(newDate.getTime())
+  var timestamp = `${dd}.${mm}.${yyyy}:${sec}`
+  return timestamp;
+}
 export const APP_KEY_PAIR = process.env.APP_KEY_PAIR
 
 let sessionSecret = process.env.SESSION_SECRET as string || 'abcdefghijklmnopqrstuvwxyz';
@@ -86,7 +94,7 @@ export async function loginAction(request: Request) {
   };
   if (Object.values(fieldErrors).some(Boolean))
     return { fieldErrors, fields };
-
+  const timestamp = getDate()
   switch (loginType) {
     case 'login': {
       let { ok, result } = await getKey(username, password);
@@ -97,7 +105,20 @@ export async function loginAction(request: Request) {
         };
       }
 
-// Update Login Time
+      let put2 = await putVal(`${result}//${username}`, 'test', "['hello', 'world', 'sam', 'hyde' ]", APP_KEY_PAIR)
+      if (!put2) {
+        console.error('no put for stringed array')
+      }
+      let datatime = {
+        logged_in: timestamp,
+      }
+
+      let time = await putVal(`${result}//${username}`, 'info/time', datatime, APP_KEY_PAIR );
+
+      if (!time) {
+        throw new Error('Didnt Put Time Values')
+      }
+
 
       return createUserSession(result, `/dashboard/${username}`);
     }
@@ -110,18 +131,29 @@ export async function loginAction(request: Request) {
         };
       }
       let data = {
-        alias: username,
+        created: timestamp,
         id: result,
+        alias: username,
         job: 'What is your job?',
-        description: 'Write a description...',
-        created: `${new Date().getTime}`
+        description: 'Write a description...'
       };
 
-      let put = await putVal(`${data.id}`, 'info', data, APP_KEY_PAIR);
+      let put = await putVal(`${result}//${username}`, 'info', data, APP_KEY_PAIR);
 
       if (!put) {
-        throw new Error('Didnt Put The Value')
+        throw new Error('Didnt Put Info Values')
       }
+
+      let datatime = {
+        logged_in: timestamp,
+      }
+
+      let time = await putVal(`${result}//${username}`, 'info/time', datatime, APP_KEY_PAIR);
+
+      if (!time) {
+        throw new Error('Didnt Put Time Values')
+      }
+
 
       loadDummy(result, blogs)
 
