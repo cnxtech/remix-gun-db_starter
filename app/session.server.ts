@@ -105,10 +105,7 @@ export async function loginAction(request: Request) {
         };
       }
 
-      let put2 = await putVal(`${result}//${username}`, 'test', "['hello', 'world', 'sam', 'hyde' ]", APP_KEY_PAIR)
-      if (!put2) {
-        console.error('no put for stringed array')
-      }
+
       let datatime = {
         logged_in: timestamp,
       }

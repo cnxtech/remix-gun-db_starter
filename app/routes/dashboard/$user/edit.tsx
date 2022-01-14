@@ -4,7 +4,7 @@ import Button from '~/components/buttons/Button';
 import Display from '~/components/DisplayHeading';
 import FormSubscribe from '~/components/FormSubscribe';
 import InputText from '~/components/InputText';
-import { gun, mapDocument, setArray } from '~/lib/GunDb';
+import { gun,  setArray } from '~/lib/GunDb';
 import { blogs } from '~/lib/utils/data/helpers';
 
 type ActionData = {

@@ -24,7 +24,7 @@ if (!ports) {
 const http = require('http');
 
 
-const relay = Gun({
+Gun({
   file: `${ports.RELAY}.private_relay`,
   web: http.createServer().listen(ports.RELAY, () => console.log('private relay peer running on :' + ports.RELAY)
   )

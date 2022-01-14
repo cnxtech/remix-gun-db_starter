@@ -1,4 +1,4 @@
-import { setArray, putVal } from "~/lib/GunDb";
+import { setArray, putVal } from "../../GunDb";
 import { APP_KEY_PAIR } from "~/session.server";
 
 
@@ -51,7 +51,6 @@ export const loadDummy = (userId: string, blogs: Array<any>) => {
             blog.title,
             blog,
             APP_KEY_PAIR,
-            `${userId}/articles/set`
         );
 
         if (!put) {

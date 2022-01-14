@@ -1,33 +1,15 @@
 import React from 'react';
 import {
   ActionFunction,
-  json,
   Link,
   LoaderFunction,
   useLoaderData,
 } from 'remix';
 import Button from '~/components/buttons/Button';
-import Wee from '~/components/Wee';
-import { getVal,putVal, setArray ,gun} from '~/lib/GunDb';
-import { blogs } from '~/lib/utils/data/helpers';
-import { getUserId, APP_KEY_PAIR } from '~/session.server';
+import { gun} from '../../../lib/GunDb';
+import { getUserId } from '~/session.server';
 
 
-
-
-export function Test() {
-  const [state, setState] = React.useState([{}]);
-  gun.get("testDoc").set({ hello: "world567", test: "Bresnow" });
-  gun.get("testDoc").set({ hello: "lalalalala", test: "Bresnow4444" });
-  gun.get("testDoc").set({ hello: "world5674444", test: "Bresnow64646" });
-
-  gun
-    .get('testDoc')
-    .map()
-    .once((value) => setState([value]));
-
-  return state;
-}
 
 
 export let loader: LoaderFunction = async ({ request, params }) => {
@@ -35,7 +17,6 @@ export let loader: LoaderFunction = async ({ request, params }) => {
   if (!userId) {
     throw new Response(`Forbidden`, { status: 403 });
   }
-  let username = params.user;
 
   return null
 };
@@ -48,8 +29,7 @@ export let action: ActionFunction = async ({ request }) => {
 
 export default function UserIndex() {
   let data = useLoaderData();
-  let state = Test();
-  console.log(data);
+   console.log(data);
 
   return (
     <>
@@ -61,8 +41,7 @@ export default function UserIndex() {
           <Button submit={true} color="red" label="Edit" />
         </Link>
       </div>
-      <h1>Map Function</h1>
-      <p className="text-yellow-500">{JSON.stringify(state)}</p>
+   
     </>
   );
 }

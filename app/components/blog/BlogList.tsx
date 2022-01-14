@@ -1,6 +1,6 @@
 import React from 'react';
 import BlogCard from './BlogCard';
-import {blogs} from '~/lib/utils/data/helpers'
+import {blogs} from '../../lib/utils/data/helpers'
 
 interface Props {
   withSearch?: boolean;

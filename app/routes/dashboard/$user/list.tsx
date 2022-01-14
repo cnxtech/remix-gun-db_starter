@@ -6,7 +6,7 @@ import { LoaderFunction, useLoaderData } from 'remix';
 import { APP_KEY_PAIR,  getUserId } from '~/session.server';
 import BlogList from '~/components/blog/BlogList';
 
-import { getVal, gun, } from '~/lib/GunDb';
+import { getVal, gun, } from '../../../lib/GunDb';
 import Display from '~/components/DisplayHeading';
 
 
