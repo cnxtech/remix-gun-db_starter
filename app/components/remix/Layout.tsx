@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="dark">{children}</div>
         </div>
       </div>
-      <FMLogo height={50} color={'white'} textColor={'pink'} width={'auto'} />
+      <FMLogo height='50' width="auto" color={'white'} textColor={'pink'}  />
     </div>
   );
 }

@@ -76,7 +76,7 @@ export default function App() {
   return (
     <Document>
       <Layout>
-        <Header links={data.links}  hideHelp={true} hideGitHubLink={true} logo={<CNXTLogo height={50}  width={'auto'}/>}  />
+        <Header links={data.links}  hideHelp={true} hideGitHubLink={true} logo={<CNXTLogo />}  />
         <Outlet />
       </Layout>
     </Document>
