@@ -1,6 +1,7 @@
 
 export interface InputTextProps {
     type?: string;
+    textArea?:boolean
     label?: string;
     required?: boolean;
     error?: string;
@@ -38,24 +39,44 @@ const InputText = (props: InputTextProps) => {
           {props.helper || props.icon}
         </span>
       )}
-      <input
-        id={props.id}
-        disabled={props.disabled}
-        className={`${props.error ? 'ring-red-500 ring-2' : ''}${
-          props.helper || props.icon
-            ? !props.square
-              ? ' rounded-r-lg'
+      {!props.textArea ? (
+        <input
+          id={props.id}
+          disabled={props.disabled}
+          className={`${props.error ? 'ring-red-500 ring-2' : ''}${
+            props.helper || props.icon
+              ? !props.square
+                ? ' rounded-r-lg'
+                : ''
+              : !props.square
+              ? ' rounded-lg border-transparent'
               : ''
-            : !props.square
-            ? ' rounded-lg border-transparent'
-            : ''
-        } flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent`}
-        type={props.type || 'text'}
-        name={props.name}
-        placeholder={props.placeholder}
-        aria-invalid={props.error ? true : false}
-        aria-describedby={props.error}
-      />
+          } flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent`}
+          type={props.type || 'text'}
+          name={props.name}
+          placeholder={props.placeholder}
+          aria-invalid={props.error ? true : false}
+          aria-describedby={props.error}
+        />
+      ) : (
+        <textarea
+          id={props.id}
+          disabled={props.disabled}
+          className={`${props.error ? 'ring-red-500 ring-2' : ''}${
+            props.helper || props.icon
+              ? !props.square
+                ? ' rounded-r-lg'
+                : ''
+              : !props.square
+              ? ' rounded-lg border-transparent'
+              : ''
+          } flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent`}
+          name={props.name}
+          placeholder={props.placeholder}
+          aria-invalid={props.error ? true : false}
+          aria-describedby={props.error}
+        />
+      )}
       {props.withForceIndications && (
         <>
           <div className="grid w-full h-1 grid-cols-12 gap-4 mt-12">

@@ -9,7 +9,9 @@ import darkStylesUrl from '~/styles/dark.css';
 import Layout from './components/remix/Layout';
 import Display from './components/DisplayHeading';
 import Header from './components/Header';
-import Logo from './components/Logo';
+import Logo from './components/svg/logos/BDS';
+import FMLogo from './components/svg/logos/FltngMmth';
+import CNXTLogo from './components/svg/logos/CNXT';
 
 export let links: LinksFunction = () => {
   return [
@@ -74,7 +76,7 @@ export default function App() {
   return (
     <Document>
       <Layout>
-        <Header links={data.links}  hideHelp={true} hideGitHubLink={true} logo={<Logo />} />
+        <Header links={data.links}  hideHelp={true} hideGitHubLink={true} logo={<CNXTLogo height={50}  width={'auto'}/>}  />
         <Outlet />
       </Layout>
     </Document>

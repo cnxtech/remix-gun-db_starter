@@ -9,5 +9,16 @@ function validatePassword(password: unknown) {
         return `Passwords must be at least 6 characters long`;
     }
 }
+function validateJob(title: unknown) {
+    if (typeof title !== 'string' || title.length < 5) {
+        return `Job title must be at least 5 characters long`;
+    }
+}
 
-export {validatePassword, validateUsername}
+function validateDescription(desc: unknown) {
+    if (typeof desc !== 'string' || desc.length > 140) {
+        return `Descriptions must be under 140 characters`;
+    }
+}
+
+export {validatePassword, validateUsername, validateJob, validateDescription}

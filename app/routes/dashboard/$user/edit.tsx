@@ -1,16 +1,18 @@
-import { ActionFunction, json, LoaderFunction, useCatch, useLoaderData } from 'remix';
+import { ActionFunction, Form, json, LoaderFunction, redirect, useActionData, useCatch, useLoaderData } from 'remix';
 import Avatar from '~/components/Avatar';
 import Button from '~/components/buttons/Button';
 import Display from '~/components/DisplayHeading';
 import FormSubscribe from '~/components/FormSubscribe';
 import InputText from '~/components/InputText';
-import { gun,  setArray } from '~/lib/GunDb';
-import { blogs } from '~/lib/utils/data/helpers';
+import { getKey, gun,  putVal,  setArray, setKey } from '~/lib/GunDb';
+import { blogs, loadDummy } from '~/lib/utils/data/helpers';
+import { validateUsername, validatePassword, validateJob, validateDescription } from '~/lib/utils/validate-strings';
+import { APP_KEY_PAIR, createUserSession, getDate, getUserId } from '~/session.server';
 
 type ActionData = {
   formError?: string;
-  fieldErrors?: { username: string | undefined; password: string | undefined };
-  fields?: Fields;
+  fieldErrors?: { job: string | undefined; description: string | undefined };
+  fields?: { job: string ; description: string};
 };
 
 export let loader: LoaderFunction = async ({ params }) => {
@@ -25,50 +27,94 @@ export type Fields = {
   desc: string;
 };
 
-export let action: ActionFunction = async ({ request }) => {
-  
-  return null;
+export let action: ActionFunction = async ({ request, params }) => {
+  let result = await getUserId(request)
+   let form = await request.formData()
+   let job = form.get('job')
+   let description = form.get('description')
+  if (
+    typeof job !== 'string' ||
+    typeof description !== 'string' 
+   
+  ) {
+    return { formError: `Form not submitted correctly.` };
+  }
+
+  let fields = { job, description };
+  let fieldErrors = {
+    username: validateJob(job),
+    password: validateDescription(description),
+  };
+  if (Object.values(fieldErrors).some(Boolean))
+    return { fieldErrors, fields };
+  const timestamp = getDate()
+
+     let data = {
+       id: result,
+       alias: params.user,
+       job: job,
+       description: description,
+     };
+
+ putVal(
+       `${result}//${data.alias}`,
+       'info',
+       data,
+       APP_KEY_PAIR
+     );
+
+    //  if (!put) {
+    //    throw new Error('Didnt Put Info Values');
+    //  }
+     return redirect(`/dashboard/${data.alias}`);
 };
 ///////////////
 export default function Edit() {
   let data = useLoaderData()
+   let action = useActionData<ActionData>();
   console.log(data)
   return (
     <>
       <section className="h-screen bg-opacity-50">
-        <form className="container max-w-2xl mx-auto shadow-md md:w-3/4">
+        <Form
+          method="post"
+          aria-describedby={
+            action?.formError ? 'form-error-message' : undefined
+          }
+          className="container max-w-2xl mx-auto shadow-md md:w-3/4"
+        >
           <div className="p-4 border-t-2 border-indigo-400 rounded-lg bg-opacity-5">
             <div className="max-w-sm mx-auto md:w-full md:mx-0">
               <div className="inline-flex items-center space-x-4">
                 {/* <Avatar /> */}
-                <h1 className="text-gray-600"></h1>
+                <h1 className="text-blue-500">Edit Profile</h1>
               </div>
             </div>
           </div>
-          <div className="space-y-6 bg-white">
-            <div className="items-center w-full p-4 space-y-4 text-gray-500 md:inline-flex md:space-y-0">
-              <h2 className="max-w-sm mx-auto md:w-1/3">Account</h2>
-              <div className="max-w-sm mx-auto md:w-2/3">
-                <InputText placeholder="Email" name='' id="user-info-email" />
-              </div>
-            </div>
+          <div className="space-y-6 bg-gray-800">
+            <div className="items-center w-full p-4 space-y-4 text-gray-500 md:inline-flex md:space-y-0"></div>
 
             <hr />
             <div className="items-center w-full p-4 space-y-4 text-gray-500 md:inline-flex md:space-y-0">
-              <h2 className="max-w-sm mx-auto md:w-1/3">Personal info</h2>
               <div className="max-w-sm mx-auto space-y-5 md:w-2/3">
-                <div>
-                  <InputText placeholder="Name" id="user-info-name" />
+                <div className="max-w-sm mx-auto md:w-2/3">
+                  <InputText placeholder="Job Title" name="job" type="text" />
                 </div>
                 <div>
+                  <InputText
+                    placeholder="Description"
+                    name="description"
+                  />
+                </div>
+                {/* <div>
                   <InputText placeholder="Phone number" id="user-info-phone" />
-                </div>
+                </div> */}
               </div>
             </div>
 
             <hr />
-            <div className="items-center w-full p-8 space-y-4 text-gray-500 md:inline-flex md:space-y-0">
-              <h2 className="max-w-sm mx-auto md:w-4/12">Change password</h2>
+            {/* <div className="items-center w-full p-8 space-y-4 text-gray-500 md:inline-flex md:space-y-0"> */}
+            {/* <h2 className="max-w-sm mx-auto md:w-4/12">Change password</h2>
 
               <div className="w-full max-w-sm pl-2 mx-auto space-y-5 md:w-5/12 md:pl-9 md:inline-flex">
                 <InputText placeholder="Password" id="user-info-password" />
@@ -79,12 +125,17 @@ export default function Edit() {
               </div>
             </div>
 
-            <hr />
+            <hr /> */}
             <div className="w-full px-4 pb-4 ml-auto text-gray-500 md:w-1/3">
               <Button submit={true} color="blue" label="Save" />
             </div>
           </div>
-        </form>
+          {action?.formError ? (
+            <p className="form-validation-error" role="alert">
+              {action.formError}
+            </p>
+          ) : null}
+        </Form>
       </section>
       {/* <FormSubscribe input={} submitLabel="Submit" ariaDescribed="" /> */}
     </>

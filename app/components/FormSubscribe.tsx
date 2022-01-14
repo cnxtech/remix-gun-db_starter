@@ -4,9 +4,9 @@ import InputText, { InputTextProps } from './InputText';
 
 interface FormProps {
   submitLabel: string;
-  ariaDescribed: string;
+  ariaDescribed?: string;
   input: Array<InputTextProps>
-  onSubmit():any
+  onSubmit?():any
 }
 
 const inputs: Array<InputTextProps> = [

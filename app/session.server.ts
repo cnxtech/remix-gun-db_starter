@@ -128,7 +128,6 @@ export async function loginAction(request: Request) {
         };
       }
       let data = {
-        created: timestamp,
         id: result,
         alias: username,
         job: 'What is your job?',

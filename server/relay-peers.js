@@ -1,6 +1,5 @@
-import Gun from 'gun';
-import getUrls from 'get-urls';
-import { getVal, putVal } from '.';
+const Gun = require('gun');
+const getUrls = require('get-urls');
 require('gun/lib/then.js')
 // Suppress extraneous GUN logging
 let cl = console.log;
@@ -11,18 +10,28 @@ const ports = {
   CLIENT: process.env.CLIENT_PORT || 3333
 }
 const Relays = async () => {
-  let gunRelays: Array<string> = [];
-
+  let gunRelays= [];
+  
   const gun = new Gun({
-    file: 'relay-peers',
     peers: [`http://${host}:${ports.CLIENT}/gun`, `http://${host}:${ports.RELAY}/gun`],
     localStorage: false,
   })
+  
 
 
+  let results = await getVal('relay-peers', 'relays', gun)
   // check gun first
-  let results = await getVal('relay-peers', 'relays')
-
+/// swear ta meeee!
+  async function getVal(document, key, gun) {
+    return new Promise((resolve) =>
+      key
+        ? gun.get(document).get(key).once(async (data) => {
+          console.log('data:', data)
+          resolve(data)
+        })
+        : gun.get(document).once(async (data) => resolve(data))
+    )
+  }
 
   if (results) gunRelays = results
   else gunRelays = await fetchRelays();
@@ -34,9 +43,9 @@ const Relays = async () => {
     );
     let data = await res.text();
 
-    let urls: any = getUrls(data);
+    let urls = getUrls(data);
     urls = Array.from(urls);
-    urls.forEach((u: string | URL) => {
+    urls.forEach((u) => {
       let testUrl = new URL(u);
       if (testUrl.pathname === '/gun') {
         gunRelays.push(testUrl.href);
@@ -44,11 +53,24 @@ const Relays = async () => {
     });
 
 
-    let put = await putVal('relay-peers', 'relays', gunRelays);
+    let put = await putVal('relay-peers', 'relays', gunRelays, gun);
 
     if (!put) {
-      throw new Error(`Could not put ${gunRelays} as gun-relays`)
+      console.error(`Could not put ${gunRelays} as gun-relays`)
     }
+
+
+    //// put it ... on god
+    async function putVal(document, key, value, gun) {
+     return new Promise((resolve) => {
+       gun.get(document).get(key).put(value, (ack) => {
+         resolve(ack.ok ? 'Added data!' : ack.err?.message ?? undefined);
+       })
+     })
+    }
+    
+    
+
 
     return gunRelays;
   }
@@ -59,4 +81,5 @@ const Relays = async () => {
   return gunRelays;
 };
 
-export default Relays;
+
+

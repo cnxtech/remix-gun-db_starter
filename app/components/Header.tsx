@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import FormSubscribe from './FormSubscribe';
 import Ddm from './DropDownMenu';
 import { Link } from 'remix';
+import { InputTextProps } from './InputText';
 
 interface HeaderProps {
   forceMenuOpenInMobile?: boolean;
@@ -35,7 +36,14 @@ interface DDMItem {
 
 const Header = (props: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+const input: Array<InputTextProps> = [
+  {
+    type: 'search',
+    label: 'Search',
+    required: false,
+    name: 'search',
+  },
+];
   return (
     <div>
       <nav
@@ -78,7 +86,7 @@ const Header = (props: HeaderProps) => {
             <div className="block">
               {props.withSearchBar && (
                 <div className="md:block -mr-2 flex">
-                  <FormSubscribe label="Search" placeholder="components" />
+                  <FormSubscribe submitLabel="Search" input={input} />
                 </div>
               )}
               <div className="ml-4 flex items-center md:ml-6">
@@ -181,7 +189,6 @@ const Header = (props: HeaderProps) => {
         {(isMenuOpen || props.forceMenuOpenInMobile) && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              
               {props.links &&
                 props.links.map((link) => {
                   return (
@@ -199,11 +206,10 @@ const Header = (props: HeaderProps) => {
                   );
                 })}
             </div>
-            
-              <div className="p-2 flex">
-                <FormSubscribe label="Search" placeholder="Search" />
-              </div>
-        
+
+            <div className="p-2 flex">
+              <FormSubscribe submitLabel="Search" input={input} />
+            </div>
           </div>
         )}
       </nav>

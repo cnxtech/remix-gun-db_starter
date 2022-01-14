@@ -31,8 +31,6 @@ let  { alias, job, description, id } = data
         job={job}
         desc={description}
       />
-      <h1>Get Function ◊</h1>
-      <p>{JSON.stringify(data)}</p>
       <Outlet />
     </div>
   );

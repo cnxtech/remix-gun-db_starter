@@ -11,6 +11,7 @@ import { IGunCryptoKeyPair } from 'gun/types/types'
 import Gun from 'gun';
 import { IGunChainReference } from 'gun/types/chain';
 import React from 'react';
+import { APP_KEY_PAIR } from '~/session.server';
 
 
 
@@ -40,6 +41,7 @@ export type GunCtxType = {
   getKey: (alias: string, password: string) => Promise<{ ok: boolean, result: string | keyof AuthKeys }>;
   setKey: (alias: string, password: string) => Promise<{ ok: boolean, result: string | keyof AuthKeys }>;
   setArray: (document: string, set: Array<any>, encryptionKey?: string) => Promise<string>
+  MapArray:(document: string, decryptionKey?: string) => any
 }
 
 type AuthKeys = { soul: string, get: string, sea: IGunCryptoKeyPair, epub: string }
@@ -47,6 +49,9 @@ type AuthKeys = { soul: string, get: string, sea: IGunCryptoKeyPair, epub: strin
 export function GunCtx(gun: IGunChainReference): GunCtxType {
   const user = gun.user().recall({ sessionStorage: true })
 
+  const credentials = async (data: any) => {
+    const pair = await Gun.SEA.pair()
+  }
   const createUser = async (username: string, password: string): Promise<{ ok: boolean, result: string | undefined }> =>
     new Promise((resolve) => user.create(username, password, (ack) => {
       console.log(ack)
@@ -113,7 +118,28 @@ export function GunCtx(gun: IGunChainReference): GunCtxType {
     })
   }
 
+  const initialState = [];
 
+  // Create a reducer that will update the components array
+  function reducer(state, set) {
+    return [set, ...state];
+  }
+
+  const MapArray = (document: string, decryptionKey?: string) =>{
+    const [state, dispatch] = React.useReducer(reducer, initialState);
+    React.useEffect(() => {
+      gun
+      .get(document)
+      .map()
+      .once(async(value) => {
+        if (decryptionKey) {
+          value = await decrypt(value, decryptionKey)
+        }
+        dispatch(value);
+        });
+    }, [decryptionKey, document, gun.get(document).off()]);
+    return state;
+  }
 
 
 
@@ -170,13 +196,14 @@ export function GunCtx(gun: IGunChainReference): GunCtxType {
           if (!ok) {
             resolve({ ok, result });
           }
-          const res = await putVal('keys', 'master', result, result.sea);
+          const res = await putVal('keys', 'master', result, APP_KEY_PAIR);
           if (res === 'Added data!') {
             resolve({ ok: true, result: result.get });
           }
         })
       ),
     setArray,
+    MapArray
     
 
   }

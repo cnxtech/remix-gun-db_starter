@@ -3,7 +3,7 @@ const express = require("express");
 const compression = require("compression");
 const morgan = require("morgan");
 const { createRequestHandler } = require("@remix-run/express");
-
+const  Relays  = require('./relay-peers')
 /**
  * GUN SERVER
  */
@@ -21,14 +21,19 @@ if (!ports) {
 }
 
 
-const http = require('http');
 
+const fretoLay = async () => {
+  
+  const http = require('http');
+  let relays = await Relays()
 
-Gun({
-  file: `${ports.RELAY}.private_relay`,
-  web: http.createServer().listen(ports.RELAY, () => console.log('private relay peer running on :' + ports.RELAY)
-  )
-});
+ return  Gun({
+    file: `${ports.RELAY}.private_relay`,
+    peers: relays,
+    web: http.createServer().listen(ports.RELAY, () => console.log('private relay peer running on :' + ports.RELAY)
+    )
+  });
+}
 
 
 
@@ -69,7 +74,7 @@ Gun({
   web: app.listen(ports.CLIENT, () => {
     console.log(`Express server listening on port ${ports.CLIENT}`);
   }),
-  localStorage:true
+  localStorage: true
 });
 
 

@@ -1,5 +1,4 @@
 import Gun from 'gun';
-import Relays from './relay-peers';
 import { GunCtx } from './GunCtx';
 
 
@@ -8,12 +7,11 @@ const ports = {
     RELAY: process.env.GUN_PORT || 5150,
     CLIENT: process.env.CLIENT_PORT || 3333
 }
-// const relays = await Relays()
 export const gun = Gun({
     peers: [`http://${host}:${ports.RELAY}/gun`]
 })
 
- export const {login, putVal, getVal,  getKey, setKey, resetPassword, setArray } = GunCtx(gun)
+ export const {login, putVal, getVal,  getKey, setKey, resetPassword, setArray, MapArray } = GunCtx(gun)
 
 
 export type UserData = {
