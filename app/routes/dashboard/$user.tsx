@@ -2,7 +2,7 @@ import { Outlet, useCatch } from 'remix';
 import { LoaderFunction, useLoaderData } from 'remix';
 import { APP_KEY_PAIR, getUserId } from '~/session.server';
 import ProfileHeader from '~/components/ProfileHeader';
-import { getVal, gun, putVal } from '../../lib/GunDb';
+import { getVal, gun,} from '../../lib/GunDb';
 import Display from '~/components/DisplayHeading';
 
 export let loader: LoaderFunction = async ({ request, params }) => {

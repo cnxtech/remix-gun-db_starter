@@ -1,13 +1,11 @@
 import { ActionFunction, Form, json, LoaderFunction, redirect, useActionData, useCatch, useLoaderData } from 'remix';
-import Avatar from '~/components/Avatar';
 import Button from '~/components/buttons/Button';
 import Display from '~/components/DisplayHeading';
 import FormSubscribe from '~/components/FormSubscribe';
 import InputText from '~/components/InputText';
-import { getKey, gun,  putVal,  setArray, setKey } from '~/lib/GunDb';
-import { blogs, loadDummy } from '~/lib/utils/data/helpers';
-import { validateUsername, validatePassword, validateJob, validateDescription } from '~/lib/utils/validate-strings';
-import { APP_KEY_PAIR, createUserSession, getDate, getUserId } from '~/session.server';
+import {  putVal,  } from '~/lib/GunDb';
+import {  validateJob, validateDescription } from '~/lib/utils/validate-strings';
+import { APP_KEY_PAIR,  getUserId } from '~/session.server';
 
 type ActionData = {
   formError?: string;
@@ -47,7 +45,6 @@ export let action: ActionFunction = async ({ request, params }) => {
   };
   if (Object.values(fieldErrors).some(Boolean))
     return { fieldErrors, fields };
-  const timestamp = getDate()
 
      let data = {
        id: result,

@@ -1,4 +1,4 @@
-import { Links, Meta, MetaFunction, Outlet, Scripts, useCatch } from 'remix';
+import { MetaFunction, Outlet, useCatch } from 'remix';
 import React from 'react';
 import Document from './components/remix/Document';
 
@@ -62,8 +62,7 @@ export const meta: MetaFunction = () => {
   };
 };
 
-// https://remix.run/api/conventions#default-export
-// https://remix.run/api/conventions#route-filenames
+
 export default function App() {
 
   let data = {
