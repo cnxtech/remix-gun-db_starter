@@ -11,7 +11,7 @@ import Gun from 'gun';
 import React from 'react';
 import { validateUsername, validatePassword } from '../utils/validate-strings';
 import { gun } from '.';
-import { createUserSession } from '~/session.server';
+import { APP_KEY_PAIR, createUserSession } from '~/session.server';
 
 export const encrypt = async (
   data: any,
@@ -30,12 +30,12 @@ export const decrypt = async (
 };
 export type GunCtxType = {
   createUser: (
-    username: string ,
-    password: string 
+    username: string,
+    password: string
   ) => Promise<{ ok: boolean; result: string | undefined }>;
   login: (
-    username: string ,
-    password: string 
+    username: string,
+    password: string
   ) => Promise<{ ok: boolean; result: string }>;
   resetPassword: (
     username: string,
@@ -56,7 +56,7 @@ export type GunCtxType = {
   ) => Promise<string>;
   signAction: (
     request: Request
-  ) => Promise<{ ok: boolean; result: string  }| Response>;
+  ) => Promise<{ ok: boolean; result: string } | Response>;
   setArray: (
     document: string,
     set: Array<any>,
@@ -101,7 +101,7 @@ export function GunCtx(): GunCtxType {
         if (Object.getOwnPropertyNames(ack).includes('id')) {
           resolve({
             ok: true,
-            result:(ack as any).get,
+            result: (ack as any).get,
           });
         } else {
           resolve({ ok: false, result: JSON.parse(JSON.stringify(ack)).err });
@@ -133,12 +133,12 @@ export function GunCtx(): GunCtxType {
     }
     return new Promise((resolve) => {
       if (typeof set === 'string') {
-        let _set = gun
+        let _set = user
           .get(document)
           .path(key)
           .put(value, async (ack) => {
             if (Object.getOwnPropertyNames(ack).includes('ok')) {
-              gun.get(set).set(_set, (ack) => {
+              user.get(set).set(_set, (ack) => {
                 resolve(
                   ack.ok ? 'Added data && set!' : ack.err?.message ?? undefined
                 );
@@ -146,7 +146,7 @@ export function GunCtx(): GunCtxType {
             }
           });
       }
-      gun
+      user
         .get(document)
         .path(key)
         .put(value, (ack) => {
@@ -225,7 +225,7 @@ export function GunCtx(): GunCtxType {
     getVal: (document: string, key?: string, decryptionKey?: string) => {
       return new Promise((resolve) =>
         key
-          ? gun
+          ? user
             .get(document)
             .path(key)
             .once(async (data) => {
@@ -234,7 +234,7 @@ export function GunCtx(): GunCtxType {
                 ? resolve(await decrypt(data, decryptionKey))
                 : resolve(data);
             })
-          : gun.get(document).once(async (data) => resolve(data))
+          : user.get(document).once(async (data) => resolve(data))
       );
     },
     putVal,
@@ -242,21 +242,22 @@ export function GunCtx(): GunCtxType {
       let { username, password } = Object.fromEntries(
         await request.formData()
       );
-      if (
-        typeof username !== 'string' ||
-        typeof password !== 'string'
-      ) {
-        return { ok: false, result: `Form not submitted correctly.` };
-      }
 
-      let fields = { username, password };
-      let fieldErrors = {
-        username: validateUsername(username),
-        password: validatePassword(password),
-      };
-      if (fieldErrors.username) return { ok:false, result: fieldErrors.username };
-      if (fieldErrors.password) return { ok:false, result: fieldErrors.password };
-      return new Promise((resolve) =>
+      return new Promise((resolve) => {
+        if (
+          typeof username !== 'string' ||
+          typeof password !== 'string'
+        ) {
+          return resolve({ ok: false, result: `Form not submitted correctly.` });
+        }
+
+        let fields = { username, password };
+        let fieldErrors = {
+          username: validateUsername(username),
+          password: validatePassword(password),
+        };
+        if (fieldErrors.username) resolve({ ok: false, result: fieldErrors.username });
+        if (fieldErrors.password) resolve({ ok: false, result: fieldErrors.password });
         gun.get(`~@${username}`).once(async (user) => {
           if (!user) {
             const { ok, result } = await createUser(fields.username, fields.password);
@@ -268,11 +269,12 @@ export function GunCtx(): GunCtxType {
           if (!ok) {
             resolve({ ok, result });
           }
-          const res = await putVal('keys', 'master', result, fields.password);
-          if (res === 'Added data!') {
-            resolve(createUserSession(result, '/'));
-          }
+          const res = await putVal('keys', 'master', result, APP_KEY_PAIR);
+          if (res !== 'Added data!') {
+            resolve({ ok: false, result: 'Error Storing Keys' });
+          } resolve(createUserSession(result, `/dashboard/${fields.username}`))
         })
+      }
       )
     },
     setArray,
