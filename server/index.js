@@ -22,18 +22,17 @@ if (!ports) {
 
 
 
-const fretoLay = async () => {
+
   
   const http = require('http');
-  let relays = await Relays()
+ 
 
- return  Gun({
+  Gun({
     file: `${ports.RELAY}.private_relay`,
-    peers: relays,
     web: http.createServer().listen(ports.RELAY, () => console.log('private relay peer running on :' + ports.RELAY)
     )
   });
-}
+
 
 
 
@@ -70,13 +69,10 @@ app.all(
     }
 );
 
-Gun({
-  web: app.listen(ports.CLIENT, () => {
-    console.log(`Express server listening on port ${ports.CLIENT}`);
-  }),
-  localStorage: true
-});
 
+app.listen(ports.CLIENT, () => {
+    console.log(`Express server listening on port ${ports.CLIENT}`);
+  })
 
 
 ////////////////////////////////////////////////////////////////////////////////
