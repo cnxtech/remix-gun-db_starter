@@ -1,12 +1,12 @@
 version: '3.3'
 
 services:
-# traefik 
+  # traefik
   traefik:
     image: traefik:v2.5
     command:
       - --providers.docker # tells traefik to use docker
-      - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`) # any service not on the 'traefik-public' network will not be exposed 
+      - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`) # any service not on the 'traefik-public' network will not be exposed
       - --providers.docker.exposedbydefault=false # would kinda ruin the point if true
       - --providers.docker.swarmmode # beautiful relic
       - --entrypoints.http.address=:80 # 80 && 443 for http >> https redirects
@@ -47,11 +47,11 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-public-certificates1:/certificates
-    
+
     networks:
       - traefik-public
 
-# FRONTEND
+  # FRONTEND
 
   cnxt:
     image: bresnow/remix-gun:latest
@@ -70,20 +70,13 @@ services:
         - traefik.http.routers.cnxt-https.entrypoints=https
         - traefik.http.routers.cnxt-https.tls.certresolver=http
         - traefik.http.services.cnxt.loadbalancer.server.port=3333
-        
+
     networks:
       - traefik-public
 
-
-      
-
- 
 volumes:
   traefik-public-certificates1:
-
 
 networks:
   traefik-public:
     external: true
-      
-

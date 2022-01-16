@@ -34,18 +34,17 @@ jobs:
       - name: Build Docker Image & Push to Github Registry
         env:
           VERSION: latest
-          
-        run: |
-         cd ~/clone
-         mv app/Dockerfile . && mv app/remixGun_swarm.yml .
-         docker build -t bresnow/remix-gun:${{ env.VERSION }} .
-         docker push bresnow/remix-gun:${{ env.VERSION }}
 
+        run: |
+          cd ~/clone
+          mv app/Dockerfile . && mv app/remixGun_swarm.yml .
+          docker build -t bresnow/remix-gun:${{ env.VERSION }} .
+          docker push bresnow/remix-gun:${{ env.VERSION }}
 
       - name: Deploy Docker Swarm Script
         run: |
-         docker stack rm dev
-         docker stack deploy -c remixGun_swarm.yml dev
-         
+          docker stack rm dev
+          docker stack deploy -c remixGun_swarm.yml dev
+
       - name: Clean Up
         run: rm -rf ~/clone

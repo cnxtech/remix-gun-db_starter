@@ -1,13 +1,9 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 // app/routes/login.tsx
-import {
-  Outlet,
-} from 'remix';
-
+import { Outlet } from 'remix';
 
 export default function Signup() {
-
   return (
     <div className="flex flex-wrap w-full">
       <div className="flex flex-col w-full md:w-1/2">

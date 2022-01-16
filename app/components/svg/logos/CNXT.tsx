@@ -35,4 +35,4 @@ const CNXTLogo = (props: SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-export default CNXTLogo
+export default CNXTLogo;

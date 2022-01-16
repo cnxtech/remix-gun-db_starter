@@ -36,14 +36,14 @@ interface DDMItem {
 
 const Header = (props: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-const input: Array<InputTextProps> = [
-  {
-    type: 'search',
-    label: 'Search',
-    required: false,
-    name: 'search',
-  },
-];
+  const input: Array<InputTextProps> = [
+    {
+      type: 'search',
+      label: 'Search',
+      required: false,
+      name: 'search',
+    },
+  ];
   return (
     <div>
       <nav

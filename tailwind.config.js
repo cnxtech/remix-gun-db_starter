@@ -1,16 +1,13 @@
-const defaultTheme = require('tailwindcss/defaultTheme')
+const defaultTheme = require('tailwindcss/defaultTheme');
 const withAnimations = require('animated-tailwindcss');
 module.exports = withAnimations({
   important: true,
-  darkMode: "class",
+  darkMode: 'class',
   i18n: {
-    locales: ["en-US"],
-    defaultLocale: "en-US",
+    locales: ['en-US'],
+    defaultLocale: 'en-US',
   },
-  content: [
-    "./app/**/*.tsx",
-    "./app/**/*.ts"
-  ],
+  content: ['./app/**/*.tsx', './app/**/*.ts'],
   theme: {
     extend: {
       backgroundImage: (theme) => ({
@@ -23,11 +20,9 @@ module.exports = withAnimations({
         body: ['ABeeZee', 'serif'],
         sans: ['Work Sans', ...defaultTheme.fontFamily.sans],
       },
-    }
+    },
   },
-  plugins: [
-    require('@tailwindcss/typography'),
-  ],
+  plugins: [require('@tailwindcss/typography')],
   future: {
     purgeLayersByDefault: true,
   },

@@ -1,6 +1,12 @@
-import React from "react";
-import { Meta, Links, ScrollRestoration, Scripts, LiveReload, useLocation } from "remix";
-
+import React from 'react';
+import {
+  Meta,
+  Links,
+  ScrollRestoration,
+  Scripts,
+  LiveReload,
+  useLocation,
+} from 'remix';
 
 export default function Document({
   children,

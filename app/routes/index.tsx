@@ -32,7 +32,8 @@ export default function Index() {
             description="Application boilerplate with authentication && sessionStorage, data encryption, and tailwind styling. "
           />
           <div className="flex mt-8">
-            <Link to="/login"
+            <Link
+              to="/login"
               className="uppercase animate-bounce py-2 px-4 rounded-lg bg-pink-500 border-2 border-transparent text-white text-md mr-4 hover:bg-pink-400"
             >
               Get started
@@ -41,7 +42,7 @@ export default function Index() {
         </div>
         <div className="hidden sm:block sm:w-1/3 lg:w-3/5 relative">
           <img
-          alt=''
+            alt=""
             src="/images/object/10.png"
             className="max-w-xs md:max-w-sm m-auto"
           />

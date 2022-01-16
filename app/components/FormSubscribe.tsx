@@ -5,21 +5,25 @@ import InputText, { InputTextProps } from './InputText';
 interface FormProps {
   submitLabel: string;
   ariaDescribed?: string;
-  input: Array<InputTextProps>
-  onSubmit?():any
+  input: Array<InputTextProps>;
+  onSubmit?(): any;
 }
 
 const inputs: Array<InputTextProps> = [
-    {
-        type: 'text',
-        label: 'Name',
-        required: true,
-        name: 'alias'
+  {
+    type: 'text',
+    label: 'Name',
+    required: true,
+    name: 'alias',
+  },
+];
 
-    }
-]
-
-const FormSubscribe = ({ submitLabel, ariaDescribed, input, onSubmit }: FormProps) => {
+const FormSubscribe = ({
+  submitLabel,
+  ariaDescribed,
+  input,
+  onSubmit,
+}: FormProps) => {
   return (
     <Form
       method="post"
@@ -44,7 +48,7 @@ const FormSubscribe = ({ submitLabel, ariaDescribed, input, onSubmit }: FormProp
       ))}
 
       <button
-      onSubmit={onSubmit()}
+        onSubmit={onSubmit()}
         className="flex-shrink-0 px-4 py-2 text-base font-semibold text-white bg-purple-600 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-purple-200"
         type="submit"
       >

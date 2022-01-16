@@ -4,14 +4,11 @@ import InputText from '~/components/InputText';
 import SvgIcon from '~/components/SvgIcon';
 import { paths } from '~/components/SvgIcon';
 
-
 type ActionData = {
   formError?: string;
   fieldErrors?: { username: string | undefined; password: string | undefined };
   fields?: { loginType: string; username: string; password: string };
 };
-
-
 
 export async function action({ request }) {
   return await loginAction(request);
@@ -28,35 +25,34 @@ export default function Login() {
         aria-describedby={action?.formError ? 'form-error-message' : undefined}
         className="flex flex-col pt-3 md:pt-8"
       >
-        
         <fieldset>
           <legend className="sr-only">Login or Register?</legend>
-  
-           <div className="flex items-center gap-8">
-          <label className="inline-flex items-center ">
-            <input
-              type="radio"
-              name="loginType"
-              value="register"
-              defaultChecked={action?.fields?.loginType === 'register'}
-              className="h-5 w-5 bg-green-400"
-            />
-            <span className="ml-2 text-gray-300">Register</span>
-          </label>
-          <label className="inline-flex items-center">
-            <input
-              type="radio"
-              name="loginType"
-              value="login"
-              defaultChecked={
-                !action?.fields?.loginType ||
-                action?.fields?.loginType === 'login'
-              }
-              className="h-5 w-5 bg-green-400"
-            />
-            <span className="ml-2 text-gray-300">Login</span>
-          </label>
-        </div>
+
+          <div className="flex items-center gap-8">
+            <label className="inline-flex items-center ">
+              <input
+                type="radio"
+                name="loginType"
+                value="register"
+                defaultChecked={action?.fields?.loginType === 'register'}
+                className="h-5 w-5 bg-green-400"
+              />
+              <span className="ml-2 text-gray-300">Register</span>
+            </label>
+            <label className="inline-flex items-center">
+              <input
+                type="radio"
+                name="loginType"
+                value="login"
+                defaultChecked={
+                  !action?.fields?.loginType ||
+                  action?.fields?.loginType === 'login'
+                }
+                className="h-5 w-5 bg-green-400"
+              />
+              <span className="ml-2 text-gray-300">Login</span>
+            </label>
+          </div>
         </fieldset>
         <div className="flex flex-col pt-4 mb-4">
           <InputText

@@ -1,23 +1,23 @@
 # Remix.Gun Boilerplate
 
-![Remix/Gun](public/images/github/rmix-gun.png "Remix.Gun")
+![Remix/Gun](public/images/github/rmix-gun.png 'Remix.Gun')
 
-This is my white-label boilerplate when building full stack apps. Using the Graph Universal Database, SEA authentication, and Remix's Express server adapter. 
+This is my white-label boilerplate when building full stack apps. Using the Graph Universal Database, SEA authentication, and Remix's Express server adapter.
 
 ## Goals
 
-- [x] Relay GunDB inside the Remix Express Server  
+- [x] Relay GunDB inside the Remix Express Server
 - [x] Authorization with Gun.Sea/ Gun's user api
   - [ ] Password-less authorization. IN PROGRESS
 - [x] Data writing / mapping with high order function
 - [x] Dynamic relay database peers
 - [x] Docker Swarm deployment
-- [x] Cryptographic ledger 
+- [x] Cryptographic ledger
 - [x] Data Encrytion
 - [ ] Data Compression
 - [x] Session Storage (needs improvment to workflow but it works)
 
-![radix-encryption](public/images/github/radix.png "Radix Storage with fully encrypted data")
+![radix-encryption](public/images/github/radix.png 'Radix Storage with fully encrypted data')
 
 Radix Storage with fully encrypted data. Each registered user has public/ private encryption credentials.
 
@@ -54,5 +54,3 @@ npm start
 ```
 
 Now you'll need to pick a host to deploy it to.
-
-

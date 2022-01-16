@@ -62,9 +62,7 @@ export const meta: MetaFunction = () => {
   };
 };
 
-
 export default function App() {
-
   let data = {
     links: [
       { to: '/', label: 'Home' },
@@ -75,7 +73,12 @@ export default function App() {
   return (
     <Document>
       <Layout>
-        <Header links={data.links}  hideHelp={true} hideGitHubLink={true} logo={<CNXTLogo />}  />
+        <Header
+          links={data.links}
+          hideHelp={true}
+          hideGitHubLink={true}
+          logo={<CNXTLogo />}
+        />
         <Outlet />
       </Layout>
     </Document>

@@ -1,16 +1,16 @@
-import { Link } from "remix";
+import { Link } from 'remix';
 
 interface Button {
-  items: Props[]
+  items: Props[];
 }
 interface Props {
-    label: string
-    to: string
+  label: string;
+  to: string;
 }
-const MultipleButton = ( props : Button) => {
+const MultipleButton = (props: Button) => {
   return (
     <div className="flex items-center">
-      {props.items &&(
+      {props.items &&
         props.items.map((button) => (
           <Link to={button.to}>
             <button
@@ -20,7 +20,7 @@ const MultipleButton = ( props : Button) => {
               {button.label}
             </button>
           </Link>
-        )))}
+        ))}
     </div>
   );
 };

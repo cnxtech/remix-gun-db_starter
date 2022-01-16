@@ -1,26 +1,19 @@
 import React from 'react';
 import BlogCard from './BlogCard';
-import {blogs} from '../../lib/utils/data/helpers'
+import { blogs } from '../../lib/utils/data/helpers';
 
 interface Props {
   withSearch?: boolean;
   userId: string;
   alias?: string;
- 
 }
 
-
-
-
 const BlogList = (props: Props) => {
-
   return (
     <div className="w-full  p-12">
       <div className="header flex items-end justify-between mb-12">
         <div className="title">
-          <p className="text-4xl font-bold text-gray-800 mb-4">
-              TAGS/Projects
-          </p>
+          <p className="text-4xl font-bold text-gray-800 mb-4">TAGS/Projects</p>
 
           <p className="text-2xl font-light text-gray-400">
             This is where the user tags will be

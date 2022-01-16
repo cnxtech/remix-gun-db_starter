@@ -1,18 +1,17 @@
-
 export interface InputTextProps {
-    type?: string;
-    textArea?:boolean
-    label?: string;
-    required?: boolean;
-    error?: string;
-    icon?: JSX.Element;
-    helper?: string;
-    placeholder?: string;
-    name?: string;
-    disabled?: boolean;
-    square?: boolean;
-    withForceIndications?: boolean;
-    id?: string;
+  type?: string;
+  textArea?: boolean;
+  label?: string;
+  required?: boolean;
+  error?: string;
+  icon?: JSX.Element;
+  helper?: string;
+  placeholder?: string;
+  name?: string;
+  disabled?: boolean;
+  square?: boolean;
+  withForceIndications?: boolean;
+  id?: string;
 }
 
 const InputText = (props: InputTextProps) => {

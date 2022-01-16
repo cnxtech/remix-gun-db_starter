@@ -1,9 +1,6 @@
 {
-  "include": [
-    "**/*.ts",
-    "**/*.tsx", "server/relay-peers.js",
-  ],
-"compilerOptions": {
+  "include": ["**/*.ts", "**/*.tsx", "server/relay-peers.js"],
+  "compilerOptions": {
     "module": "esnext",
     "lib": ["DOM", "DOM.Iterable", "ES2019"],
     "esModuleInterop": true,

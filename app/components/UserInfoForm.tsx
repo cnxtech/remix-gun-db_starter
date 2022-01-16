@@ -1,6 +1,6 @@
-import Avatar from "./Avatar";
-import Button from "./buttons/Button";
-import InputText from "./InputText";
+import Avatar from './Avatar';
+import Button from './buttons/Button';
+import InputText from './InputText';
 
 const UserInfoForm = () => {
   return (

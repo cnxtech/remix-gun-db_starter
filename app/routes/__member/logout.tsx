@@ -1,15 +1,15 @@
-import { ActionFunction} from 'remix';
+import { ActionFunction } from 'remix';
 import { logout } from '~/session.server';
-export let action: ActionFunction = async({request}) => { 
- //action function
-  return await logout(request)
-}
+export let action: ActionFunction = async ({ request }) => {
+  //action function
+  return await logout(request);
+};
 
 export default function Logout() {
-// main function
+  // main function
   return (
-<>
-<h1>Logged Out</h1>
-</>
+    <>
+      <h1>Logged Out</h1>
+    </>
   );
 }

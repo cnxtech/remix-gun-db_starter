@@ -1,16 +1,8 @@
 import React from 'react';
-import {
-  ActionFunction,
-  Link,
-  LoaderFunction,
-  useLoaderData,
-} from 'remix';
+import { ActionFunction, Link, LoaderFunction, useLoaderData } from 'remix';
 import Button from '~/components/buttons/Button';
-import { gun} from '../../../lib/GunDb';
+import { gun } from '../../../lib/GunDb';
 import { getUserId } from '~/session.server';
-
-
-
 
 export let loader: LoaderFunction = async ({ request, params }) => {
   let userId = await getUserId(request);
@@ -18,7 +10,7 @@ export let loader: LoaderFunction = async ({ request, params }) => {
     throw new Response(`Forbidden`, { status: 403 });
   }
 
-  return null
+  return null;
 };
 ///////////////
 export let action: ActionFunction = async ({ request }) => {
@@ -29,7 +21,7 @@ export let action: ActionFunction = async ({ request }) => {
 
 export default function UserIndex() {
   let data = useLoaderData();
-   console.log(data);
+  console.log(data);
 
   return (
     <>
@@ -41,8 +33,6 @@ export default function UserIndex() {
           <Button submit={true} color="red" label="Edit" />
         </Link>
       </div>
-   
     </>
   );
 }
-

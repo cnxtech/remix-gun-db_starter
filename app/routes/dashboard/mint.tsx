@@ -6,14 +6,13 @@ import Button from '~/components/elements/buttons/Button';
 import InputArea from '~/components/form/inputtext/InputArea';
 import { putVal } from '~/lib/GunDb';
 
-
 export function meta() {
   return { title: 'Mint Tokens' };
 }
 type ActionMessage = {
   pubKey: string;
   privKey: string;
-}
+};
 // When your form sends a POST, the action is called on the server.
 // - https://remix.run/api/conventions#action
 // - https://remix.run/guides/data-updates
@@ -23,10 +22,10 @@ export let action: ActionFunction = async ({ request }) => {
   let description = body.get('description');
   let publisher = body.get('publisher');
   let url = body.get('url');
-let put = putVal('test', 'data', body)
-console.log(put)
+  let put = putVal('test', 'data', body);
+  console.log(put);
 
-return redirect('/')
+  return redirect('/');
 };
 
 export default function ActionsDemo() {
@@ -90,7 +89,7 @@ export default function ActionsDemo() {
                 />
               </div>
 
-            <InputArea   />
+              <InputArea />
 
               <div className="col-span-2">
                 {' '}

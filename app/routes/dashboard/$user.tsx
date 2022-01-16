@@ -2,7 +2,7 @@ import { Outlet, useCatch } from 'remix';
 import { LoaderFunction, useLoaderData } from 'remix';
 import { APP_KEY_PAIR, getUserId } from '~/session.server';
 import ProfileHeader from '~/components/ProfileHeader';
-import { getVal, gun,} from '../../lib/GunDb';
+import { getVal, gun } from '../../lib/GunDb';
 import Display from '~/components/DisplayHeading';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
@@ -19,9 +19,9 @@ export let loader: LoaderFunction = async ({ request, params }) => {
 };
 
 export default function User() {
- let data = useLoaderData();
- console.log(data)
-let  { alias, job, description, id } = data
+  let data = useLoaderData();
+  console.log(data);
+  let { alias, job, description, id } = data;
   return (
     <div className="mt-5">
       <ProfileHeader

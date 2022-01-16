@@ -1,20 +1,29 @@
-import { ActionFunction, Form, json, LoaderFunction, redirect, useActionData, useCatch, useLoaderData } from 'remix';
+import {
+  ActionFunction,
+  Form,
+  json,
+  LoaderFunction,
+  redirect,
+  useActionData,
+  useCatch,
+  useLoaderData,
+} from 'remix';
 import Button from '~/components/buttons/Button';
 import Display from '~/components/DisplayHeading';
 import FormSubscribe from '~/components/FormSubscribe';
 import InputText from '~/components/InputText';
-import {  putVal,  } from '~/lib/GunDb';
-import {  validateJob, validateDescription } from '~/lib/utils/validate-strings';
-import { APP_KEY_PAIR,  getUserId } from '~/session.server';
+import { putVal } from '~/lib/GunDb';
+import { validateJob, validateDescription } from '~/lib/utils/validate-strings';
+import { APP_KEY_PAIR, getUserId } from '~/session.server';
 
 type ActionData = {
   formError?: string;
   fieldErrors?: { job: string | undefined; description: string | undefined };
-  fields?: { job: string ; description: string};
+  fields?: { job: string; description: string };
 };
 
 export let loader: LoaderFunction = async ({ params }) => {
-return null
+  return null;
 };
 ///////////////
 export type Fields = {
@@ -26,15 +35,11 @@ export type Fields = {
 };
 
 export let action: ActionFunction = async ({ request, params }) => {
-  let result = await getUserId(request)
-   let form = await request.formData()
-   let job = form.get('job')
-   let description = form.get('description')
-  if (
-    typeof job !== 'string' ||
-    typeof description !== 'string' 
-   
-  ) {
+  let result = await getUserId(request);
+  let form = await request.formData();
+  let job = form.get('job');
+  let description = form.get('description');
+  if (typeof job !== 'string' || typeof description !== 'string') {
     return { formError: `Form not submitted correctly.` };
   }
 
@@ -43,33 +48,27 @@ export let action: ActionFunction = async ({ request, params }) => {
     username: validateJob(job),
     password: validateDescription(description),
   };
-  if (Object.values(fieldErrors).some(Boolean))
-    return { fieldErrors, fields };
+  if (Object.values(fieldErrors).some(Boolean)) return { fieldErrors, fields };
 
-     let data = {
-       id: result,
-       alias: params.user,
-       job: job,
-       description: description,
-     };
+  let data = {
+    id: result,
+    alias: params.user,
+    job: job,
+    description: description,
+  };
 
- putVal(
-       `${result}//${data.alias}`,
-       'info',
-       data,
-       APP_KEY_PAIR
-     );
+  putVal(`${result}//${data.alias}`, 'info', data, APP_KEY_PAIR);
 
-    //  if (!put) {
-    //    throw new Error('Didnt Put Info Values');
-    //  }
-     return redirect(`/dashboard/${data.alias}`);
+  //  if (!put) {
+  //    throw new Error('Didnt Put Info Values');
+  //  }
+  return redirect(`/dashboard/${data.alias}`);
 };
 ///////////////
 export default function Edit() {
-  let data = useLoaderData()
-   let action = useActionData<ActionData>();
-  console.log(data)
+  let data = useLoaderData();
+  let action = useActionData<ActionData>();
+  console.log(data);
   return (
     <>
       <section className="h-screen bg-opacity-50">
@@ -98,10 +97,7 @@ export default function Edit() {
                   <InputText placeholder="Job Title" name="job" type="text" />
                 </div>
                 <div>
-                  <InputText
-                    placeholder="Description"
-                    name="description"
-                  />
+                  <InputText placeholder="Description" name="description" />
                 </div>
                 {/* <div>
                   <InputText placeholder="Phone number" id="user-info-phone" />

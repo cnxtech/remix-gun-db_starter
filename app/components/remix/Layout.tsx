@@ -2,7 +2,6 @@ import Header from '~/components/Header';
 import Logo from '../svg/logos/BDS';
 import FMLogo from '../svg/logos/FltngMmth';
 
-
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative">
@@ -11,7 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="dark">{children}</div>
         </div>
       </div>
-      <FMLogo height='50' width="auto" color={'white'} textColor={'pink'}  />
+      <FMLogo height="50" width="auto" color={'white'} textColor={'pink'} />
     </div>
   );
 }
