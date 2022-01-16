@@ -16,19 +16,33 @@ import { APP_KEY_PAIR, createUserSession } from '~/session.server';
 
 export const encrypt = async (
   data: any,
-  keys: undefined | string | IGunCryptoKeyPair
+  keys?: string | IGunCryptoKeyPair
 ) => {
-  console.log('Encrypting data...');
-  return Gun.SEA.encrypt(data, keys);
+  if (!keys) {
+    console.log('Using the environment variables to encrypt data...');
+    let enc = await Gun.SEA.encrypt(data, APP_KEY_PAIR); 
+    return LZString.compress(enc)
+  }
+  console.log('Encrypting data with new keys...');
+  let enc = await Gun.SEA.encrypt(data, keys);
+  return LZString.compress(enc)
 };
 
 export const decrypt = async (
   data: any,
-  keys: undefined | string | IGunCryptoKeyPair
+  keys?: string | IGunCryptoKeyPair
 ) => {
-  console.log('Decrypting data...');
-  return Gun.SEA.decrypt(data, keys);
+  if (!keys) {
+    console.log('Using the environment variables to encrypt data...');
+    let enc = LZString.decompress(data)
+    return  Gun.SEA.decrypt(enc, APP_KEY_PAIR);
+  }
+  console.log('Encrypting data with new keys...');
+  let enc = LZString.decompress(data)
+  return Gun.SEA.decrypt(enc, keys);
 };
+
+
 export type GunCtxType = {
   createUser: (
     username: string,
@@ -134,12 +148,8 @@ export function GunCtx(): GunCtxType {
   ): Promise<string> => {
     if (encryptionKey) {
       value = await encrypt(value, encryptionKey);
-      value = LZString.compress(value);
-    } else
-      value = await encrypt(value, APP_KEY_PAIR);
-    console.log(value)
-    value = LZString.compress(value);
-    console.log(value)
+    } 
+      value = await encrypt(value);
     return new Promise((resolve) => {
       if (typeof set === 'string') {
         let _set = user
@@ -171,12 +181,10 @@ export function GunCtx(): GunCtxType {
         .path(key)
         .once(async (data) => {
           if (decryptionKey) {
-            let dec = LZString.decompress(data as never);
-            let _data = await decrypt(dec, decryptionKey) 
+            let _data = await decrypt(data, decryptionKey) 
             resolve(_data)
           }
-          let dec = LZString.decompress(data as never);
-          let _data = await decrypt(dec, APP_KEY_PAIR)
+          let _data = await decrypt(data)
           resolve(_data)
         })
 
@@ -194,6 +202,7 @@ export function GunCtx(): GunCtxType {
         if (encryptionKey) {
           ref = await encrypt(ref, encryptionKey);
         }
+        ref = await encrypt(ref, APP_KEY_PAIR);
         _document.set(ref, (ack) => {
           resolve(ack.ok ? 'Added set!' : ack.err?.message ?? undefined);
         });
@@ -211,7 +220,7 @@ export function GunCtx(): GunCtxType {
   const MapArray = (document: string, decryptionKey?: string) => {
     const [state, dispatch] = React.useReducer(reducer, initialState);
     React.useEffect(() => {
-      gun
+      user
         .get(document)
         .map()
         .once(async (value) => {
@@ -288,6 +297,7 @@ export function GunCtx(): GunCtxType {
             resolve({ ok: false, result: 'Error Storing Keys' });
           }
           let data = await getVal('keys', 'master')
+          // @ts-ignore
           console.log(data)
           resolve(createUserSession(result, `/`))
         })
