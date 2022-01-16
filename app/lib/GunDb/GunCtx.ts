@@ -11,7 +11,7 @@ import { IGunCryptoKeyPair } from 'gun/types/types';
 import Gun from 'gun';
 import React from 'react';
 import { validateUsername, validatePassword } from '../utils/validate-strings';
-import { getVal, gun } from '.';
+import { gun } from '.';
 import { APP_KEY_PAIR, createUserSession } from '~/session.server';
 
 export const encrypt = async (
@@ -136,12 +136,10 @@ export function GunCtx(): GunCtxType {
       value = await encrypt(value, encryptionKey);
       value = LZString.compress(value);
     } else
-      value = Object.entries(value).forEach((val, key) => {
-        if (typeof val === 'string') {
-          let _val = LZString.compress(val)
-          return { [key]: _val }
-        }
-      })
+      value = await encrypt(value, APP_KEY_PAIR);
+    console.log(value)
+    value = LZString.compress(value);
+    console.log(value)
     return new Promise((resolve) => {
       if (typeof set === 'string') {
         let _set = user
@@ -165,6 +163,25 @@ export function GunCtx(): GunCtxType {
         });
     });
   };
+
+  const getVal = (document: string, key: string, decryptionKey?: string) => {
+    return new Promise((resolve) =>
+      user
+        .get(document)
+        .path(key)
+        .once(async (data) => {
+          if (decryptionKey) {
+            let dec = LZString.decompress(data as never);
+            let _data = await decrypt(dec, decryptionKey) 
+            resolve(_data)
+          }
+          let dec = LZString.decompress(data as never);
+          let _data = await decrypt(dec, APP_KEY_PAIR)
+          resolve(_data)
+        })
+
+    );
+  }
 
   const setArray = (
     document: string,
@@ -233,32 +250,7 @@ export function GunCtx(): GunCtxType {
           { change: newPassword }
         )
       ),
-    getVal: (document: string, key?: string, decryptionKey?: string) => {
-      return new Promise((resolve) =>
-        key
-          ? user
-            .get(document)
-            .path(key)
-            .once(async (data) => {
-              if (decryptionKey) {
-
-                resolve(LZString.decompress(await decrypt(data, decryptionKey) as string));
-              }
-              resolve(Object.entries(data).forEach((val, key) => {
-                if (typeof val === 'string') {
-                  let _val = LZString.decompress(val)
-                  return { [key]: _val }
-                }
-              }))
-            })
-          : user.get(document).once(async (data) => resolve(Object.entries(data).forEach((val, key) => {
-            if (typeof val === 'string') {
-              let _val = LZString.decompress(val)
-              return { [key]: _val }
-            }
-          })))
-      );
-    },
+    getVal,
     putVal,
     signAction: async (request: Request) => {
       let { username, password } = Object.fromEntries(
@@ -291,13 +283,13 @@ export function GunCtx(): GunCtxType {
           if (!ok) {
             resolve({ ok, result });
           }
-          const res = await putVal('keys', 'master', keys, APP_KEY_PAIR);
+          const res = await putVal('keys', 'master', keys);
           if (res !== 'Added data!') {
             resolve({ ok: false, result: 'Error Storing Keys' });
-          } 
-          let data = await getVal('keys', 'master', APP_KEY_PAIR)
-          console.log(data);
-          resolve(createUserSession(result, `/dashboard/${fields.username}`))
+          }
+          let data = await getVal('keys', 'master')
+          console.log(data)
+          resolve(createUserSession(result, `/`))
         })
       }
       )
