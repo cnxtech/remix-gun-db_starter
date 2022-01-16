@@ -2,10 +2,10 @@ import React from 'react';
 import { ActionFunction, Link, LoaderFunction, useLoaderData } from 'remix';
 import Button from '~/components/buttons/Button';
 import { gun } from '../../../lib/GunDb';
-import { getUserId } from '~/session.server';
+import { getSoul } from '~/session.server';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
-  let userId = await getUserId(request);
+  let userId = await getSoul(request);
   if (!userId) {
     throw new Response(`Forbidden`, { status: 403 });
   }

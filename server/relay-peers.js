@@ -14,7 +14,6 @@ const Relays = async () => {
 
   const gun = new Gun({
     peers: [
-      `http://${host}:${ports.CLIENT}/gun`,
       `http://${host}:${ports.RELAY}/gun`,
     ],
     localStorage: false,

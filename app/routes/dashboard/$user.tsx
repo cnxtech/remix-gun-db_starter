@@ -1,12 +1,12 @@
 import { Outlet, useCatch } from 'remix';
 import { LoaderFunction, useLoaderData } from 'remix';
-import { APP_KEY_PAIR, getUserId } from '~/session.server';
+import { APP_KEY_PAIR, getSoul } from '~/session.server';
 import ProfileHeader from '~/components/ProfileHeader';
 import { getVal, gun } from '../../lib/GunDb';
 import Display from '~/components/DisplayHeading';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
-  let userId = await getUserId(request);
+  let userId = await getSoul(request);
   let username = params.user;
   let isAlias = gun.get(`~@${username}`).once(async (exist) => {
     if (!exist) return false;

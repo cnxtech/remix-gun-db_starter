@@ -1,8 +1,9 @@
 import { Form, useActionData } from 'remix';
-import { loginAction } from '~/session.server';
 import InputText from '~/components/InputText';
 import SvgIcon from '~/components/SvgIcon';
 import { paths } from '~/components/SvgIcon';
+import { signAction } from '~/lib/GunDb';
+import { createUserSession } from '~/session.server';
 
 type ActionData = {
   formError?: string;
@@ -11,7 +12,7 @@ type ActionData = {
 };
 
 export async function action({ request }) {
-  return await loginAction(request);
+  return  await signAction(request);
 }
 
 ///////////////

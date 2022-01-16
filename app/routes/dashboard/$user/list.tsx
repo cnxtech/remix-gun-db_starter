@@ -1,13 +1,13 @@
 import { ActionFunction, useCatch } from 'remix';
 import { LoaderFunction, useLoaderData } from 'remix';
-import { APP_KEY_PAIR, getUserId } from '~/session.server';
+import { APP_KEY_PAIR, getSoul } from '~/session.server';
 import BlogList from '~/components/blog/BlogList';
 
 import { getVal, gun } from '../../../lib/GunDb';
 import Display from '~/components/DisplayHeading';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
-  let userId = await getUserId(request);
+  let userId = await getSoul(request);
   if (!userId) {
     throw new Response(`Forbidden`, { status: 403 });
   }

@@ -14,7 +14,7 @@ import FormSubscribe from '~/components/FormSubscribe';
 import InputText from '~/components/InputText';
 import { putVal } from '~/lib/GunDb';
 import { validateJob, validateDescription } from '~/lib/utils/validate-strings';
-import { APP_KEY_PAIR, getUserId } from '~/session.server';
+import { APP_KEY_PAIR, getSoul } from '~/session.server';
 
 type ActionData = {
   formError?: string;
@@ -35,7 +35,7 @@ export type Fields = {
 };
 
 export let action: ActionFunction = async ({ request, params }) => {
-  let result = await getUserId(request);
+  let result = await getSoul(request);
   let form = await request.formData();
   let job = form.get('job');
   let description = form.get('description');

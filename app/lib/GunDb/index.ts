@@ -14,12 +14,11 @@ export const {
   login,
   putVal,
   getVal,
-  getKey,
-  setKey,
+  signAction,
   resetPassword,
   setArray,
   MapArray,
-} = GunCtx(gun);
+} = GunCtx();
 
 export type UserData = {
   profile: UserProfile;

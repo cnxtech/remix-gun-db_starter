@@ -1,10 +1,5 @@
 import { createCookieSessionStorage, redirect } from 'remix';
-import { getKey, gun, putVal, setKey } from './lib/GunDb';
-import { blogs, loadDummy } from './lib/utils/data/helpers';
-import {
-  validateUsername,
-  validatePassword,
-} from './lib/utils/validate-strings';
+import { AuthKeys } from './lib/GunDb/GunCtx';
 
 export function getDate() {
   const newDate = new Date();
@@ -39,26 +34,31 @@ export function getUserSession(request: Request) {
   return getSession(request.headers.get('Cookie'));
 }
 
-export async function getUserId(request: Request) {
+export async function getSoul(request: Request) {
   let session = await getUserSession(request);
-  let userId = session.get('userId');
-  if (!userId || typeof userId !== 'string') return null;
-  return userId;
+  let soul = session.get('soul');
+  if (!soul || typeof soul !== 'string') return null;
+  return soul;
+}
+export async function getEpub(request: Request) {
+  let session = await getUserSession(request);
+  let epub = session.get('epub');
+  if (!epub || typeof epub !== 'string') return null;
+  return epub;
+}
+export async function getSea(request: Request) {
+  let session = await getUserSession(request);
+  let sea = session.get('sea');
+  if (!sea || typeof sea !== 'string') return null;
+  return sea;
+}
+export async function requireSoul(request: Request) {
+  let session = await getUserSession(request);
+  let soul = session.get('soul');
+  if (!soul || typeof soul !== 'string') throw redirect('/login');
+  return soul;
 }
 
-export async function requireUserId(request: Request) {
-  let session = await getUserSession(request);
-  let userId = session.get('userId');
-  if (!userId || typeof userId !== 'string') throw redirect('/login');
-  return userId;
-}
-
-export async function getUser(request: Request) {
-  let userId = await getUserId(request);
-  if (typeof userId !== 'string') return null;
-  let user = gun.user(userId);
-  return user;
-}
 
 export async function logout(request: Request) {
   let session = await getSession(request.headers.get('Cookie'));
@@ -67,107 +67,14 @@ export async function logout(request: Request) {
   });
 }
 
-export async function createUserSession(userId: string, redirectTo: string) {
+export async function createUserSession(result: AuthKeys, redirectTo: string) {
   let session = await getSession();
-  session.set('userId', userId);
+  session.set('sea', result.sea);
+  session.set('epub', result.epub);
+  session.set('soul', result.soul);
   return redirect(redirectTo, {
     headers: { 'Set-Cookie': await commitSession(session) },
   });
 }
 
-export async function loginAction(request: Request) {
-  let { loginType, username, password } = Object.fromEntries(
-    await request.formData()
-  );
-  if (
-    typeof loginType !== 'string' ||
-    typeof username !== 'string' ||
-    typeof password !== 'string'
-  ) {
-    return { formError: `Form not submitted correctly.` };
-  }
 
-  let fields = { loginType, username, password };
-  let fieldErrors = {
-    username: validateUsername(username),
-    password: validatePassword(password),
-  };
-  if (Object.values(fieldErrors).some(Boolean)) return { fieldErrors, fields };
-  const timestamp = getDate();
-  switch (loginType) {
-    case 'login': {
-      let { ok, result } = await getKey(username, password);
-      if (!ok) {
-        return {
-          fields,
-          formError: `${result}`,
-        };
-      }
-
-      let datatime = {
-        logged_in: timestamp,
-      };
-
-      let time = await putVal(
-        `${result}//${username}`,
-        'info/time',
-        datatime,
-        APP_KEY_PAIR
-      );
-
-      if (!time) {
-        throw new Error('Didnt Put Time Values');
-      }
-
-      return createUserSession(result, `/dashboard/${username}`);
-    }
-    case 'register': {
-      let { ok, result } = await setKey(username, password);
-      if (!ok) {
-        return {
-          fields,
-          formError: `${result}`,
-        };
-      }
-      let data = {
-        id: result,
-        alias: username,
-        job: 'What is your job?',
-        description: 'Write a description...',
-      };
-
-      let put = await putVal(
-        `${result}//${username}`,
-        'info',
-        data,
-        APP_KEY_PAIR
-      );
-
-      if (!put) {
-        throw new Error('Didnt Put Info Values');
-      }
-
-      let datatime = {
-        logged_in: timestamp,
-      };
-
-      let time = await putVal(
-        `${result}//${username}`,
-        'info/time',
-        datatime,
-        APP_KEY_PAIR
-      );
-
-      if (!time) {
-        throw new Error('Didnt Put Time Values');
-      }
-
-      loadDummy(result, blogs);
-
-      return createUserSession(result, `/dashboard/${username}`);
-    }
-    default: {
-      return { fields, formError: `Login type invalid` };
-    }
-  }
-}

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import 'gun/lib/radix';
 import 'gun/lib/radisk';
 import 'gun/lib/store';
@@ -5,12 +6,12 @@ import 'gun/lib/rindexed';
 import 'gun/lib/not.js';
 import 'gun/lib/then';
 import 'gun/lib/path';
-import invariant from 'tiny-invariant';
 import { IGunCryptoKeyPair } from 'gun/types/types';
 import Gun from 'gun';
-import { IGunChainReference } from 'gun/types/chain';
 import React from 'react';
-import { APP_KEY_PAIR } from '~/session.server';
+import { validateUsername, validatePassword } from '../utils/validate-strings';
+import { gun } from '.';
+import { createUserSession } from '~/session.server';
 
 export const encrypt = async (
   data: any,
@@ -29,12 +30,12 @@ export const decrypt = async (
 };
 export type GunCtxType = {
   createUser: (
-    username: string,
-    password: string
+    username: string ,
+    password: string 
   ) => Promise<{ ok: boolean; result: string | undefined }>;
   login: (
-    username: string,
-    password: string
+    username: string ,
+    password: string 
   ) => Promise<{ ok: boolean; result: AuthKeys }>;
   resetPassword: (
     username: string,
@@ -53,14 +54,9 @@ export type GunCtxType = {
     encryptionKey?: string,
     set?: string
   ) => Promise<string>;
-  getKey: (
-    alias: string,
-    password: string
-  ) => Promise<{ ok: boolean; result: string | keyof AuthKeys }>;
-  setKey: (
-    alias: string,
-    password: string
-  ) => Promise<{ ok: boolean; result: string | keyof AuthKeys }>;
+  signAction: (
+    request: Request
+  ) => Promise<{ ok: boolean; result: string | AuthKeys }>;
   setArray: (
     document: string,
     set: Array<any>,
@@ -69,19 +65,18 @@ export type GunCtxType = {
   MapArray: (document: string, decryptionKey?: string) => any;
 };
 
-type AuthKeys = {
+export type AuthKeys = {
   soul: string;
-  get: string;
   sea: IGunCryptoKeyPair;
   epub: string;
 };
 
-export function GunCtx(gun: IGunChainReference): GunCtxType {
+export function GunCtx(): GunCtxType {
   const user = gun.user().recall({ sessionStorage: true });
 
-  const credentials = async (data: any) => {
-    const pair = await Gun.SEA.pair();
-  };
+  // const credentials = async (data: any) => {
+  //   const pair = await Gun.SEA.pair();
+  // };
   const createUser = async (
     username: string,
     password: string
@@ -108,9 +103,8 @@ export function GunCtx(gun: IGunChainReference): GunCtxType {
             ok: true,
             result: {
               soul: (ack as any).soul,
-              get: (ack as any).get,
               sea: (ack as any).sea,
-              epub: (ack as any).epub,
+              epub: (ack as any).put.epub,
             },
           });
         } else {
@@ -236,51 +230,55 @@ export function GunCtx(gun: IGunChainReference): GunCtxType {
       return new Promise((resolve) =>
         key
           ? gun
-              .get(document)
-              .path(key)
-              .once(async (data) => {
-                console.log('data:', data);
-                decryptionKey
-                  ? resolve(await decrypt(data, decryptionKey))
-                  : resolve(data);
-              })
+            .get(document)
+            .path(key)
+            .once(async (data) => {
+              console.log('data:', data);
+              decryptionKey
+                ? resolve(await decrypt(data, decryptionKey))
+                : resolve(data);
+            })
           : gun.get(document).once(async (data) => resolve(data))
       );
     },
     putVal,
-    getKey: (alias: string, password: string) =>
-      new Promise((resolve) =>
-        gun.get(`~@${alias}`).once(async (exists) => {
-          if (!exists) {
-            resolve({ ok: false, result: 'Alias does not exist' });
-          }
-          const { ok, result } = await login(alias, password);
-          if (!ok) {
-            resolve({ ok, result });
-          }
-          resolve({ ok: true, result: result.get });
-        })
-      ),
-    setKey: async (username: string, password: string) =>
+    signAction: async (request: Request) => {
+      let { username, password } = Object.fromEntries(
+        await request.formData()
+      );
+      if (
+        typeof username !== 'string' ||
+        typeof password !== 'string'
+      ) {
+        return { ok: false, result: `Form not submitted correctly.` };
+      }
+
+      let fields = { username, password };
+      let fieldErrors = {
+        username: validateUsername(username),
+        password: validatePassword(password),
+      };
+      if (fieldErrors.username) return { ok:false, result: fieldErrors.username };
+      if (fieldErrors.password) return { ok:false, result: fieldErrors.password };
       new Promise((resolve) =>
         gun.get(`~@${username}`).once(async (user) => {
-          invariant(username && password, 'string');
           if (!user) {
-            const { ok, result } = await createUser(username, password);
+            const { ok, result } = await createUser(fields.username, fields.password);
             if (!ok) {
               resolve({ ok: false, result: result });
             }
           }
-          const { ok, result } = await login(username, password);
+          const { ok, result } = await login(fields.username, fields.password);
           if (!ok) {
             resolve({ ok, result });
           }
-          const res = await putVal('keys', 'master', result, APP_KEY_PAIR);
+          const res = await putVal('keys', 'master', result, result.sea);
           if (res === 'Added data!') {
-            resolve({ ok: true, result: result.get });
+            resolve(createUserSession(result, '/'));
           }
         })
-      ),
+      )
+    },
     setArray,
     MapArray,
   };
