@@ -1,8 +1,9 @@
 import React from 'react';
 import InputText from '../inputtext/InputText';
 import Button from '../../elements/buttons/Button';
+import { InputTextProps } from '~/components/InputText';
 
-const LoginWithBackground = () => {
+const LoginWithBackground = (input:Array<InputTextProps>) => {
   return (
     <div className="w-full h-screen font-sans bg-cover bg-landscape">
       <div className="container flex items-center justify-center flex-1 h-full mx-auto">

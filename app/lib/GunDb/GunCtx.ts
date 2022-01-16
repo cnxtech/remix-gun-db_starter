@@ -6,11 +6,12 @@ import 'gun/lib/rindexed';
 import 'gun/lib/not.js';
 import 'gun/lib/then';
 import 'gun/lib/path';
+import LZString from 'lz-string';
 import { IGunCryptoKeyPair } from 'gun/types/types';
 import Gun from 'gun';
 import React from 'react';
 import { validateUsername, validatePassword } from '../utils/validate-strings';
-import { gun } from '.';
+import { getVal, gun } from '.';
 import { APP_KEY_PAIR, createUserSession } from '~/session.server';
 
 export const encrypt = async (
@@ -36,7 +37,7 @@ export type GunCtxType = {
   login: (
     username: string,
     password: string
-  ) => Promise<{ ok: boolean; result: string }>;
+  ) => Promise<{ ok: boolean; result: string; keys?: AuthKeys }>;
   resetPassword: (
     username: string,
     oldPassword: string,
@@ -95,13 +96,14 @@ export function GunCtx(): GunCtxType {
   const login = (
     username: string,
     password: string
-  ): Promise<{ ok: boolean; result: any }> =>
+  ): Promise<{ ok: boolean; result: any; keys?: AuthKeys }> =>
     new Promise((resolve) =>
       user.auth(username, password, (ack) => {
         if (Object.getOwnPropertyNames(ack).includes('id')) {
           resolve({
             ok: true,
             result: (ack as any).get,
+            keys: { soul: (ack as any).soul, sea: (ack as any).sea, epub: (ack as any).put.epub }
           });
         } else {
           resolve({ ok: false, result: JSON.parse(JSON.stringify(ack)).err });
@@ -112,13 +114,15 @@ export function GunCtx(): GunCtxType {
   /**
    *
    * @param document
-   * Uses gun/lib/path library... separate nodes with full tops or slashes
+   * Document Node
    * @param key
-   * another node record
+   * Uses gun/lib/path library... separate nodes with full tops or slashes
    * @param value
-   *
+   * Uses gun's .put({}) method... can be any object or IGunChainReference
    * @param encryptionKey
+   * Key(s) to encrypt data
    * @param set
+   * Path to make value apart of a numerical set
    * @returns
    */
   const putVal = async (
@@ -130,7 +134,14 @@ export function GunCtx(): GunCtxType {
   ): Promise<string> => {
     if (encryptionKey) {
       value = await encrypt(value, encryptionKey);
-    }
+      value = LZString.compress(value);
+    } else
+      value = Object.entries(value).forEach((val, key) => {
+        if (typeof val === 'string') {
+          let _val = LZString.compress(val)
+          return { [key]: _val }
+        }
+      })
     return new Promise((resolve) => {
       if (typeof set === 'string') {
         let _set = user
@@ -229,12 +240,23 @@ export function GunCtx(): GunCtxType {
             .get(document)
             .path(key)
             .once(async (data) => {
-              console.log('data:', data);
-              decryptionKey
-                ? resolve(await decrypt(data, decryptionKey))
-                : resolve(data);
+              if (decryptionKey) {
+
+                resolve(LZString.decompress(await decrypt(data, decryptionKey) as string));
+              }
+              resolve(Object.entries(data).forEach((val, key) => {
+                if (typeof val === 'string') {
+                  let _val = LZString.decompress(val)
+                  return { [key]: _val }
+                }
+              }))
             })
-          : user.get(document).once(async (data) => resolve(data))
+          : user.get(document).once(async (data) => resolve(Object.entries(data).forEach((val, key) => {
+            if (typeof val === 'string') {
+              let _val = LZString.decompress(val)
+              return { [key]: _val }
+            }
+          })))
       );
     },
     putVal,
@@ -265,14 +287,17 @@ export function GunCtx(): GunCtxType {
               resolve({ ok: false, result: result });
             }
           }
-          const { ok, result } = await login(fields.username, fields.password);
+          const { ok, result, keys } = await login(fields.username, fields.password);
           if (!ok) {
             resolve({ ok, result });
           }
-          const res = await putVal('keys', 'master', result, APP_KEY_PAIR);
+          const res = await putVal('keys', 'master', keys, APP_KEY_PAIR);
           if (res !== 'Added data!') {
             resolve({ ok: false, result: 'Error Storing Keys' });
-          } resolve(createUserSession(result, `/dashboard/${fields.username}`))
+          } 
+          let data = await getVal('keys', 'master', APP_KEY_PAIR)
+          console.log(data);
+          resolve(createUserSession(result, `/dashboard/${fields.username}`))
         })
       }
       )

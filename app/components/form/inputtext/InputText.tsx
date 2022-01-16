@@ -1,6 +1,6 @@
 import React, { InputHTMLAttributes, LegacyRef, RefObject } from 'react';
 
-interface Props {
+export interface InputTextProps {
   type?: string;
   label?: string;
   required?: boolean;
@@ -16,7 +16,7 @@ interface Props {
   ref?: LegacyRef<HTMLInputElement>;
 }
 
-const InputText = (props: Props) => {
+const InputText = (props: InputTextProps) => {
   return (
     <div
       className={`${props.helper || props.icon ? 'flex' : ''} relative ${
