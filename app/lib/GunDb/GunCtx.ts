@@ -36,7 +36,7 @@ export type GunCtxType = {
   login: (
     username: string ,
     password: string 
-  ) => Promise<{ ok: boolean; result: AuthKeys }>;
+  ) => Promise<{ ok: boolean; result: string }>;
   resetPassword: (
     username: string,
     oldPassword: string,
@@ -56,7 +56,7 @@ export type GunCtxType = {
   ) => Promise<string>;
   signAction: (
     request: Request
-  ) => Promise<{ ok: boolean; result: string | AuthKeys }>;
+  ) => Promise<{ ok: boolean; result: string  }| Response>;
   setArray: (
     document: string,
     set: Array<any>,
@@ -101,11 +101,7 @@ export function GunCtx(): GunCtxType {
         if (Object.getOwnPropertyNames(ack).includes('id')) {
           resolve({
             ok: true,
-            result: {
-              soul: (ack as any).soul,
-              sea: (ack as any).sea,
-              epub: (ack as any).put.epub,
-            },
+            result:(ack as any).get,
           });
         } else {
           resolve({ ok: false, result: JSON.parse(JSON.stringify(ack)).err });
@@ -260,7 +256,7 @@ export function GunCtx(): GunCtxType {
       };
       if (fieldErrors.username) return { ok:false, result: fieldErrors.username };
       if (fieldErrors.password) return { ok:false, result: fieldErrors.password };
-      new Promise((resolve) =>
+      return new Promise((resolve) =>
         gun.get(`~@${username}`).once(async (user) => {
           if (!user) {
             const { ok, result } = await createUser(fields.username, fields.password);
@@ -272,7 +268,7 @@ export function GunCtx(): GunCtxType {
           if (!ok) {
             resolve({ ok, result });
           }
-          const res = await putVal('keys', 'master', result, result.sea);
+          const res = await putVal('keys', 'master', result, fields.password);
           if (res === 'Added data!') {
             resolve(createUserSession(result, '/'));
           }

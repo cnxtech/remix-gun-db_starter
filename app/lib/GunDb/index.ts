@@ -11,6 +11,7 @@ export const gun = Gun({
 });
 
 export const {
+  createUser,
   login,
   putVal,
   getVal,

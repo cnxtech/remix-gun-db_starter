@@ -5,24 +5,21 @@ import { paths } from '~/components/SvgIcon';
 import { signAction } from '~/lib/GunDb';
 import { createUserSession } from '~/session.server';
 
-type ActionData = {
-ok: boolean,
-result: any
-};
+type ActionData = { ok: boolean; result: string };
 
 export async function action({ request }) {
   return await signAction(request);
+ 
 }
 
 ///////////////
 export default function Login() {
-  let {ok, result} = useActionData<ActionData>();
+  // let {ok, result} = useActionData();
 
   return (
     <>
       <Form
         method="post"
-        aria-describedby={!ok ? 'form-error-message' : undefined}
         className="flex flex-col pt-3 md:pt-8"
       >
         <div className="flex flex-col pt-4 mb-4">
@@ -52,11 +49,11 @@ export default function Login() {
       </Form>
       <div className="pt-12 pb-12 text-center">
         {' '}
-        {!ok ? (
+        {/* {!ok? (
           <p className="form-validation-error" role="alert">
             {result}
           </p>
-        ) : null}
+        ) : null} */}
       </div>
     </>
   );

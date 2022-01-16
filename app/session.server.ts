@@ -67,11 +67,11 @@ export async function logout(request: Request) {
   });
 }
 
-export async function createUserSession(result: AuthKeys, redirectTo: string) {
+export async function createUserSession(result: string, redirectTo: string) {
   let session = await getSession();
-  session.set('sea', result.sea);
-  session.set('epub', result.epub);
-  session.set('soul', result.soul);
+  // session.set('sea', result.sea);
+  session.set('epub', result);
+  // session.set('soul', result.soul);
   return redirect(redirectTo, {
     headers: { 'Set-Cookie': await commitSession(session) },
   });

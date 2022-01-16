@@ -1,12 +1,13 @@
-import React, { FC } from 'react';
+import React from 'react';
+import { Link } from 'remix';
 interface Props {
   labels: Array<string>;
 }
-const MultipleButton: FC = ({ props }: Props) => {
+const MultipleButton = ({ labels }: Props) => {
   return (
     <div className="flex items-center">
-      {props.labels &&
-        props.labels.map((label: string) => (
+      {labels &&
+        labels.map((label: string) => (
           <Link to={label}>
             <button
               type="button"
