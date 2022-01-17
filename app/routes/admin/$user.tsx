@@ -6,7 +6,9 @@ import Display from '~/components/DisplayHeading';
 import { getSea } from '~/session.server';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
-  return await loadProfile(request, params)
+  let data =  await loadProfile(request, params)
+  if (!data) return new Response('Data Not Loaded')
+  return data
 };
 
 export default function User() {
@@ -15,11 +17,11 @@ export default function User() {
   return (
     <div className="mt-5">
       <ProfileHeader
-        img={`https://avatars.dicebear.com/api/micah/${'data ?? data.id'}}.svg`}
-        name={'data ?? data.alias'}
+        img={`https://avatars.dicebear.com/api/micah/${data.alias?? data.alias}}.svg`}
+        name={data.alias ?? data.alias}
         size="monster"
-        job={'data ?? data.job'}
-        desc={'data ?? data.description'}
+        job={data.job ?? data.job}
+        desc={data.description ?? data.description}
       />
       <Outlet />
     </div>

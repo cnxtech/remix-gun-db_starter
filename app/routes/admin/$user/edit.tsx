@@ -26,17 +26,21 @@ export let loader: LoaderFunction = async ({ params }) => {
 };
 ///////////////
 
-export let action: ActionFunction = async({request, params}) => { 
-  return await editProfile(request, params)
-}
-
-
+export let action: ActionFunction = async ({ request, params }) => {
+  let err = await editProfile(request, params);
+  if (err) {
+    return err;
+  }
+  return redirect(`/admin/${params.user}`);
+};
 
 ///////////////
 export default function Edit() {
+  let err = useActionData();
   return (
     <>
       <section className="h-screen bg-opacity-50">
+        <h1>{err ?? err}</h1>
         <Form
           method="post"
           className="container max-w-2xl mx-auto shadow-md md:w-3/4"

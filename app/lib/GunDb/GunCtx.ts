@@ -277,38 +277,39 @@ export function GunCtx(): GunCtxType {
     getVal,
     putVal,
 
-/**
- * LOAD PROFILE
- * @param request 
- * @param params 
- * @returns 
- */
+    /**
+     * LOAD PROFILE
+     * @param request 
+     * @param params 
+     * @returns 
+     */
 
     loadProfile: async (request: Request, params: Params<string>) => {
-      
+
       let epub = await getSea(request)
+
       let alias = params.user
-      let fields = { job: 'Add Job Title', description: 'Add Job Description' }
+
       return new Promise((resolve) => {
-  
+        if (!epub) resolve(new Error('No User id in localStore'))
         gun.get(`~@${alias}`).once(async (exist) => {
           if (!exist) {
             resolve(`User ${alias} not found`)
           }
           const profileGet = await getVal(`//${alias}`, `PROFILE`);
-                   resolve({profileGet})
+          resolve(profileGet)
         })
       })
     },
 
 
 
-/**
- * EDIT PROFILE
- * @param request 
- * @param params 
- * @returns 
- */
+    /**
+     * EDIT PROFILE
+     * @param request 
+     * @param params 
+     * @returns 
+     */
 
 
     editProfile: async (request: Request, params: Params<string>) => {
@@ -320,12 +321,13 @@ export function GunCtx(): GunCtxType {
       let alias = params.user
       return new Promise((resolve) => {
         if (
-          typeof { job, description } !== 'string'
+          typeof job !== 'string'||
+          typeof description !== 'string'
         ) {
           return resolve(`Form not submitted correctly.`);
         }
 
-        let fields = { job:job, description:description };
+        let fields = { alias, job, description };
         gun.get(`~@${alias}`).once(async (exist) => {
           if (!exist) {
             resolve(`User ${alias} not found`)
@@ -347,7 +349,13 @@ export function GunCtx(): GunCtxType {
       let time = getDate()
       return new Promise((resolve) => {
         if (
-          typeof { title, slug, description, document, tags, url } !== 'string'
+          typeof title !== 'string' ||
+          typeof slug !== 'string' ||
+          typeof description !== 'string' ||
+          typeof document !== 'string' ||
+          typeof tags !== 'string' ||
+          typeof url !== 'string' ||
+          !image
         ) {
           return resolve(`Form not submitted correctly.`);
         }
@@ -357,7 +365,7 @@ export function GunCtx(): GunCtxType {
 
         gun.get(`~@${alias}`).once(async (exist) => {
           if (!exist) {
-            resolve(new Error(`User ${alias} not found`))
+            resolve(`User ${alias} not found`)
           }
           const fieldPut = await putVal(`//${alias}`, `PROJECTS/${fields.title}`, fields, undefined, 'PROJECTS/LIST/global');
           if (!fieldPut) resolve(`For some reason... We couldn't add the project data`)
@@ -365,8 +373,8 @@ export function GunCtx(): GunCtxType {
           const metaPut = await putVal(`//${alias}`, `TAGS/${fields.title}`, metadata, undefined, `TAGS/${fields.title}/LIST`);
           if (!metaPut) resolve(`For some reason... We couldn't add the project metadata`);
 
-          const tagSet = await setArray(`~//{alias}/TAGS/${fields.title}`, tagArr, epub,);
-          if (!tagSet ) resolve(`For some reason... We couldn't add the project tags`);
+          const tagSet = await setArray(`//${alias}/TAGS/${fields.title}`, tagArr, epub,);
+          if (!tagSet) resolve(`For some reason... We couldn't add the project tags`);
           resolve(redirect(`/project/${fields.slug}`))
         })
       })
@@ -400,7 +408,7 @@ export function GunCtx(): GunCtxType {
 
         let fields = { username, password };
 
-      let fields2 = { job: 'Add Job Title', description: 'Add Job Description' }
+        let fields2 = { alias: username, job: 'Add Job Title', description: 'Add Job Description' }
         let fieldErrors = {
           username: validateUsername(username),
           password: validatePassword(password),
@@ -413,23 +421,23 @@ export function GunCtx(): GunCtxType {
             if (!ok) {
               resolve({ ok: false, result: result });
             }
-            const { ok:ok2, result: res2, keys } = await login(fields.username, fields.password);
+            const { ok: ok2, result: res2, keys } = await login(fields.username, fields.password);
             if (!ok2) {
-              resolve({ ok:ok2, result: res2 });
+              resolve({ ok: ok2, result: res2 });
             }
             const res = await putVal('keys', 'master', keys);
             if (res !== 'Added data!') {
               resolve({ ok: false, result: 'Error Storing Keys' });
             }
             const fieldPut = await putVal(`//${username}`, `PROFILE`, fields2);
-            if (!fieldPut) resolve({ok:false, result:`For some reason... We couldn't add the default project data`})
+            if (!fieldPut) resolve({ ok: false, result: `For some reason... We couldn't add the default project data` })
             resolve(createUserSession((keys as any).epub, `/admin/${fields.username}`))
           }
           const { ok: ok3, result: res3, keys } = await login(fields.username, fields.password);
           if (!ok3) {
             resolve({ ok: ok3, result: res3 });
           }
-       
+
           resolve(createUserSession((keys as any).epub, `/admin/${fields.username}`))
         })
       }
