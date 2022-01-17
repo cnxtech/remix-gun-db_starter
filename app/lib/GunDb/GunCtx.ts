@@ -6,6 +6,8 @@ import 'gun/lib/rindexed';
 import 'gun/lib/not.js';
 import 'gun/lib/then';
 import 'gun/lib/path';
+import 'gun/lib/load';
+import 'gun/lib/open';
 import LZString from 'lz-string';
 import { IGunCryptoKeyPair } from 'gun/types/types';
 import Gun from 'gun';
@@ -83,7 +85,7 @@ export type GunCtxType = {
     set: Array<any>,
     encryptionKey?: string
   ) => Promise<string>;
-  MapArray: (document: string, decryptionKey?: string) => any;
+  mapArray: (document: string, decryptionKey?: string) => Promise<any>;
 };
 
 export type AuthKeys = {
@@ -170,15 +172,13 @@ export function GunCtx(): GunCtxType {
         let _set = gun
           .get(document)
           .path(key)
-          .put(value, async (ack) => {
-            if (Object.getOwnPropertyNames(ack).includes('ok')) {
-              gun.get(set).set(_set, (ack) => {
-                resolve(
-                  ack.ok ? 'Added data && set!' : ack.err?.message ?? undefined
-                );
-              });
-            }
-          });
+          .put(value);
+
+        gun.get(set).set(_set, (ack) => {
+          resolve(
+            ack.ok ? 'Added data && set!' : ack.err?.message ?? undefined
+          );
+        });
       }
       gun
         .get(document)
@@ -211,13 +211,13 @@ export function GunCtx(): GunCtxType {
     set: Array<any>,
     encryptionKey?: string
   ): Promise<string> => {
-    let _document = gun.path(document);
+    let _document = gun.get(document);
     return new Promise((resolve) => {
       set.forEach(async (ref: any) => {
         if (encryptionKey) {
           ref = await encrypt(ref, encryptionKey);
         }
-        ref = await encrypt(ref, APP_KEY_PAIR);
+        ref = await encrypt(ref);
         _document.set(ref, (ack) => {
           resolve(ack.ok ? 'Added set!' : ack.err?.message ?? undefined);
         });
@@ -225,27 +225,23 @@ export function GunCtx(): GunCtxType {
     });
   };
 
-  const initialState = [];
 
-  // Create a reducer that will update the components array
-  function reducer(state, set) {
-    return [set, ...state];
-  }
 
-  const MapArray = (document: string, decryptionKey?: string) => {
-    const [state, dispatch] = React.useReducer(reducer, initialState);
-    React.useEffect(() => {
-      user
-        .get(document)
-        .map()
-        .once(async (value) => {
-          if (decryptionKey) {
-            value = await decrypt(value, decryptionKey);
-          }
-          dispatch(value);
-        });
-    }, [decryptionKey, document, gun.get(document).off()]);
-    return state;
+  const mapArray = (document: string, decryptionKey?: string): Promise<any> => {
+
+
+    let SET = gun
+      .get(document)
+    return new Promise((resolve) => {
+      SET.map().on(async(items) => {
+        decryptionKey ? 
+        items = await decrypt(items, decryptionKey):
+        items = await decrypt(items)
+     resolve(Object.entries(items).map((item, key )=>item))
+
+       
+      })
+    })
   };
 
   return {
@@ -291,7 +287,7 @@ export function GunCtx(): GunCtxType {
       let alias = params.user
 
       return new Promise((resolve) => {
-        if (!epub) resolve(new Error('No User id in localStore'))
+        if (!epub) resolve('No User id in localStore')
         gun.get(`~@${alias}`).once(async (exist) => {
           if (!exist) {
             resolve(`User ${alias} not found`)
@@ -321,7 +317,7 @@ export function GunCtx(): GunCtxType {
       let alias = params.user
       return new Promise((resolve) => {
         if (
-          typeof job !== 'string'||
+          typeof job !== 'string' ||
           typeof description !== 'string'
         ) {
           return resolve(`Form not submitted correctly.`);
@@ -332,7 +328,9 @@ export function GunCtx(): GunCtxType {
           if (!exist) {
             resolve(`User ${alias} not found`)
           }
-          const fieldPut = await putVal(`//${alias}`, `PROFILE`, fields, undefined, 'USERS/LIST/global');
+          const fieldPut = await putVal(`//${alias}`, `PROFILE`, fields);
+          const fieldSet = await setArray('PROFILE-SET', [fields]);
+          if(!fieldSet) resolve('No Set')
           if (!fieldPut) resolve(`For some reason... We couldn't add the project data`)
 
           resolve(redirect(`/admin/${alias}`))
@@ -360,17 +358,17 @@ export function GunCtx(): GunCtxType {
           return resolve(`Form not submitted correctly.`);
         }
 
-        let fields = { title, slug, description, document, tags, url, image };
+        let fields = { title, slug, description, document, url, image };
         let metadata = { alias: alias, created: time, title: fields.title, cover: fields.image }
 
         gun.get(`~@${alias}`).once(async (exist) => {
           if (!exist) {
             resolve(`User ${alias} not found`)
           }
-          const fieldPut = await putVal(`//${alias}`, `PROJECTS/${fields.title}`, fields, undefined, 'PROJECTS/LIST/global');
+          const fieldPut = await putVal(`//${alias}`, `PROJECTS/${fields.title}`, fields);
           if (!fieldPut) resolve(`For some reason... We couldn't add the project data`)
 
-          const metaPut = await putVal(`//${alias}`, `TAGS/${fields.title}`, metadata, undefined, `TAGS/${fields.title}/LIST`);
+          const metaPut = await putVal(`//${alias}`, `TAGS/${fields.title}`, metadata);
           if (!metaPut) resolve(`For some reason... We couldn't add the project metadata`);
 
           const tagSet = await setArray(`//${alias}/TAGS/${fields.title}`, tagArr, epub,);
@@ -387,9 +385,12 @@ export function GunCtx(): GunCtxType {
       return new Promise((resolve) => {
         gun.get(`~@${alias}`).once(async (exist) => {
           if (!exist) {
-            resolve(new Error(`User ${alias} not found`))
+            resolve(`User ${alias} not found`)
           }
-
+          let list = await mapArray('PROFILE-SET')
+          console.log(list)
+          if (!list) resolve('Synclist bust')
+          resolve(list)
         })
       })
     },
@@ -444,6 +445,6 @@ export function GunCtx(): GunCtxType {
       )
     },
     setArray,
-    MapArray,
+    mapArray,
   };
 }

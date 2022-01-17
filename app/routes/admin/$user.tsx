@@ -13,7 +13,7 @@ export let loader: LoaderFunction = async ({ request, params }) => {
 
 export default function User() {
   let data = useLoaderData();
- console.log(data)
+
   return (
     <div className="mt-5">
       <ProfileHeader

@@ -2816,6 +2816,11 @@ graceful-fs@^4.1.6, graceful-fs@^4.2.0, graceful-fs@^4.2.6:
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.8.tgz#e412b8d33f5e006593cbd3cee6df9f2cebbe802a"
   integrity sha512-qkIilPUYcNhJpd33n0GBXTB1MMPp14TxEsEs0pTrsSVucApsYzW5V+Q8Qxhik6KU3evy+qkAAowTByymK0avdg==
 
+gun-synclist@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/gun-synclist/-/gun-synclist-1.0.2.tgz#a42dc8009df36b2cc12c050344af34d46306ce69"
+  integrity sha512-05e0Ar92MY2SLLvWJBiELnLAIAFtwSPSwFSj7n7TpZzpWEnjPkRXMz3GznyKlD+5FyDcHpMeuMJq+s9JjFD6/w==
+
 gun@^0.2020.1235:
   version "0.2020.1235"
   resolved "https://registry.yarnpkg.com/gun/-/gun-0.2020.1235.tgz#5b6cdfb383b8e7d5e430f12af8cc59621d0b6191"

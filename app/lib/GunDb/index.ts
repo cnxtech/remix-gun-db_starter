@@ -22,7 +22,7 @@ export const {
   loadProject,
   addProject,
   setArray,
-  MapArray,
+  mapArray,
 }:GunCtxType = GunCtx();
 
 export type UserData = {

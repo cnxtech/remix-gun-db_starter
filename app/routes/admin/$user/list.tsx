@@ -1,12 +1,16 @@
-import { ActionFunction, useCatch } from 'remix';
+import { ActionFunction, json, useCatch } from 'remix';
 import { LoaderFunction, useLoaderData } from 'remix';
 import BlogList from '~/components/blog/BlogList';
 
-import { getVal, gun } from '../../../lib/GunDb';
+import { getVal, gun, loadProject, } from '../../../lib/GunDb';
 import Display from '~/components/DisplayHeading';
+import React from 'react';
+import { decrypt } from '~/lib/GunDb/GunCtx';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
-return null;
+
+let list = await loadProject(request, params);
+return list
 };
 
 ///////////////
@@ -16,10 +20,12 @@ export let action: ActionFunction = async ({ request }) => {
 };
 ///////////////
 export default function List() {
-  // let { alias, id } = useLoaderData();
+  let data = useLoaderData();
+console.log(data);
 
   return (
     <>
+    {/* <p>{JSON.parse(JSON.stringify())}</p> */}
       <BlogList  alias={''} />
     </>
   );
@@ -60,3 +66,7 @@ export function ErrorBoundary({ error }: { error: Error }) {
     </div>
   );
 }
+
+
+
+
