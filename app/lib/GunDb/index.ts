@@ -1,16 +1,10 @@
 import Gun from 'gun';
-import { GunCtx, GunCtxType } from './GunCtx';
+import GunCtx,{  GunCtxType } from './GunCtx';
 
-const host = process.env.DOMAIN || '0.0.0.0';
-const ports = {
-  RELAY: process.env.GUN_PORT || 5150,
-  CLIENT: process.env.CLIENT_PORT || 3333,
-};
-export const gun = Gun({
-  peers: [`http://${host}:${ports.RELAY}/gun`],
-});
+
 
 export const {
+  gun,
   createUser,
   login,
   putVal,

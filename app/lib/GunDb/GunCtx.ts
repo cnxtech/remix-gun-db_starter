@@ -13,10 +13,10 @@ import { IGunCryptoKeyPair } from 'gun/types/types';
 import Gun from 'gun';
 import React from 'react';
 import { validateUsername, validatePassword } from '../utils/validate-strings';
-import { gun } from '.';
 import { APP_KEY_PAIR, createUserSession, getDate, getSea } from '~/session.server';
 import { Params } from 'react-router';
 import { redirect } from 'remix';
+import { IGunChainReference } from 'gun/types/chain';
 
 export const encrypt = async (
   data: any,
@@ -48,6 +48,7 @@ export const decrypt = async (
 
 
 export type GunCtxType = {
+  gun: IGunChainReference,
   createUser: (
     username: string,
     password: string
@@ -94,7 +95,15 @@ export type AuthKeys = {
   epub: string;
 };
 
-export function GunCtx(): GunCtxType {
+export default function GunCtx(): GunCtxType {
+  const host = process.env.DOMAIN || '0.0.0.0';
+  const ports = {
+    RELAY: process.env.GUN_PORT || 5150,
+    CLIENT: process.env.CLIENT_PORT || 3333,
+  };
+  const gun = Gun({
+    peers: [`http://localhost:${ports.RELAY}/gun`, `http://localhost:${ports.CLIENT}`],
+  });
   const user = gun.user().recall({ sessionStorage: true });
 
   // const credentials = async (data: any) => {
@@ -141,6 +150,9 @@ export function GunCtx(): GunCtxType {
       user.leave()
     })
   }
+
+
+
 
   /**
    *
@@ -225,7 +237,22 @@ export function GunCtx(): GunCtxType {
     });
   };
 
+  function throttle(callback, limit) {
+    let lastArgs = [];
+    let waiting = false;
 
+    return function () {
+      lastArgs = Array.from(arguments);
+
+      if (!waiting) {
+        waiting = true;
+        setTimeout(function () {
+          waiting = false;
+          callback(...lastArgs);
+        }, limit);
+      }
+    };
+  }
 
   const mapArray = (document: string, decryptionKey?: string): Promise<any> => {
 
@@ -233,18 +260,20 @@ export function GunCtx(): GunCtxType {
     let SET = gun
       .get(document)
     return new Promise((resolve) => {
-      SET.map().on(async(items) => {
-        decryptionKey ? 
-        items = await decrypt(items, decryptionKey):
-        items = await decrypt(items)
-     resolve(Object.entries(items).map((item, key )=>item))
+      SET.map().on(async (item, key) => {
+        decryptionKey ?
+          item = await decrypt(item, decryptionKey) :
+          item = await decrypt(item)
+          // @ts-ignore
+        resolve({[key]:item}, ...key);
 
-       
-      })
+      }
+      )
     })
   };
 
   return {
+    gun,
     createUser,
     login,
     resetPassword: (
@@ -329,8 +358,8 @@ export function GunCtx(): GunCtxType {
             resolve(`User ${alias} not found`)
           }
           const fieldPut = await putVal(`//${alias}`, `PROFILE`, fields);
-          const fieldSet = await setArray('PROFILE-SET', [fields]);
-          if(!fieldSet) resolve('No Set')
+          const fieldSet = await setArray('PROFILE-SET', [fields, {hello: 'hi', me:'too'}]);
+          if (!fieldSet) resolve('No Set')
           if (!fieldPut) resolve(`For some reason... We couldn't add the project data`)
 
           resolve(redirect(`/admin/${alias}`))

@@ -25,11 +25,11 @@ export default function Index() {
       <div className="container mx-auto px-6 flex relative py-16">
         <div className="sm:w-2/3 lg:w-2/5 flex flex-col relative z-20">
           <Display
-            title="Remix/ GunDb"
-            titleColor="white"
-            spanColor="pink-500"
-            span="App Starter"
-            description="Application boilerplate with authentication && sessionStorage, data encryption, and tailwind styling. "
+            title="CNXT"
+            titleColor="red-500"
+            spanColor="blue-500"
+            span="Dev"
+            description="Edit profile details/ Crypto Keys Encrypted, compressed and saved in browser storage."
           />
           <div className="flex mt-8">
             <Link

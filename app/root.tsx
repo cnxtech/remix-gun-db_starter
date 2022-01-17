@@ -65,7 +65,7 @@ export const meta: MetaFunction = () => {
 export default function App() {
   let data = {
     links: [
-      { to: '/', label: 'Home' },
+      { to: '/', label: 'Home', isFat:true },
       { to: '/login', label: 'LogIn' },
       { to: '/logout', label: 'LogOut' },
     ],

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'remix';
 import Avatar from './Avatar';
+import Display from './DisplayHeading';
 
 interface Props {
   size?: 'small' | 'normal' | 'big' | 'monster';
@@ -20,17 +21,9 @@ interface Social {
 const ProfileHeader = (props: Props) => {
   return (
     <div className="p-4">
-      <div className="text-center mb-4 opacity-90">
+      <div className="text-center items-center mb-4 opacity-90">
         <Avatar size={props.size} img={props.img} />
-      </div>
-      <div className="text-center">
-        <p className="text-2xl text-gray-800 dark:text-white">{props.name}</p>
-        <p className="text-xl text-gray-500 dark:text-gray-200 font-light">
-          {props.job}
-        </p>
-        <p className="text-md text-gray-500 dark:text-gray-400 max-w-l py-4 font-light">
-          {props.desc}
-        </p>
+  <Display title={props.name} span={props.job} description={props.desc} titleColor='red-500' spanColor='blue-500' />
       </div>
       <div className="pt-8 flex border-t border-gray-200 w-44 mx-auto text-gray-500 items-center justify-between">
         {props.social &&

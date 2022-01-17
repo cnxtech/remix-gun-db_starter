@@ -19,12 +19,12 @@ export default function UserIndex() {
 
   return (
     <>
-      <div className="w-full px-4 pb-4 mx-auto text-gray-500 md:w-1/3">
+      <div className="w-full flex-row px-4 pb-4 mx-auto text-gray-500 md:w-1/3">
         <Link to="list">
-          <Button submit={true} color="blue" label="Tags" />
+          <Button submit={true} color="gray" disabled={true} label="Tags" />
         </Link>
         <Link to="edit">
-          <Button submit={true} color="red" label="Edit" />
+          <Button submit={true} color="red" label="Edit Profile Info" />
         </Link>
       </div>
     </>

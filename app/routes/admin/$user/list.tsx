@@ -1,15 +1,16 @@
 import { ActionFunction, json, useCatch } from 'remix';
 import { LoaderFunction, useLoaderData } from 'remix';
 import BlogList from '~/components/blog/BlogList';
-
-import { getVal, gun, loadProject, } from '../../../lib/GunDb';
+import Gun from 'gun';
+import { getVal,  loadProject, } from '../../../lib/GunDb';
 import Display from '~/components/DisplayHeading';
-import React from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { decrypt } from '~/lib/GunDb/GunCtx';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
 
 let list = await loadProject(request, params);
+console.log(list)
 return list
 };
 
@@ -19,13 +20,23 @@ export let action: ActionFunction = async ({ request }) => {
   return null;
 };
 ///////////////
-export default function List() {
+
+  const initialState = [];
+
+  // Create a reducer that will update the components array
+  function reducer(state, set) {
+    return [set, ...state];
+  }
+
+  export default function List() {
+
   let data = useLoaderData();
-console.log(data);
+console.log(data)
+
 
   return (
     <>
-    {/* <p>{JSON.parse(JSON.stringify())}</p> */}
+    {/* <p>{JSON.stringify(state)}</p> */}
       <BlogList  alias={''} />
     </>
   );

@@ -14,10 +14,10 @@ const LoginWithBackground = (input:Array<InputTextProps>) => {
                 Login
               </p>
               <div className="mb-2">
-                <InputText placeholder="email" id="login-with-bg-email" />
+                <InputText placeholder="username" name="username"  id="login-with-bg-email" />
               </div>
               <div className="mb-2">
-                <InputText placeholder="password" id="login-with-bg-password" />
+                <InputText placeholder="password" name="password" id="login-with-bg-password" />
               </div>
 
               <div className="flex items-center justify-between mt-4">

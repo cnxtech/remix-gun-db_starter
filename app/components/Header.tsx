@@ -4,6 +4,7 @@ import FormSubscribe from './FormSubscribe';
 import Ddm from './DropDownMenu';
 import { Link } from 'remix';
 import { InputTextProps } from './InputText';
+import RoundedButton from './elements/buttons/RoundedButton';
 
 interface HeaderProps {
   forceMenuOpenInMobile?: boolean;
@@ -26,6 +27,7 @@ interface HeaderLink {
   isSelected?: boolean;
   desc?: string;
   icon?: JSX.Element;
+  onClick?: () => void;
 }
 interface DDMItem {
   label: string;
@@ -65,18 +67,7 @@ const Header = (props: HeaderProps) => {
                     props.links.map((link: any) => {
                       return (
                         <Link key={link.label} to={link.to}>
-                          <h1
-                            key={link.label}
-                            className={`${
-                              link.isSelected
-                                ? 'text-gray-800 dark:text-white'
-                                : 'text-gray-300'
-                            }  hover:text-gray-800 dark:hover:text-white px-3 py-2 rounded-md ${
-                              props.isFat ? 'text-md' : 'text-sm'
-                            } font-medium`}
-                          >
-                            {link.label}
-                          </h1>
+                          <RoundedButton label={link.label} onClick={link.onClick} />
                         </Link>
                       );
                     })}

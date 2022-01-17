@@ -1,4 +1,5 @@
 import { Form, useActionData, useCatch } from 'remix';
+import Button from '~/components/buttons/Button';
 import Display from '~/components/DisplayHeading';
 import InputText from '~/components/InputText';
 import SvgIcon from '~/components/SvgIcon';
@@ -15,7 +16,7 @@ export default function Login() {
   console.log(action)
   return (
     <>
-      <Form method="post" className="flex flex-col pt-3 md:pt-8">
+      <Form method="post" className="flex flex-col pt-3 md:pt-8 max-w-xl">
         <div className="flex flex-col pt-4 mb-4">
           <InputText
             type="text"
@@ -41,7 +42,7 @@ export default function Login() {
           <span className="w-full">Submit</span>
         </button>
       </Form>
-      {action? <p>{action.result}</p> : null}
+      {action ? <p>{action.result}</p> : null}
       <div className="pt-12 pb-12 text-center"></div>
     </>
   );
