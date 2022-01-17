@@ -4,7 +4,6 @@ import { blogs } from '../../lib/utils/data/helpers';
 
 interface Props {
   withSearch?: boolean;
-  userId: string;
   alias?: string;
 }
 
@@ -32,7 +31,6 @@ const BlogList = (props: Props) => {
               img={blog.img}
               desc={blog.desc}
               showAuthor={true}
-              userId={props.userId}
               alias={props.alias}
             />
           );

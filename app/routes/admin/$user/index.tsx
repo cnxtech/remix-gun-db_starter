@@ -2,14 +2,8 @@ import React from 'react';
 import { ActionFunction, Link, LoaderFunction, useLoaderData } from 'remix';
 import Button from '~/components/buttons/Button';
 import { gun } from '../../../lib/GunDb';
-import { getSoul } from '~/session.server';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
-  let userId = await getSoul(request);
-  if (!userId) {
-    throw new Response(`Forbidden`, { status: 403 });
-  }
-
   return null;
 };
 ///////////////
@@ -20,8 +14,8 @@ export let action: ActionFunction = async ({ request }) => {
 ///////////////
 
 export default function UserIndex() {
-  let data = useLoaderData();
-  console.log(data);
+  // let data = useLoaderData();
+  // console.log(data);
 
   return (
     <>

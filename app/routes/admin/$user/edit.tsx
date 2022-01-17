@@ -12,9 +12,8 @@ import Button from '~/components/buttons/Button';
 import Display from '~/components/DisplayHeading';
 import FormSubscribe from '~/components/FormSubscribe';
 import InputText from '~/components/InputText';
-import { putVal } from '~/lib/GunDb';
+import { editProfile, putVal } from '~/lib/GunDb';
 import { validateJob, validateDescription } from '~/lib/utils/validate-strings';
-import { APP_KEY_PAIR, getSoul } from '~/session.server';
 
 type ActionData = {
   formError?: string;
@@ -26,57 +25,20 @@ export let loader: LoaderFunction = async ({ params }) => {
   return null;
 };
 ///////////////
-export type Fields = {
-  tags: string[];
-  title: string;
-  categ: string;
-  img: URL;
-  desc: string;
-};
 
-export let action: ActionFunction = async ({ request, params }) => {
-  let result = await getSoul(request);
-  let form = await request.formData();
-  let job = form.get('job');
-  let description = form.get('description');
-  if (typeof job !== 'string' || typeof description !== 'string') {
-    return { formError: `Form not submitted correctly.` };
-  }
+export let action: ActionFunction = async({request, params}) => { 
+  return await editProfile(request, params)
+}
 
-  let fields = { job, description };
-  let fieldErrors = {
-    username: validateJob(job),
-    password: validateDescription(description),
-  };
-  if (Object.values(fieldErrors).some(Boolean)) return { fieldErrors, fields };
 
-  let data = {
-    id: result,
-    alias: params.user,
-    job: job,
-    description: description,
-  };
 
-  putVal(`${result}//${data.alias}`, 'info', data, APP_KEY_PAIR);
-
-  //  if (!put) {
-  //    throw new Error('Didnt Put Info Values');
-  //  }
-  return redirect(`/dashboard/${data.alias}`);
-};
 ///////////////
 export default function Edit() {
-  let data = useLoaderData();
-  let action = useActionData<ActionData>();
-  console.log(data);
   return (
     <>
       <section className="h-screen bg-opacity-50">
         <Form
           method="post"
-          aria-describedby={
-            action?.formError ? 'form-error-message' : undefined
-          }
           className="container max-w-2xl mx-auto shadow-md md:w-3/4"
         >
           <div className="p-4 border-t-2 border-indigo-400 rounded-lg bg-opacity-5">
@@ -123,11 +85,6 @@ export default function Edit() {
               <Button submit={true} color="blue" label="Save" />
             </div>
           </div>
-          {action?.formError ? (
-            <p className="form-validation-error" role="alert">
-              {action.formError}
-            </p>
-          ) : null}
         </Form>
       </section>
       {/* <FormSubscribe input={} submitLabel="Submit" ariaDescribed="" /> */}

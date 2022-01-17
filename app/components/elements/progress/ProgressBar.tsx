@@ -2,7 +2,7 @@ import React from 'react';
 
 interface Props {
   color?: string;
-  textColor?: string;
+  textcolor?: string;
   isFat?: boolean;
   label?: string;
   withBadge?: boolean;
@@ -15,7 +15,7 @@ const ProgressBar = (props: Props) => {
         {props.withBadge && (
           <div>
             <span
-              className={`text-xs font-light inline-block py-1 px-2 uppercase rounded-full ${props.textColor} ${props.color}`}
+              className={`text-xs font-light inline-block py-1 px-2 uppercase rounded-full ${props.textcolor} ${props.color}`}
             >
               Task in progress
             </span>

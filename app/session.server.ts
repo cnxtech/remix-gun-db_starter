@@ -1,5 +1,5 @@
 import { createCookieSessionStorage, redirect } from 'remix';
-import { AuthKeys } from './lib/GunDb/GunCtx';
+import { AuthKeys, decrypt, encrypt } from './lib/GunDb/GunCtx';
 
 export function getDate() {
   const newDate = new Date();
@@ -18,7 +18,7 @@ if (typeof sessionSecret !== 'string') {
   throw new Error('SESSION_SECRET must be set');
 }
 
-let { getSession, commitSession, destroySession } = createCookieSessionStorage({
+export let { getSession, commitSession, destroySession } = createCookieSessionStorage({
   cookie: {
     name: 'FM_session',
     secure: true,
@@ -34,44 +34,32 @@ export function getUserSession(request: Request) {
   return getSession(request.headers.get('Cookie'));
 }
 
-export async function getSoul(request: Request) {
-  let session = await getUserSession(request);
-  let soul = session.get('soul');
-  if (!soul || typeof soul !== 'string') return null;
-  return soul;
-}
-export async function getEpub(request: Request) {
-  let session = await getUserSession(request);
-  let epub = session.get('epub');
-  if (!epub || typeof epub !== 'string') return null;
-  return epub;
-}
+
 export async function getSea(request: Request) {
   let session = await getUserSession(request);
   let sea = session.get('sea');
   if (!sea || typeof sea !== 'string') return null;
   return sea;
 }
-export async function requireSoul(request: Request) {
+export async function requireSEA(request: Request) {
   let session = await getUserSession(request);
-  let soul = session.get('soul');
-  if (!soul || typeof soul !== 'string') throw redirect('/login');
-  return soul;
+  let sea = session.get('sea');
+  if (!sea || typeof sea !== 'string') throw redirect('/login');
+  return sea;
 }
 
 
 export async function logout(request: Request) {
   let session = await getSession(request.headers.get('Cookie'));
-  return redirect('/login', {
-    headers: { 'Set-Cookie': await destroySession(session) },
-  });
+  session.set('sea', null)
+  let sea = session.get('sea');
+  return sea
 }
 
 export async function createUserSession(result: string, redirectTo: string) {
   let session = await getSession();
-  // session.set('sea', result.sea);
-  session.set('epub', result);
-  // session.set('soul', result.soul);
+  session.set('sea', result);
+ 
   return redirect(redirectTo, {
     headers: { 'Set-Cookie': await commitSession(session) },
   });

@@ -3,7 +3,7 @@ import React from 'react';
 interface Props {
   color?: string;
   removeAction?: () => void;
-  textColor?: string;
+  textcolor?: string;
   borderColor?: string;
   label?: string;
   icon?: boolean;
@@ -26,7 +26,7 @@ const Badge = (props: Props) => {
     <span
       className={`${props.isSmall ? `px-2 py-1` : `px-4 py-2`} ${
         props.icon ? 'flex items-center' : ''
-      } text-base ${props.rounded} ${props.textColor ? props.textColor : ''} ${
+      } text-base ${props.rounded} ${props.textcolor ? props.textcolor : ''} ${
         props.borderColor ? props.borderColor : ''
       } ${props.color} ${props.isMediumWeight ? 'font-medium' : ''}`}
     >

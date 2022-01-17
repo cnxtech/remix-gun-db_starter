@@ -1,8 +1,11 @@
-import { ActionFunction } from 'remix';
-import { logout } from '~/session.server';
+import { ActionFunction, redirect } from 'remix';
+import { destroySession, getSession, logout } from '~/session.server';
 export let action: ActionFunction = async ({ request }) => {
   //action function
-  return await logout(request);
+  let session = await getSession(request.headers.get('Cookie'));
+  let unset = await logout(request);
+  if (unset)
+  return redirect('/');
 };
 
 export default function Logout() {

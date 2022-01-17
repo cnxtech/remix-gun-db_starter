@@ -1,42 +1,31 @@
-import { ActionFunction, useCatch } from 'remix';
+import { Outlet, useCatch } from 'remix';
 import { LoaderFunction, useLoaderData } from 'remix';
-import { APP_KEY_PAIR, getSoul } from '~/session.server';
-import BlogList from '~/components/blog/BlogList';
-
-import { getVal, gun } from '../../../lib/GunDb';
+import ProfileHeader from '~/components/ProfileHeader';
+import { getVal, gun, loadProfile } from '../../lib/GunDb';
 import Display from '~/components/DisplayHeading';
+import { getSea } from '~/session.server';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
-  let userId = await getSoul(request);
-  if (!userId) {
-    throw new Response(`Forbidden`, { status: 403 });
-  }
-  let isAlias = gun.get(`~@${params.user}`).once(async (exist) => {
-    if (!exist) return false;
-    return true;
-  });
-
-  if (!isAlias) {
-    throw new Response(`Alias Not Found`, { status: 404 });
-  }
-  return getVal(`${userId}`, 'info', APP_KEY_PAIR);
+  return await loadProfile(request, params)
 };
 
-///////////////
-export let action: ActionFunction = async ({ request }) => {
-  //action function
-  return null;
-};
-///////////////
-export default function List() {
-  let { alias, id } = useLoaderData();
-
+export default function User() {
+  let data = useLoaderData();
+ console.log(data)
   return (
-    <>
-      <BlogList userId={id} alias={alias} />
-    </>
+    <div className="mt-5">
+      <ProfileHeader
+        img={`https://avatars.dicebear.com/api/micah/${'data ?? data.id'}}.svg`}
+        name={'data ?? data.alias'}
+        size="monster"
+        job={'data ?? data.job'}
+        desc={'data ?? data.description'}
+      />
+      <Outlet />
+    </div>
   );
 }
+
 export function CatchBoundary() {
   let caught = useCatch();
 

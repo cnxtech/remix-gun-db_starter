@@ -57,9 +57,10 @@ app.all(
       }
 );
 
-app.listen(ports.CLIENT, () => {
+Gun({
+  web:app.listen(ports.CLIENT, () => {
   console.log(`Express server listening on port ${ports.CLIENT}`);
-});
+})});
 
 ////////////////////////////////////////////////////////////////////////////////
 function purgeRequireCache() {

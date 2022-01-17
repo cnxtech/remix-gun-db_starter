@@ -10,7 +10,6 @@ interface Props {
   icon?: string;
   showTags?: boolean;
   showAuthor?: boolean;
-  userId?: string;
   alias?: string;
 }
 
@@ -49,7 +48,7 @@ const BlogCard = (props: Props) => {
             <div className="flex items-center mt-4">
               <Avatar
                 size="small"
-                img={`https://avatars.dicebear.com/api/micah/${props.userId}}.svg`}
+                img={`https://avatars.dicebear.com/api/micah/${props.alias}}.svg`}
               />
               <div className="flex flex-col justify-between ml-4 text-sm">
                 <p className="text-gray-800 dark:text-white">{props.alias}</p>

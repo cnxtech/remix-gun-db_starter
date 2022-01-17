@@ -1,5 +1,5 @@
 import Gun from 'gun';
-import { GunCtx } from './GunCtx';
+import { GunCtx, GunCtxType } from './GunCtx';
 
 const host = process.env.DOMAIN || '0.0.0.0';
 const ports = {
@@ -17,9 +17,13 @@ export const {
   getVal,
   signAction,
   resetPassword,
+  loadProfile,
+  editProfile,
+  loadProject,
+  addProject,
   setArray,
   MapArray,
-} = GunCtx();
+}:GunCtxType = GunCtx();
 
 export type UserData = {
   profile: UserProfile;
