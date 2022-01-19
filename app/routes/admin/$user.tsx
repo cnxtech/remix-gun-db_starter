@@ -1,19 +1,18 @@
 import { Outlet, useCatch } from 'remix';
 import { LoaderFunction, useLoaderData } from 'remix';
 import ProfileHeader from '~/components/ProfileHeader';
-import { getVal, gun, loadProfile } from '../../lib/GunDb';
+import { user,  } from '../../lib/GunDb';
 import Display from '~/components/DisplayHeading';
-import { getSea } from '~/session.server';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
-  let data =  await loadProfile(request, params)
-  if (!data) return new Response('Data Not Loaded')
-  return data
+  return null
 };
 
 export default function User() {
-  let data = useLoaderData();
+  let {data, keys} = useLoaderData();
+console.log(keys)
 
+user.get('PROFILE').on(data => console.log(data))
   return (
     <div className="mt-5">
       <ProfileHeader

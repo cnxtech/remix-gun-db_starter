@@ -1,17 +1,10 @@
-import { ActionFunction, json, useCatch } from 'remix';
+import { ActionFunction, useCatch } from 'remix';
 import { LoaderFunction, useLoaderData } from 'remix';
 import BlogList from '~/components/blog/BlogList';
-import Gun from 'gun';
-import { getVal,  loadProject, } from '../../../lib/GunDb';
 import Display from '~/components/DisplayHeading';
-import React, { useEffect, useReducer } from 'react';
-import { decrypt } from '~/lib/GunDb/GunCtx';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
-
-let list = await loadProject(request, params);
-console.log(list)
-return list
+return null
 };
 
 ///////////////

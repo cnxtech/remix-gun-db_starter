@@ -12,7 +12,7 @@ import Button from '~/components/buttons/Button';
 import Display from '~/components/DisplayHeading';
 import FormSubscribe from '~/components/FormSubscribe';
 import InputText from '~/components/InputText';
-import { editProfile, putVal } from '~/lib/GunDb';
+import {  putVal } from '~/lib/GunDb';
 import { validateJob, validateDescription } from '~/lib/utils/validate-strings';
 
 type ActionData = {
@@ -27,11 +27,7 @@ export let loader: LoaderFunction = async ({ params }) => {
 ///////////////
 
 export let action: ActionFunction = async ({ request, params }) => {
-  let err = await editProfile(request, params);
-  if (err) {
-    return err;
-  }
-  return redirect(`/admin/${params.user}`);
+return null;
 };
 
 ///////////////

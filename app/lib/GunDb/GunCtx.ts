@@ -11,11 +11,7 @@ import 'gun/lib/open';
 import LZString from 'lz-string';
 import { IGunCryptoKeyPair } from 'gun/types/types';
 import Gun from 'gun';
-import React from 'react';
-import { validateUsername, validatePassword } from '../utils/validate-strings';
-import { APP_KEY_PAIR, createUserSession, getDate, getSea } from '~/session.server';
-import { Params } from 'react-router';
-import { redirect } from 'remix';
+import { APP_KEY_PAIR } from '~/session.server';
 import { IGunChainReference } from 'gun/types/chain';
 
 export const encrypt = async (
@@ -39,23 +35,23 @@ export const decrypt = async (
   if (!keys) {
     console.log('Using the environment variables to encrypt data...');
     let enc = LZString.decompress(data)
-    return Gun.SEA.decrypt(enc, APP_KEY_PAIR);
+    let dec = await Gun.SEA.decrypt(enc, APP_KEY_PAIR);
+    return dec
   }
   console.log('Encrypting data with new keys...');
   let enc = LZString.decompress(data)
-  return Gun.SEA.decrypt(enc, keys);
+  let dec = await Gun.SEA.decrypt(enc, keys);
+  return dec
 };
 
 
 export type GunCtxType = {
-  gun: IGunChainReference,
+  user: IGunChainReference,
   createUser: (
-    username: string,
-    password: string
-  ) => Promise<{ ok: boolean; result: string | undefined }>;
-  login: (
-    username: string,
-    password: string
+    alias: string ,
+  ) => Promise<{ result: string | IGunCryptoKeyPair }>;
+  validate: (
+    sea: IGunCryptoKeyPair
   ) => Promise<{ ok: boolean; result: string; keys?: keyof AuthKeys }>;
   resetPassword: (
     username: string,
@@ -64,7 +60,7 @@ export type GunCtxType = {
   ) => Promise<{ ok: boolean; result: string }>;
   getVal: (
     document: string,
-    key?: string,
+    key: string,
     decryptionKey?: string
   ) => Promise<any>;
   putVal: (
@@ -72,21 +68,8 @@ export type GunCtxType = {
     key: string,
     value: any,
     encryptionKey?: string,
-    set?: string
   ) => Promise<string>;
-  loadProfile: (request: Request, params: Params<string>) => Promise<any>;
-  editProfile: (request: Request, params: Params<string>) => Promise<any>;
-  addProject: (request: Request, params: Params<string>) => Promise<any>;
-  loadProject: (request: Request, params: Params<string>) => Promise<any>;
-  signAction: (
-    request: Request
-  ) => Promise<{ ok: boolean; result: string } | Response>;
-  setArray: (
-    document: string,
-    set: Array<any>,
-    encryptionKey?: string
-  ) => Promise<string>;
-  mapArray: (document: string, decryptionKey?: string) => Promise<any>;
+
 };
 
 export type AuthKeys = {
@@ -95,46 +78,68 @@ export type AuthKeys = {
   epub: string;
 };
 
-export default function GunCtx(): GunCtxType {
-  const host = process.env.DOMAIN || '0.0.0.0';
+export function GunCtx(): GunCtxType {
+
   const ports = {
     RELAY: process.env.GUN_PORT || 5150,
     CLIENT: process.env.CLIENT_PORT || 3333,
   };
   const gun = Gun({
     peers: [`http://localhost:${ports.RELAY}/gun`, `http://localhost:${ports.CLIENT}`],
+    localStorage: false
   });
-  const user = gun.user().recall({ sessionStorage: true });
+  const user = gun.user()
 
   // const credentials = async (data: any) => {
   //   const pair = await Gun.SEA.pair();
   // };
   const createUser = async (
-    username: string,
-    password: string
-  ): Promise<{ ok: boolean; result: string | undefined }> =>
-    new Promise((resolve) =>
-      user.create(username, password, (ack) => {
-        console.log(ack);
-        if (Object.getOwnPropertyNames(ack).includes('ok')) {
-          resolve({ ok: true, result: undefined });
-        } else {
-          resolve({ ok: false, result: JSON.parse(JSON.stringify(ack)).err });
-        }
-      })
-    );
+    alias: string,
+  ): Promise<{  result: string | IGunCryptoKeyPair }> =>
+    new Promise(async(resolve) => {
+      /** Generate Keypair */
+      const pair = await Gun.SEA.pair();
+      console.log(alias)
+      /** check */
+      let exist = await getVal(`@${alias}`, 'creds')
 
-  const login = (
-    username: string,
-    password: string
-  ): Promise<{ ok: boolean; result: any; keys?: keyof AuthKeys }> =>
+      if (!exist) {
+
+        // TODO: handle decrypion to map user Credentials
+  
+        /** Encrypt && Sign */
+        const enc = await Gun.SEA.encrypt(alias, pair)
+        const signed = await Gun.SEA.sign(enc, pair)
+        let comp = LZString.compress(signed)
+  
+        console.log(`
+        
+        COMPRESSED USER DATA  — size: ${comp.length} —  
+        
+        ${comp}
+        
+        `  )
+        /** Store user data */
+        let store = await putVal(`@${alias}`,'creds', comp)
+        if (!store) resolve({ result: 'Could not store credentials' })
+        resolve({ result: pair })
+      }
+         resolve({ result: 'Alias already exists' })
+      })
+
+      //
+    ;
+
+  const validate = (
+    sea: IGunCryptoKeyPair
+  ): Promise<{ ok: boolean; result: string }> =>
     new Promise((resolve) =>
-      user.auth(username, password, (ack) => {
+      user.auth(sea.pub, sea.priv, async (ack) => {
+        const cookie = await encrypt((ack as any).epriv)
         if (Object.getOwnPropertyNames(ack).includes('id')) {
           resolve({
             ok: true,
-            result: (ack as any).get,
-            keys: (ack as any).sea
+            result: cookie
           });
         } else {
           resolve({ ok: false, result: JSON.parse(JSON.stringify(ack)).err });
@@ -142,24 +147,12 @@ export default function GunCtx(): GunCtxType {
       })
     );
 
-  const logOut = async (request: Request) => {
-    let sesh = await getSea(request)
-    return new Promise((resolve) => {
-
-
-      user.leave()
-    })
-  }
-
-
-
-
   /**
    *
    * @param document
-   * Document Node
+   * Document node
    * @param key
-   * Uses gun/lib/path library... separate nodes with full tops or slashes
+   * Key node
    * @param value
    * Uses gun's .put({}) method... can be any object or IGunChainReference
    * @param encryptionKey
@@ -168,114 +161,32 @@ export default function GunCtx(): GunCtxType {
    * Path to make value apart of a numerical set
    * @returns
    */
-  const putVal = async (
-    document: string,
-    key: string,
-    value: any,
-    encryptionKey?: string,
-    set?: string
-  ): Promise<string> => {
+  const putVal = async (document: string, key: string, value: any, encryptionKey?: string): Promise<string | undefined> => {
     if (encryptionKey) {
       value = await encrypt(value, encryptionKey);
     }
-    value = await encrypt(value);
-    return new Promise((resolve) => {
-      if (typeof set === 'string') {
-        let _set = gun
-          .get(document)
-          .path(key)
-          .put(value);
-
-        gun.get(set).set(_set, (ack) => {
-          resolve(
-            ack.ok ? 'Added data && set!' : ack.err?.message ?? undefined
-          );
-        });
-      }
-      gun
-        .get(document)
-        .path(key)
-        .put(value, (ack) => {
-          resolve(ack.ok ? 'Added data!' : ack.err?.message ?? undefined);
-        });
-    });
-  };
+    return new Promise((resolve) =>
+      gun.get(document).get(key).put(value as never, (ack) => {
+        console.log(ack)
+        resolve(ack.ok ? 'Added data!' : ack.err?.message ?? undefined);
+      })
+    )
+  }
 
   const getVal = (document: string, key: string, decryptionKey?: string) => {
     return new Promise((resolve) =>
-      gun
-        .get(document)
-        .path(key)
-        .once(async (data) => {
-          if (decryptionKey) {
-            let _data = await decrypt(data, decryptionKey)
-            resolve(_data)
-          }
-          let _data = await decrypt(data)
-          resolve(_data)
+      gun.get(document).get(key).once(async (data) => {
+          console.log('data:', data)
+          decryptionKey
+            ? resolve(await decrypt(data, decryptionKey))
+            : resolve(data)
         })
-
-    );
+    )
   }
-
-  const setArray = (
-    document: string,
-    set: Array<any>,
-    encryptionKey?: string
-  ): Promise<string> => {
-    let _document = gun.get(document);
-    return new Promise((resolve) => {
-      set.forEach(async (ref: any) => {
-        if (encryptionKey) {
-          ref = await encrypt(ref, encryptionKey);
-        }
-        ref = await encrypt(ref);
-        _document.set(ref, (ack) => {
-          resolve(ack.ok ? 'Added set!' : ack.err?.message ?? undefined);
-        });
-      });
-    });
-  };
-
-  function throttle(callback, limit) {
-    let lastArgs = [];
-    let waiting = false;
-
-    return function () {
-      lastArgs = Array.from(arguments);
-
-      if (!waiting) {
-        waiting = true;
-        setTimeout(function () {
-          waiting = false;
-          callback(...lastArgs);
-        }, limit);
-      }
-    };
-  }
-
-  const mapArray = (document: string, decryptionKey?: string): Promise<any> => {
-
-
-    let SET = gun
-      .get(document)
-    return new Promise((resolve) => {
-      SET.map().on(async (item, key) => {
-        decryptionKey ?
-          item = await decrypt(item, decryptionKey) :
-          item = await decrypt(item)
-          // @ts-ignore
-        resolve({[key]:item}, ...key);
-
-      }
-      )
-    })
-  };
-
   return {
-    gun,
+    user,
     createUser,
-    login,
+    validate,
     resetPassword: (
       username: string,
       oldPassword: string,
@@ -301,179 +212,5 @@ export default function GunCtx(): GunCtxType {
       ),
     getVal,
     putVal,
-
-    /**
-     * LOAD PROFILE
-     * @param request 
-     * @param params 
-     * @returns 
-     */
-
-    loadProfile: async (request: Request, params: Params<string>) => {
-
-      let epub = await getSea(request)
-
-      let alias = params.user
-
-      return new Promise((resolve) => {
-        if (!epub) resolve('No User id in localStore')
-        gun.get(`~@${alias}`).once(async (exist) => {
-          if (!exist) {
-            resolve(`User ${alias} not found`)
-          }
-          const profileGet = await getVal(`//${alias}`, `PROFILE`);
-          resolve(profileGet)
-        })
-      })
-    },
-
-
-
-    /**
-     * EDIT PROFILE
-     * @param request 
-     * @param params 
-     * @returns 
-     */
-
-
-    editProfile: async (request: Request, params: Params<string>) => {
-      let { job, description } = Object.fromEntries(
-        await request.formData()
-      );
-
-      let epub = await getSea(request)
-      let alias = params.user
-      return new Promise((resolve) => {
-        if (
-          typeof job !== 'string' ||
-          typeof description !== 'string'
-        ) {
-          return resolve(`Form not submitted correctly.`);
-        }
-
-        let fields = { alias, job, description };
-        gun.get(`~@${alias}`).once(async (exist) => {
-          if (!exist) {
-            resolve(`User ${alias} not found`)
-          }
-          const fieldPut = await putVal(`//${alias}`, `PROFILE`, fields);
-          const fieldSet = await setArray('PROFILE-SET', [fields, {hello: 'hi', me:'too'}]);
-          if (!fieldSet) resolve('No Set')
-          if (!fieldPut) resolve(`For some reason... We couldn't add the project data`)
-
-          resolve(redirect(`/admin/${alias}`))
-        })
-      })
-    },
-    addProject: async (request: Request, params: Params<string>) => {
-      let { title, slug, description, document, tags, url, image } = Object.fromEntries(
-        await request.formData()
-      );
-      let tagArr = tags.toString().split(/,\s+/)
-      let epub = await getSea(request)
-      let alias = params.user
-      let time = getDate()
-      return new Promise((resolve) => {
-        if (
-          typeof title !== 'string' ||
-          typeof slug !== 'string' ||
-          typeof description !== 'string' ||
-          typeof document !== 'string' ||
-          typeof tags !== 'string' ||
-          typeof url !== 'string' ||
-          !image
-        ) {
-          return resolve(`Form not submitted correctly.`);
-        }
-
-        let fields = { title, slug, description, document, url, image };
-        let metadata = { alias: alias, created: time, title: fields.title, cover: fields.image }
-
-        gun.get(`~@${alias}`).once(async (exist) => {
-          if (!exist) {
-            resolve(`User ${alias} not found`)
-          }
-          const fieldPut = await putVal(`//${alias}`, `PROJECTS/${fields.title}`, fields);
-          if (!fieldPut) resolve(`For some reason... We couldn't add the project data`)
-
-          const metaPut = await putVal(`//${alias}`, `TAGS/${fields.title}`, metadata);
-          if (!metaPut) resolve(`For some reason... We couldn't add the project metadata`);
-
-          const tagSet = await setArray(`//${alias}/TAGS/${fields.title}`, tagArr, epub,);
-          if (!tagSet) resolve(`For some reason... We couldn't add the project tags`);
-          resolve(redirect(`/project/${fields.slug}`))
-        })
-      })
-    },
-    loadProject: async (request: Request, params: Params<string>) => {
-
-      let epub = await getSea(request)
-      let alias = params.user
-      let time = getDate()
-      return new Promise((resolve) => {
-        gun.get(`~@${alias}`).once(async (exist) => {
-          if (!exist) {
-            resolve(`User ${alias} not found`)
-          }
-          let list = await mapArray('PROFILE-SET')
-          console.log(list)
-          if (!list) resolve('Synclist bust')
-          resolve(list)
-        })
-      })
-    },
-    signAction: async (request: Request) => {
-      let { username, password } = Object.fromEntries(
-        await request.formData()
-      );
-
-      return new Promise((resolve) => {
-        if (
-          typeof username !== 'string' ||
-          typeof password !== 'string'
-        ) {
-          return resolve({ ok: false, result: `Form not submitted correctly.` });
-        }
-
-        let fields = { username, password };
-
-        let fields2 = { alias: username, job: 'Add Job Title', description: 'Add Job Description' }
-        let fieldErrors = {
-          username: validateUsername(username),
-          password: validatePassword(password),
-        };
-        if (fieldErrors.username) resolve({ ok: false, result: fieldErrors.username });
-        if (fieldErrors.password) resolve({ ok: false, result: fieldErrors.password });
-        gun.get(`~@${username}`).once(async (exist) => {
-          if (!exist) {
-            const { ok, result } = await createUser(fields.username, fields.password);
-            if (!ok) {
-              resolve({ ok: false, result: result });
-            }
-            const { ok: ok2, result: res2, keys } = await login(fields.username, fields.password);
-            if (!ok2) {
-              resolve({ ok: ok2, result: res2 });
-            }
-            const res = await putVal('keys', 'master', keys);
-            if (res !== 'Added data!') {
-              resolve({ ok: false, result: 'Error Storing Keys' });
-            }
-            const fieldPut = await putVal(`//${username}`, `PROFILE`, fields2);
-            if (!fieldPut) resolve({ ok: false, result: `For some reason... We couldn't add the default project data` })
-            resolve(createUserSession((keys as any).epub, `/admin/${fields.username}`))
-          }
-          const { ok: ok3, result: res3, keys } = await login(fields.username, fields.password);
-          if (!ok3) {
-            resolve({ ok: ok3, result: res3 });
-          }
-
-          resolve(createUserSession((keys as any).epub, `/admin/${fields.username}`))
-        })
-      }
-      )
-    },
-    setArray,
-    mapArray,
-  };
+  }
 }

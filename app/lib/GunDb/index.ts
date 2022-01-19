@@ -1,113 +1,67 @@
-import Gun from 'gun';
-import GunCtx,{  GunCtxType } from './GunCtx';
+import {GunCtx,  GunCtxType } from './GunCtx';
 
 
 
 export const {
-  gun,
+  user,
   createUser,
-  login,
+  validate,
   putVal,
   getVal,
-  signAction,
   resetPassword,
-  loadProfile,
-  editProfile,
-  loadProject,
-  addProject,
-  setArray,
-  mapArray,
 }:GunCtxType = GunCtx();
 
-export type UserData = {
-  profile: UserProfile;
-  info: UserInfo;
-};
 
-export interface UserProfile {
-  alias: string;
-  socials: Socials;
-}
 
-export type UserInfo = {
-  createdAt: string;
-  lastLogin: string;
-  viewed: string[];
-  bookmarked: string[];
-};
 
-export type Socials = {
-  facebook: SocialData;
-  twitter: SocialData;
-  linkedIn: SocialData;
-  github: SocialData;
-  [key: string]: SocialData;
-};
+// const signAction = async (request: Request) => {
+//   let { username, password } = Object.fromEntries(
+//     await request.formData()
+//   );
+//   let fields
+//   return new Promise((resolve) => {
+//     if (
+//       typeof username !== 'string'
+//     ) {
+//       return resolve({ ok: false, result: `Please enter username` });
+//     }
+//     if (typeof password === 'string')
+//       fields = { username, password };
 
-export type SocialData = {
-  brand: string;
-  url: string;
-  color?: string;
-};
+//     let fields2 = { alias: username, job: 'Add Job Title', description: 'Add Job Description' }
+//     let fieldErrors = {
+//       username: validateUsername(username),
+//       // password: validatePassword(password),
+//     };
+//     if (fieldErrors.username) resolve({ ok: false, result: fieldErrors.username });
+//     // if (fieldErrors.password) resolve({ ok: false, result: fieldErrors.password });
+//     gun.get(`~@${username}`).once(async (exist) => {
 
-export type Category =
-  | 'concepts'
-  | 'tutorials'
-  | 'packages'
-  | 'templates'
-  | 'examples'
-  | 'others';
+//       let pair = await Gun.SEA.pair()
+//       let PRIV_KEY = pair.epriv
 
-export interface Page {
-  url: string;
-  site?: string;
-  author?: string;
-  category?: Category;
-  title?: string;
-  description?: string;
-  dependencies?: Record<string, string>;
-  image?: string;
-  video?: string;
-}
-
-export type SubmissionStatus = 'PUBLISHED' | 'RESUBMITTED' | 'INVALID_CATEGORY';
-
-export type MessageType = 'success' | 'error' | 'warning' | 'info';
-
-export interface Metadata
-  extends Pick<
-    Entry,
-    | 'id'
-    | 'url'
-    | 'category'
-    | 'author'
-    | 'title'
-    | 'description'
-    | 'viewCounts'
-    | 'bookmarkCounts'
-    | 'createdAt'
-  > {
-  integrations: string[];
-}
-
-export interface Entry extends Page {
-  id: string;
-  viewCounts?: number;
-  bookmarkCounts?: number;
-  createdAt: string;
-  createdBy: string;
-  updatedAt: string;
-  updatedBy: string;
-}
-
-export interface SearchOptions {
-  keyword?: string;
-  list?: 'bookmarks' | 'history' | null;
-  author?: string | null;
-  hostname?: string | null;
-  categories?: Category[] | null;
-  integrations?: string[] | null;
-  excludes?: string[] | null;
-  limit?: number;
-  sortBy?: 'hotness' | null;
-}
+//       if (!exist) {
+//         const { ok, result } = await createUser(fields.username, PRIV_KEY);
+//         if (!ok) {
+//           resolve({ ok: false, result: result });
+//         }
+//         const { ok: ok2, result: res2 } = await login(fields.username, PRIV_KEY);
+//         if (!ok2) {
+//           resolve({ ok: ok2, result: res2 });
+//         }
+//         const res = await putVal(`+${username}`, 'master', pair);
+//         if (res !== 'Added data!') {
+//           resolve({ ok: false, result: 'Error Storing Keys' });
+//         }
+//         resolve(createUserSession(pair, `/admin/${fields.username}`))
+//       }
+//       const { ok: ok3, result: res3 } = await login(fields.username, fields.password);
+//       if (!ok3) {
+//         resolve({ ok: ok3, result: res3 });
+//       }
+//       let loginPair = await getVal(`+${username}`, 'master')
+//       resolve(createUserSession(loginPair as IGunCryptoKeyPair, `/admin/${fields.username}`))
+//     })
+//   }
+//   )
+// }

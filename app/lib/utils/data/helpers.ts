@@ -1,4 +1,4 @@
-import { setArray, putVal } from '../../GunDb';
+import {  putVal } from '../../GunDb';
 import { APP_KEY_PAIR } from '~/session.server';
 
 export const blogs = [
@@ -31,22 +31,4 @@ export const blogs = [
   },
 ];
 
-export const loadDummy = (userId: string, blogs: Array<any>) => {
-  blogs.forEach(async (blog) => {
-    blog.tags.forEach(async (tag) => {
-      let set = setArray(`${userId}/articles/${blog.title}/tags`, [tag]);
-      if (!set) {
-        console.log('Did not Load The Dummy Tags');
-      }
-    });
 
-    delete blog.tags;
-
-    let put = putVal(`${userId}/articles`, blog.title, blog, APP_KEY_PAIR);
-
-    if (!put) {
-      console.log('Did not Load The Dummy Articles');
-    }
-    console.log('success');
-  });
-};

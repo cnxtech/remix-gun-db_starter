@@ -1,19 +1,26 @@
-import { Form, useActionData, useCatch } from 'remix';
+import { IGunCryptoKeyPair } from 'gun/types/types';
+import { Form, json, useActionData, useCatch } from 'remix';
 import Button from '~/components/buttons/Button';
 import Display from '~/components/DisplayHeading';
 import InputText from '~/components/InputText';
 import SvgIcon from '~/components/SvgIcon';
 import { paths } from '~/components/SvgIcon';
-import { signAction } from '~/lib/GunDb';
+import { createUser } from '~/lib/GunDb';
 
 export async function action({ request }) {
-  return await signAction(request);
+  let { alias, priv } = Object.fromEntries(await request.formData());
+  if (typeof alias !== 'string') {}
+  let fields = { alias};
+  console.log(fields);
+  let { result} = await createUser(fields.alias);
+  if (typeof result === 'string') return new Error(result);
+  return  result;
 }
 
 ///////////////
 export default function Login() {
-  let action = useActionData<{ ok: boolean; result: string }|undefined>();
-  console.log(action)
+  let action = useActionData();
+console.log( action);
   return (
     <>
       <Form method="post" className="flex flex-col pt-3 md:pt-8 max-w-xl">
@@ -21,18 +28,18 @@ export default function Login() {
           <InputText
             type="text"
             square={false}
-            icon={<SvgIcon size="15" path={paths.email} />}
+            // icon={<SvgIcon size="15" path={paths.email} />}
             placeholder="Username"
-            name="username"
+            name="alias"
           />
         </div>
         <div className="flex flex-col pt-4 mb-12">
           <InputText
-            type="password"
+            type="text"
             square={false}
-            icon={<SvgIcon size="15" path={paths.password} />}
+            // icon={<SvgIcon size="15" path={paths.password} />}
             placeholder="Password"
-            name="password"
+            name="priv"
           />
         </div>
         <button
@@ -42,7 +49,7 @@ export default function Login() {
           <span className="w-full">Submit</span>
         </button>
       </Form>
-      {action ? <p>{action.result}</p> : null}
+      { action ? <p>{JSON.stringify(action)}</p> : null}
       <div className="pt-12 pb-12 text-center"></div>
     </>
   );
