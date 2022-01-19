@@ -45,32 +45,33 @@ export const decrypt = async (
 };
 
 
-export type GunCtxType = {
-  user: IGunChainReference,
-  createUser: (
-    alias: string ,
-  ) => Promise<{ result: string | IGunCryptoKeyPair }>;
-  validate: (
-    sea: IGunCryptoKeyPair
-  ) => Promise<{ ok: boolean; result: string; keys?: keyof AuthKeys }>;
-  resetPassword: (
-    username: string,
-    oldPassword: string,
-    newPassword: string
-  ) => Promise<{ ok: boolean; result: string }>;
-  getVal: (
-    document: string,
-    key: string,
-    decryptionKey?: string
-  ) => Promise<any>;
-  putVal: (
-    document: string,
-    key: string,
-    value: any,
-    encryptionKey?: string,
-  ) => Promise<string>;
+// export type GunCtxType = {
+//   user: IGunChainReference,
+//   createUser: (
+//     alias: string ,
+//   ) => Promise<{ result: string | IGunCryptoKeyPair }>;
+//   validate: (
+//     alias: string,
+//     sea: IGunCryptoKeyPair
+//   ) => Promise<{ result: string }>
+//   resetPassword: (
+//     username: string,
+//     oldPassword: string,
+//     newPassword: string
+//   ) => Promise<{ ok: boolean; result: string }>;
+//   getVal: (
+//     document: string,
+//     key: string,
+//     decryptionKey?: string
+//   ) => Promise<any>;
+//   putVal: (
+//     document: string,
+//     key: string,
+//     value: any,
+//     encryptionKey?: string,
+//   ) => Promise<string>;
 
-};
+// };
 
 export type AuthKeys = {
   soul: string;
@@ -78,7 +79,7 @@ export type AuthKeys = {
   epub: string;
 };
 
-export function GunCtx(): GunCtxType {
+export function GunCtx() {
 
   const ports = {
     RELAY: process.env.GUN_PORT || 5150,
@@ -95,8 +96,8 @@ export function GunCtx(): GunCtxType {
   // };
   const createUser = async (
     alias: string,
-  ): Promise<{  result: string | IGunCryptoKeyPair }> =>
-    new Promise(async(resolve) => {
+  ): Promise<{ result: string | IGunCryptoKeyPair }> =>
+    new Promise(async (resolve, reject) => {
       /** Generate Keypair */
       const pair = await Gun.SEA.pair();
       console.log(alias)
@@ -106,46 +107,50 @@ export function GunCtx(): GunCtxType {
       if (!exist) {
 
         // TODO: handle decrypion to map user Credentials
-  
+
         /** Encrypt && Sign */
         const enc = await Gun.SEA.encrypt(alias, pair)
         const signed = await Gun.SEA.sign(enc, pair)
         let comp = LZString.compress(signed)
-  
-        console.log(`
-        
-        COMPRESSED USER DATA  — size: ${comp.length} —  
-        
-        ${comp}
-        
-        `  )
+
+        console.log(`\n \n **** COMPRESSED USER DATA ****  — size:  ${comp.length} — \n \n${comp}\n \n`)
         /** Store user data */
-        let store = await putVal(`@${alias}`,'creds', comp)
-        if (!store) resolve({ result: 'Could not store credentials' })
+        let store = await putVal(`@${alias}`, 'creds', comp)
+        if (!store) reject({ reason: 'Could not store credentials' })
+        /** else */
         resolve({ result: pair })
       }
-         resolve({ result: 'Alias already exists' })
-      })
-
-      //
-    ;
+      reject({ reason: 'Alias already exists' })
+    });
 
   const validate = (
-    sea: IGunCryptoKeyPair
-  ): Promise<{ ok: boolean; result: string }> =>
-    new Promise((resolve) =>
-      user.auth(sea.pub, sea.priv, async (ack) => {
-        const cookie = await encrypt((ack as any).epriv)
-        if (Object.getOwnPropertyNames(ack).includes('id')) {
-          resolve({
-            ok: true,
-            result: cookie
-          });
-        } else {
-          resolve({ ok: false, result: JSON.parse(JSON.stringify(ack)).err });
-        }
-      })
-    );
+    alias: string,
+    pair: IGunCryptoKeyPair
+  ): Promise<{ result: string }> =>
+    new Promise(async (resolve, reject) => {
+      let stored = await getVal(`@${alias}`, 'creds')
+      if (!stored) reject({ result: 'Alias Not Found' })
+      console.info(`\n \n **** stored data **** \n \n  ${stored}`)
+      /** verify  */
+      let dcomp = LZString.decompress(stored as string)
+      console.info(`\n \n **** decompressed **** \n \n  ${dcomp}`)
+      let msg = await Gun.SEA.verify(dcomp, pair.pub)
+      let dec = await Gun.SEA.decrypt(msg, pair);
+      console.info(`\n \n **** decrypted **** \n \n  ${dec}`)
+
+      let proof = await Gun.SEA.work(dec, pair)
+      console.info(`\n \n **** Hashing decrypted data and keypair **** \n \n  ${proof}`)
+
+      if (!proof) {
+        console.error('Keys invalid')
+        reject({ result: 'Keys invalid' })
+      }
+
+      resolve({ result: dec as string })
+
+
+
+    });
 
   /**
    *
@@ -176,11 +181,11 @@ export function GunCtx(): GunCtxType {
   const getVal = (document: string, key: string, decryptionKey?: string) => {
     return new Promise((resolve) =>
       gun.get(document).get(key).once(async (data) => {
-          console.log('data:', data)
-          decryptionKey
-            ? resolve(await decrypt(data, decryptionKey))
-            : resolve(data)
-        })
+        console.log('data:', data)
+        decryptionKey
+          ? resolve(await decrypt(data, decryptionKey))
+          : resolve(data)
+      })
     )
   }
   return {
