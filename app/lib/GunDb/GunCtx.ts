@@ -16,13 +16,8 @@ import { IGunChainReference } from 'gun/types/chain';
 
 export const encrypt = async (
   data: any,
-  keys?: string | IGunCryptoKeyPair
+  keys: string | IGunCryptoKeyPair
 ) => {
-  if (!keys) {
-    console.log('Using the environment variables to encrypt data...');
-    let enc = await Gun.SEA.encrypt(data, APP_KEY_PAIR);
-    return LZString.compress(enc)
-  }
   console.log('Encrypting data with new keys...');
   let enc = await Gun.SEA.encrypt(data, keys);
   return LZString.compress(enc)
@@ -30,14 +25,8 @@ export const encrypt = async (
 
 export const decrypt = async (
   data: any,
-  keys?: string | IGunCryptoKeyPair
+  keys: string | IGunCryptoKeyPair
 ) => {
-  if (!keys) {
-    console.log('Using the environment variables to encrypt data...');
-    let enc = LZString.decompress(data)
-    let dec = await Gun.SEA.decrypt(enc, APP_KEY_PAIR);
-    return dec
-  }
   console.log('Encrypting data with new keys...');
   let enc = LZString.decompress(data)
   let dec = await Gun.SEA.decrypt(enc, keys);
@@ -97,7 +86,7 @@ export function GunCtx() {
   const createUser = async (
     alias: string,
   ): Promise<{ result: string | IGunCryptoKeyPair }> =>
-    new Promise(async (resolve, reject) => {
+    new Promise(async (resolve) => {
       /** Generate Keypair */
       const pair = await Gun.SEA.pair();
       console.log(alias)
@@ -113,23 +102,23 @@ export function GunCtx() {
         const signed = await Gun.SEA.sign(enc, pair)
         let comp = LZString.compress(signed)
 
-        console.log(`\n \n **** COMPRESSED USER DATA ****  — size:  ${comp.length} — \n \n${comp}\n \n`)
+        console.info(`\n \n **** COMPRESSED USER DATA ****  — size:  ${comp.length} — \n \n${comp}\n \n`)
         /** Store user data */
         let store = await putVal(`@${alias}`, 'creds', comp)
-        if (!store) reject({ reason: 'Could not store credentials' })
+        if (!store) resolve({ result: 'Could not store credentials' })
         /** else */
         resolve({ result: pair })
       }
-      reject({ reason: 'Alias already exists' })
+      resolve({ result: 'Alias already exists' })
     });
 
   const validate = (
     alias: string,
     pair: IGunCryptoKeyPair
   ): Promise<{ result: string }> =>
-    new Promise(async (resolve, reject) => {
+    new Promise(async (resolve) => {
       let stored = await getVal(`@${alias}`, 'creds')
-      if (!stored) reject({ result: 'Alias Not Found' })
+      if (!stored) resolve({ result: 'Alias Not Found' })
       console.info(`\n \n **** stored data **** \n \n  ${stored}`)
       /** verify  */
       let dcomp = LZString.decompress(stored as string)
@@ -143,14 +132,34 @@ export function GunCtx() {
 
       if (!proof) {
         console.error('Keys invalid')
-        reject({ result: 'Keys invalid' })
+        resolve({ result: 'Keys invalid' })
       }
 
       resolve({ result: dec as string })
 
-
-
     });
+
+
+  let setMap = (document: string, key: string, data: Array<any>) => {
+
+data.forEach((value: any) => {
+  let set = gun.get(key).put(value)
+    gun.get(document).set(set)
+})
+    return gun.get(document).map().once(data => {
+        if (!data) return undefined
+        return JSON.stringify(data)
+
+      })
+
+
+    
+  }
+
+
+
+
+
 
   /**
    *
@@ -189,7 +198,7 @@ export function GunCtx() {
     )
   }
   return {
-    user,
+    gun,
     createUser,
     validate,
     resetPassword: (
@@ -217,5 +226,24 @@ export function GunCtx() {
       ),
     getVal,
     putVal,
+    setMap
   }
+}
+
+
+export const {
+  gun,
+  createUser,
+setMap,
+  validate,
+  putVal,
+  getVal,
+  resetPassword,
+} = GunCtx();
+
+
+export const context = (request: Request) => {
+
+  return { action: '', loader: '' }
+
 }

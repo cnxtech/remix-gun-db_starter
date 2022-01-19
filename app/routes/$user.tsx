@@ -1,7 +1,6 @@
 import { Outlet, useCatch } from 'remix';
 import { LoaderFunction, useLoaderData } from 'remix';
 import ProfileHeader from '~/components/ProfileHeader';
-import { user,  } from '../../lib/GunDb';
 import Display from '~/components/DisplayHeading';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
@@ -12,7 +11,6 @@ export default function User() {
   let {data, keys} = useLoaderData();
 console.log(keys)
 
-user.get('PROFILE').on(data => console.log(data))
   return (
     <div className="mt-5">
       <ProfileHeader

@@ -3,24 +3,52 @@ import { Form, json, useActionData, useCatch } from 'remix';
 import Button from '~/components/buttons/Button';
 import Display from '~/components/DisplayHeading';
 import InputText from '~/components/InputText';
-import SvgIcon from '~/components/SvgIcon';
-import { paths } from '~/components/SvgIcon';
-import { createUser } from '~/lib/GunDb';
+import SvgIcon from '~/components/svg/logos/SvgIcon';
+import { paths } from '~/components/svg/logos/SvgIcon';
+import { createUser, setMap } from '~/lib/GunDb/GunCtx';
+import { blogs } from '~/lib/utils/data/helpers'
+import Gun from 'gun'
+import { useEffect, useReducer, useState } from 'react';
 
 export async function action({ request }) {
   let { alias, priv } = Object.fromEntries(await request.formData());
   if (typeof alias !== 'string') {}
   let fields = { alias};
   console.log(fields);
-  let { result} = await createUser(fields.alias);
-  if (typeof result === 'string') return new Error(result);
+  let {result} = await createUser(fields.alias);
+  if (typeof {result} === 'string') return new Response(`The alias ${fields.alias} exists... but your credentials are not stored in the browser. Paste credentials below. `);
   return  result;
 }
-
+let initialState = []
+let reducer = (state: any, set: any) => {
+  return [...state, set ]
+}
 ///////////////
 export default function Login() {
   let action = useActionData();
-console.log( action);
+  let [state, dispatch] = useReducer(reducer,initialState)
+  let gun = Gun()
+
+// blogs.forEach((value: any) => {
+//   let set = gun.get('test3').put(value)
+//     gun.get('document').set(set)
+// })
+
+useEffect(() => {
+  gun.get('document').map().once(data => {
+        if (!data) return {undefined}
+        dispatch(data)
+
+      }) 
+}, [gun.get('document').off()])
+ 
+    
+
+
+    
+  
+
+// console.log( test);
   return (
     <>
       <Form method="post" className="flex flex-col pt-3 md:pt-8 max-w-xl">
@@ -49,6 +77,7 @@ console.log( action);
           <span className="w-full">Submit</span>
         </button>
       </Form>
+      <p> {JSON.stringify(state)} </p>
       { action ? <p>{JSON.stringify(action)}</p> : null}
       <div className="pt-12 pb-12 text-center"></div>
     </>

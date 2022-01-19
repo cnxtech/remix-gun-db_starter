@@ -1,15 +1,8 @@
-import {GunCtx,  GunCtxType } from './GunCtx';
+import {GunCtx } from './GunCtx';
 
 
 
-export const {
-  user,
-  createUser,
-  validate,
-  putVal,
-  getVal,
-  resetPassword,
-}:GunCtxType = GunCtx();
+
 
 
 

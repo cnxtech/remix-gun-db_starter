@@ -1,6 +1,7 @@
 const defaultTheme = require('tailwindcss/defaultTheme');
 const withAnimations = require('animated-tailwindcss');
 module.exports = withAnimations({
+  mode: 'jit',
   important: true,
   darkMode: 'class',
   i18n: {
@@ -22,7 +23,11 @@ module.exports = withAnimations({
       },
     },
   },
-  plugins: [require('@tailwindcss/typography')],
+ plugins: [
+    require("@tailwindcss/aspect-ratio"),
+    require("@tailwindcss/forms"),
+    require("@tailwindcss/typography"),
+  ],
   future: {
     purgeLayersByDefault: true,
   },

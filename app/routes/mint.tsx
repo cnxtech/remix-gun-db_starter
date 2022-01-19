@@ -5,7 +5,6 @@ import invariant from 'tiny-invariant';
 import Button from '~/components/elements/buttons/Button';
 import InputArea from '~/components/form/inputtext/InputArea';
 import BasicForm from '~/components/form/layout/FormBasic';
-import { putVal } from '~/lib/GunDb';
 
 export function meta() {
   return { title: 'Mint Tokens' };
@@ -23,10 +22,8 @@ export let action: ActionFunction = async ({ request }) => {
   let description = body.get('description');
   let publisher = body.get('publisher');
   let url = body.get('url');
-  let put = putVal('test', 'data', body);
-  console.log(put);
 
-  return redirect('/');
+  return null
 };
 
 export default function ActionsDemo() {

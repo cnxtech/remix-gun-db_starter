@@ -39,8 +39,8 @@ export function getUserSession(request: Request) {
 export async function getSea(request: Request) {
   let session = await getUserSession(request);
   let sea = session.get('sea');
-  if (!sea) return null;
-  return await decrypt(sea);
+  let dec =  await decrypt(sea, APP_KEY_PAIR);
+  return dec;
 }
 export async function requireSEA(request: Request) {
   let session = await getUserSession(request);
@@ -59,7 +59,7 @@ export async function logout(request: Request) {
 
 export async function createUserSession(result: IGunCryptoKeyPair , redirectTo: string) {
   let session = await getSession();
-  let res = await encrypt(result)
+  let res = await encrypt(result, APP_KEY_PAIR)
   session.set('sea', res);
  
   return redirect(redirectTo, {

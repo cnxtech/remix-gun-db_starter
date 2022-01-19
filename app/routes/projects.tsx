@@ -1,15 +1,10 @@
-import { ActionFunction, LoaderFunction } from 'remix';
-export let loader: LoaderFunction = async ({ params }) => {
-  // loader function
-  return null;
-};
-///////////////
-export let action: ActionFunction = async ({ request }) => {
-  //action function
-  return null;
-};
-///////////////
-export default function Projects() {
-  // main function
-  return <>()</>;
+import { Outlet } from 'remix';
+
+export default function Profile() {
+  return (
+    <div>
+      <Outlet />
+      <aside></aside>
+    </div>
+  );
 }

@@ -1,4 +1,4 @@
-import { MetaFunction, Outlet, useCatch } from 'remix';
+import { LoaderFunction, MetaFunction, Outlet, useCatch, useLoaderData, useLocation } from 'remix';
 import React from 'react';
 import Document from './components/remix/Document';
 
@@ -12,6 +12,8 @@ import Header from './components/Header';
 import Logo from './components/svg/logos/BDS';
 import FMLogo from './components/svg/logos/FltngMmth';
 import CNXTLogo from './components/svg/logos/CNXT';
+import { gun, GunCtx } from './lib/GunDb/GunCtx';
+import { IGunChainReference } from 'gun/types/chain';
 
 export let links: LinksFunction = () => {
   return [
@@ -62,7 +64,15 @@ export const meta: MetaFunction = () => {
   };
 };
 
+export const loader: LoaderFunction = () => {
+  
+return null
+}
+
 export default function App() {
+
+  const location = useLocation()
+  console.log(location)
   let data = {
     links: [
       { to: '/', label: 'Home', isFat:true },
@@ -79,7 +89,7 @@ export default function App() {
           hideGitHubLink={true}
           logo={<CNXTLogo />}
         />
-        <Outlet />
+        <Outlet  />
       </Layout>
     </Document>
   );
