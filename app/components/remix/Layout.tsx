@@ -1,16 +1,13 @@
-import Header from '~/components/Header';
-import Logo from '../svg/logos/BDS';
+
 import FMLogo from '../svg/logos/FltngMmth';
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children, theme }: { children: React.ReactNode , theme: 'dark' | 'light' }) {
   return (
-    <div className="relative">
-      <div className="mx-auto h-full" style={{ minHeight: 85 + 'vh' }}>
-        <div className="relative z-10 pb-8 overflow-hidden sm:pb-16 md:pb-20 lg:w-full lg:pb-28 xl:pb-32 h-full">
-          <div className="dark">{children}</div>
-        </div>
+    <div className={theme}>
+      <div className="relative bg-zinc-300 dark:bg-zinc-900 z-10 px-8 overflow-hidden sm:px-16 md:px-20 lg:w-full lg:px-28 xl:px-32 h-screen">
+        {children}
+        <FMLogo height="30" width="auto" color={'white'} textcolor={'pink'} />
       </div>
-      <FMLogo height="50" width="auto" color={'white'} textcolor={'pink'} />
     </div>
   );
 }

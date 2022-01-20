@@ -11,6 +11,7 @@ import 'gun/lib/open';
 import LZString from 'lz-string';
 import { IGunCryptoKeyPair } from 'gun/types/types';
 import Gun from 'gun';
+import {db} from '~/root'
 
 export const encrypt = async (
   data: any,
@@ -87,15 +88,8 @@ export function GunCtx() {
     RELAY: process.env.GUN_PORT || 5150,
     CLIENT: process.env.CLIENT_PORT || 3333,
   };
-  const gun = Gun({
-    peers: [`http://localhost:${ports.RELAY}/gun`, `http://localhost:${ports.CLIENT}`],
-    localStorage: false
-  });
-  const user = gun.user()
+  const gun = db
 
-  // const credentials = async (data: any) => {
-  //   const pair = await Gun.SEA.pair();
-  // };
   const createUser = async (
     { alias }: Credentials
   ): Promise<{ ok: boolean, result: string, keys?: IGunCryptoKeyPair }> =>
@@ -213,29 +207,6 @@ export function GunCtx() {
     gun,
     createUser,
     validate,
-    resetPassword: (
-      username: string,
-      oldPassword: string,
-      newPassword: string
-    ) =>
-      new Promise((resolve) =>
-        user.auth(
-          username,
-          oldPassword,
-          (ack) => {
-            console.log(ack);
-            if (Object.getOwnPropertyNames(ack).includes('ok')) {
-              resolve({ ok: true, result: undefined });
-            } else {
-              resolve({
-                ok: false,
-                result: JSON.parse(JSON.stringify(ack)).err,
-              });
-            }
-          },
-          { change: newPassword }
-        )
-      ),
     getVal,
     putVal,
     setMap
@@ -250,7 +221,6 @@ export const {
   validate,
   putVal,
   getVal,
-  resetPassword,
 } = GunCtx();
 
 

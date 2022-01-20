@@ -16,6 +16,7 @@ import { decrypt, gun, GunCtx } from './lib/GunDb/GunCtx';
 import { IGunChainReference } from 'gun/types/chain';
 import { IGunCryptoKeyPair } from 'gun/types/types';
 import { master } from './session.server';
+import Gun from 'gun';
 
 export let links: LinksFunction = () => {
   return [
@@ -30,6 +31,7 @@ export let links: LinksFunction = () => {
       rel: 'stylesheet',
       href: 'https://use.fontawesome.com/releases/v5.15.4/css/all.css',
     },
+    { rel:'stylesheet', href:"https://cdn.materialdesignicons.com/6.5.95/css/materialdesignicons.min.css"},
     {
       rel: 'apple-touch-icon',
       sizes: '180x180',
@@ -84,7 +86,7 @@ export default function App() {
   };
   return (
     <Document>
-      <Layout>
+      <Layout theme={'dark'}>
         <Header
           links={data.links}
           hideHelp={true}
@@ -143,7 +145,11 @@ export function CatchBoundary() {
       );
   }
 }
-
+export const db = Gun({
+  peers: ['http://localhost:5150/gun','http://localhost:3333/gun'],
+  radisk: false,
+  localStorage: true,
+});
 export let initialState = [];
 export let reducer = (state: any, set: any) => {
   return [...state, set];
@@ -152,12 +158,11 @@ export let reducer = (state: any, set: any) => {
 
 // const gun = Gun({ peers: peers });
  export function map(
-  gun: IGunChainReference,
   document: string,
   dispatch: React.Dispatch<any>,
 
 ) {
-  return gun
+  return db
     .get(document)
     .map()
     .on(async(data) => {

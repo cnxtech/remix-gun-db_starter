@@ -10,8 +10,8 @@ const { createRequestHandler } = require('@remix-run/express');
 let Gun = require('gun');
 
 const ports = {
-  RELAY: process.env.GUN_PORT || 5150,
-  CLIENT: process.env.CLIENT_PORT || 3333,
+  RELAY: process.env.GUN_PORT,
+  CLIENT: process.env.CLIENT_PORT
 };
 
 if (!ports) {
@@ -51,16 +51,39 @@ app.all(
   MODE === 'production'
     ? createRequestHandler({ build: require('./build') })
     : (req, res, next) => {
-        purgeRequireCache();
-        let build = require('./build');
-        return createRequestHandler({ build, mode: MODE })(req, res, next);
-      }
+      purgeRequireCache();
+      let build = require('./build');
+      return createRequestHandler({ build, mode: MODE })(req, res, next);
+    }
 );
-
+ const peers = [
+  `http://localhost:${ports.RELAY}/gun`,
+  'https://relay.peer.ooo/gun',
+  'https://replicant.adamantium.online/gun',
+  'http://gun-matrix.herokuapp.com/gun',
+  'https://gun-ams1.maddiex.wtf:443/gun',
+  'https://gun-sjc1.maddiex.wtf:443/gun',
+  'https://shockblox-gun-server.herokuapp.com/gun',
+  'https://mg-gun-manhattan.herokuapp.com/gun',
+  'https://gunmeetingserver.herokuapp.com/gun',
+  'https://gun-eu.herokuapp.com/gun',
+  'https://gunjs.herokuapp.com/gun',
+  'https://myriad-gundb-relay-peer.herokuapp.com/gun',
+  'https://gun-armitro.herokuapp.com/',
+  'https://fire-gun.herokuapp.com/gun',
+  'http://34.101.247.230:8765/gun',
+  'https://gun-manhattan.herokuapp.com/gun',
+  'https://us-west.xerberus.net/gun',
+  'https://dletta.rig.airfaas.com/gun',
+  'https://e2eec.herokuapp.com/gun']
 Gun({
-  web:app.listen(ports.CLIENT, () => {
-  console.log(`Express server listening on port ${ports.CLIENT}`);
-})});
+  peers: peers,
+  web: app.listen(ports.CLIENT, () => {
+    console.log(`Express server listening on port ${ports.CLIENT}`);
+  }),
+  localStorage:false,
+  radisk: false
+});
 
 ////////////////////////////////////////////////////////////////////////////////
 function purgeRequireCache() {
