@@ -17,8 +17,8 @@ export let loader: LoaderFunction = () => {
 
 export let meta: MetaFunction = () => {
   return {
-    title: 'Remix Starter',
-    description: 'Welcome to remix!',
+    title: 'CNXT',
+    description: 'CNXT',
   };
 };
 
@@ -41,7 +41,7 @@ export default function Index() {
           >
             <img
               className="w-full h-full object-cover"
-              src="/images/landscape/5.svg"
+              src="/images/landscape/6.svg"
               alt="nike shoes"
             />
           </div>
@@ -64,17 +64,14 @@ export default function Index() {
           </div>
           <div className="flex flex-col">
             <div className="flex flex-col gap-4">
-              <h1 className="capitalize text-4xl font-extrabold">Nike shoes</h1>
+              <h1 className="capitalize text-4xl font-extrabold">Nike</h1>
               <h2 className="text-3xl">$44</h2>
               <p className="text-lg text-gray-500	">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Voluptatibus voluptatum nisi maxime obcaecati impedit? Ratione
-                error eum qui quidem? Veniam accusamus ea repudiandae itaque,
-                explicabo quidem perspiciatis. Culpa, asperiores deserunt.
+This is a tag
               </p>
               <div className="flex items-center gap-4 my-6 cursor-pointer ">
                 <div className="bg-blue-600 px-5 py-3 text-white rounded-lg w-2/4 text-center">
-                  Add to bag
+                  Add to wallet
                 </div>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
