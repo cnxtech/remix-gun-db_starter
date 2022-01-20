@@ -1,31 +1,25 @@
 import {
   ActionFunction,
   Form,
-  json,
   Link,
   LoaderFunction,
-  useLoaderData,
 } from 'remix';
 import JobCard from '~/components/elements/data/JobCard';
 import PaymentCard from '~/components/elements/data/PaymentCard';
-import SimpleIconDescCard from '~/components/elements/data/SimpleIconDescCard';
 import ProfileHeader from '~/components/ProfileHeader';
-import SvgIcon, {  paths } from '~/components/svg/logos/SvgIcon';
-import { setMap } from '~/lib/GunDb/GunCtx';
-import { blogs } from '~/lib/utils/data/helpers';
-export let loader: LoaderFunction = async ({ params }) => {
+import {  paths } from '~/components/svg/logos/SvgIcon';
+export let loader: LoaderFunction = async () => {
 
 
   return null
 };
 ///////////////
-export let action: ActionFunction = async ({ request }) => {
+export let action: ActionFunction = async () => {
 
   return null;
 };
 ///////////////
 export default function ProjectSlug() {
-  let data = useLoaderData();
   
 
   // let transition = useTransition();

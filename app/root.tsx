@@ -12,8 +12,10 @@ import Header from './components/Header';
 import Logo from './components/svg/logos/BDS';
 import FMLogo from './components/svg/logos/FltngMmth';
 import CNXTLogo from './components/svg/logos/CNXT';
-import { gun, GunCtx } from './lib/GunDb/GunCtx';
+import { decrypt, gun, GunCtx } from './lib/GunDb/GunCtx';
 import { IGunChainReference } from 'gun/types/chain';
+import { IGunCryptoKeyPair } from 'gun/types/types';
+import { master } from './session.server';
 
 export let links: LinksFunction = () => {
   return [
@@ -141,3 +143,27 @@ export function CatchBoundary() {
       );
   }
 }
+
+export let initialState = [];
+export let reducer = (state: any, set: any) => {
+  return [...state, set];
+};
+/////
+
+// const gun = Gun({ peers: peers });
+ export function map(
+  gun: IGunChainReference,
+  document: string,
+  dispatch: React.Dispatch<any>,
+
+) {
+  return gun
+    .get(document)
+    .map()
+    .on(async(data) => {
+      if (!data) return  undefined ;
+      data = await decrypt(data, master)
+      dispatch(data);
+    });
+}
+

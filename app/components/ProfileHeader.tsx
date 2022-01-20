@@ -1,9 +1,7 @@
-import React from 'react';
 import { Link } from 'remix';
 import Avatar from './Avatar';
 import Display from './DisplayHeading';
-import SvgIcon, { paths } from './svg/logos/SvgIcon';
-import H1 from './typography/Heading';
+import SvgIcon from './svg/logos/SvgIcon';
 
 interface Props {
   size?: 'small' | 'normal' | 'big' | 'monster';

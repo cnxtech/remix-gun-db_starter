@@ -1,6 +1,6 @@
 import { IGunCryptoKeyPair } from 'gun/types/types';
 import { createCookieSessionStorage, redirect } from 'remix';
-import { AuthKeys, decrypt, encrypt } from './lib/GunDb/GunCtx';
+import { decrypt, encrypt } from './lib/GunDb/GunCtx';
 
 export function getDate() {
   const newDate = new Date();
@@ -11,7 +11,13 @@ export function getDate() {
   var timestamp = `${dd}.${mm}.${yyyy}:${sec}`;
   return timestamp;
 }
-export const APP_KEY_PAIR = process.env.APP_KEY_PAIR;
+export const master: IGunCryptoKeyPair = {
+  pub: process.env.PUB,
+  priv: process.env.PRIV,
+  epub: process.env.EPUB,
+  epriv: process.env.EPRIV
+  
+} 
 
 let sessionSecret =
   (process.env.SESSION_SECRET as string) || 'abcdefghijklmnopqrstuvwxyz';
@@ -39,7 +45,7 @@ export function getUserSession(request: Request) {
 export async function getSea(request: Request) {
   let session = await getUserSession(request);
   let sea = session.get('sea');
-  let dec =  await decrypt(sea, APP_KEY_PAIR);
+  let dec =  await decrypt(sea, master);
   return dec;
 }
 export async function requireSEA(request: Request) {
@@ -59,7 +65,7 @@ export async function logout(request: Request) {
 
 export async function createUserSession(result: IGunCryptoKeyPair , redirectTo: string) {
   let session = await getSession();
-  let res = await encrypt(result, APP_KEY_PAIR)
+  let res = await encrypt(result, master)
   session.set('sea', res);
  
   return redirect(redirectTo, {

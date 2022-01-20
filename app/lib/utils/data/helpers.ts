@@ -1,4 +1,4 @@
-import { APP_KEY_PAIR } from '~/session.server';
+import { master } from '~/session.server';
 
 export const blogs = [
   {
