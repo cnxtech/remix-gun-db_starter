@@ -1,7 +1,7 @@
 import Gun from 'gun';
 import { IGunCryptoKeyPair } from 'gun/types/types';
 import { createCookieSessionStorage, redirect } from 'remix';
-import { AuthKeys, decrypt, encrypt } from '../lib/GunDb/GunCtx';
+import { AuthKeys, decrypt, encrypt } from '../lib/RemiGunCtx/context';
 
 
 export const master: IGunCryptoKeyPair = {
@@ -55,18 +55,5 @@ export async function logout(request: Request) {
   return sea
 }
 
-export async function createUserSession(result: any, colorCode: string , redirectTo: string) {
-  let session = await getSession();
-  let store = {
-    enc: result,
-    v: colorCode
-  }
-  let res = await Gun.SEA.encrypt(store, master)
-  session.set('sea', res);
- 
-  return redirect(redirectTo, {
-    headers: { 'Set-Cookie': await commitSession(session) },
-  });
-}
 
 

@@ -1,7 +1,6 @@
 import { renderToString } from 'react-dom/server';
 import { RemixServer } from 'remix';
 import type { EntryContext } from 'remix';
-import { Context } from '../lib/GunDb/GunCtx';
 
 export default function handleRequest(
   request: Request,

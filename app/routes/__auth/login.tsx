@@ -2,7 +2,7 @@ import { IGunCryptoKeyPair } from 'gun/types/types';
 import { ActionFunction, Form, useActionData, useCatch } from 'remix';
 import Display from '~/components/DisplayHeading';
 import InputText from '~/components/InputText';
-import { Context, decrypt, encrypt} from '../../../lib/GunDb/GunCtx';
+import { decrypt, encrypt} from '../../../lib/RemiGunCtx/context';
 import React from 'react';
 import RoundContainer from '~/components/RoundContainer';
 import { db } from '~/root';

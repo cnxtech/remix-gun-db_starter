@@ -12,7 +12,7 @@ import Header from './components/Header';
 import Logo from './components/svg/logos/BDS';
 import FMLogo from './components/svg/logos/FltngMmth';
 import CNXTLogo from './components/svg/logos/CNXT';
-import { decrypt, } from '../lib/GunDb/GunCtx';
+import { decrypt, } from '../lib/RemiGunCtx/context';
 import { master } from './session.server';
 import Gun from 'gun';
 

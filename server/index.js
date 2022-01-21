@@ -3,7 +3,7 @@ const express = require('express');
 const compression = require('compression');
 const morgan = require('morgan');
 const { createRequestHandler } = require('@remix-run/express');
-const { createContext } = require('../lib/GunDb')
+const { createContext } = require('remix-gun-context')
 /**
  * GUN Relay
  */

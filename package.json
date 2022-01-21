@@ -4,15 +4,15 @@
   "description": "",
   "license": "",
   "scripts": {
-    "build": "remix build",
+    "build": "concurrently \"tsc -b ./lib/RemiGunCtx\"remix build\"",
     "dev": "remix watch",
     "build:css": "cross-env NODE_ENV=production tailwindcss -i ./app/styles/tailwind.css -o ./app/styles/app.css --minify",
     "dev:css": "tailwindcss -i ./app/styles/tailwind.css -o ./app/styles/app.css --watch",
     "lint": "eslint --ext \".js,.jsx,.ts,.tsx\" --ignore-path .gitignore .",
     "postinstall": "remix setup node && sh scripts/postinstall.sh",
     "prepare": "husky install",
-    "start": "cross-env NODE_ENV=production node -r dotenv/config server/index.js",
-    "start:dev": "cross-env NODE_ENV=development node -r dotenv/config server/index.js",
+    "start": "concurrently \"tsc -b ./lib/RemiGunCtx\"cross-env NODE_ENV=production node -r dotenv/config server/index.js\"",
+    "start:dev": "concurrently \"tsc -b ./lib/RemiGunCtx\" cross-env NODE_ENV=development node -r dotenv/config server/index.js\"",
     "purge": "rm -rf radata *.private_relay"
   },
   "dependencies": {
