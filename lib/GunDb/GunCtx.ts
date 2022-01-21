@@ -6,7 +6,7 @@ import 'gun/lib/rindexed';
 import LZString from 'lz-string';
 import { IGunCryptoKeyPair } from 'gun/types/types';
 import Gun from 'gun';
-import { getUserSession, master } from '~/session.server';
+// import { getUserSession, master } from '~/session.server';
 
 export const encrypt = async (
   data: any,
@@ -170,7 +170,7 @@ function GunCtx(env: EnvironmentVariables) {
       let { alias, idString, pub, priv, colorCode } = Object.fromEntries(
         await request.formData()
       );
-      let session = await getUserSession(request)
+      // let session = await getUserSession(request)
       let fields: any
       let err: { [key: string]: string }
       return new Promise(async (resolve) => {
@@ -183,7 +183,7 @@ function GunCtx(env: EnvironmentVariables) {
         }
         colorCode = fields.colorCode
         /** set colorcode in session storage and remove it from fields object */
-        session.set('color', colorCode)
+        // session.set('color', colorCode)
         delete fields.colorCode
         if (typeof alias === 'string') {
           /** createUser if making new profile */
