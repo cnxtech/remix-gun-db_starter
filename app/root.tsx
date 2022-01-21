@@ -12,9 +12,7 @@ import Header from './components/Header';
 import Logo from './components/svg/logos/BDS';
 import FMLogo from './components/svg/logos/FltngMmth';
 import CNXTLogo from './components/svg/logos/CNXT';
-import { decrypt, gun, GunCtx } from './lib/GunDb/GunCtx';
-import { IGunChainReference } from 'gun/types/chain';
-import { IGunCryptoKeyPair } from 'gun/types/types';
+import { decrypt, } from '../lib/GunDb/GunCtx';
 import { master } from './session.server';
 import Gun from 'gun';
 

@@ -6,7 +6,7 @@ import 'gun/lib/rindexed';
 import LZString from 'lz-string';
 import { IGunCryptoKeyPair } from 'gun/types/types';
 import Gun from 'gun';
-import {  getUserSession, master } from '~/session.server';
+import { getUserSession, master } from '~/session.server';
 
 export const encrypt = async (
   data: any,
@@ -51,11 +51,35 @@ export type AuthKeys = {
   priv: string;
 };
 
-export function GunCtx() {
+export interface EnvironmentVariables {
+  PUB: string
+  PRIV: string
+  EPUB: string
+  EPRIV: string
+  GUN_PORT: number | string
+  CLIENT_PORT: number | string
+  DOMAIN: string
+}
 
+
+
+function GunCtx(env: EnvironmentVariables) {
+
+  const ports = {
+    DOMAIN: env.DOMAIN,
+    RELAY: env.GUN_PORT,
+    CLIENT: env.CLIENT_PORT
+  };
+  const master: IGunCryptoKeyPair = {
+    pub: env.PUB,
+    priv: env.PRIV,
+    epub: env.EPUB,
+    epriv: env.EPRIV
+  }
+  if (!ports || !master) throw new Error('Run "yarn generate" or "npm run generate" to generate your keypair then set it in your environment variables');
   const gun = new Gun({
-    file: `5150.private_relay`,
-    peers: ['http://localhost:5150/gun', 'http://localhost:3333/gun'],
+    file: `${ports.DOMAIN}.private_relay`,
+    peers: [`http://0.0.0.0:${ports.RELAY}gun`, `http://${ports.DOMAIN}:${ports.RELAY}gun` || `htts://${ports.DOMAIN}:${ports.RELAY}gun`],
     localStorage: false,
     radisk: true
   });
@@ -82,7 +106,7 @@ export function GunCtx() {
 
 
       /** Encrypt && Sign */
-      const comp = await encrypt({ a: alias, i: a.pub, e: e }, a)
+      const comp = await encrypt({ a: alias, i: idString, e: e }, a)
 
       console.info(`\n \n **** COMPRESSED USER DATA ****  — size:  ${comp.length} — \n \n${comp}\n \n`)
       /** Store user data */
@@ -185,13 +209,16 @@ export function GunCtx() {
         if (!ok) {
           err.auth = result
         }
-        console.log(`\n \n check \n \n `)
-        console.log(fields === result)
+
         console.log(`\n \n result \n \n `)
         console.log(result)
         resolve({ ok: true, result })
       }
       )
+    },
+
+    isAuthenticated: async (request: Request) => {
+
     }
 
   }
@@ -200,5 +227,12 @@ export function GunCtx() {
 
 
 export interface Context {
+  auth: (request: Request) => Promise<{ ok: boolean, result: any, keys?: any }>
+}
 
+export const createContext = (request: Request, env: EnvironmentVariables) => {
+  const {authenticate} = GunCtx(env)
+  return {
+    auth: authenticate(request)
+  }
 }

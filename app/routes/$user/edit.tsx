@@ -12,7 +12,6 @@ import Button from '~/components/buttons/Button';
 import Display from '~/components/DisplayHeading';
 import FormSubscribe from '~/components/FormSubscribe';
 import InputText from '~/components/InputText';
-import { validateJob, validateDescription } from '~/lib/utils/validate-strings';
 
 type ActionData = {
   formError?: string;

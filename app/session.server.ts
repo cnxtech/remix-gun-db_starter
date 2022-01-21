@@ -1,7 +1,7 @@
 import Gun from 'gun';
 import { IGunCryptoKeyPair } from 'gun/types/types';
 import { createCookieSessionStorage, redirect } from 'remix';
-import { AuthKeys, decrypt, encrypt } from './lib/GunDb/GunCtx';
+import { AuthKeys, decrypt, encrypt } from '../lib/GunDb/GunCtx';
 
 
 export const master: IGunCryptoKeyPair = {

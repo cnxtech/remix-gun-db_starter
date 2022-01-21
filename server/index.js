@@ -3,20 +3,29 @@ const express = require('express');
 const compression = require('compression');
 const morgan = require('morgan');
 const { createRequestHandler } = require('@remix-run/express');
+const { createContext } = require('../lib/GunDb')
 /**
  * GUN Relay
  */
-
+let env = {
+  PUB: process.env.PUB,
+  PRIV: process.env.PRIV,
+  EPUB: process.env.EPUB,
+  EPRIV: process.env.EPRIV,
+  GUN_PORT: process.env.GUN_PORT,
+  CLIENT_PORT: process.env.CLIENT_PORT,
+  DOMAIN: process.env.DOMAIN,
+}
+if (!env) {
+  throw Error('Set your environment variables ya dingus!');
+}
 let Gun = require('gun');
 
 const ports = {
-  RELAY: process.env.GUN_PORT,
-  CLIENT: process.env.CLIENT_PORT
+  RELAY: env.GUN_PORT,
+  CLIENT: env.CLIENT_PORT
 };
 
-if (!ports) {
-  throw Error('Set your environment variables ya dingus!');
-}
 
 const http = require('http');
 
@@ -49,15 +58,25 @@ app.use(morgan('tiny'));
 app.all(
   '*',
   MODE === 'production'
-    ? createRequestHandler({ build: require('./build') })
+    ? createRequestHandler({
+      build: require('./build'),
+      // load context
+      getLoadContext(req, res) {
+        return (createContext(req, env))
+      }
+    })
     : (req, res, next) => {
       purgeRequireCache();
       let build = require('./build');
-      return createRequestHandler({ build, mode: MODE })(req, res, next);
+      function getLoadContext(req, res) {
+        return (createContext(req, env))
+      }
+      return createRequestHandler({ build, getLoadContext, mode: MODE })(req, res, next);
     }
 );
- const peers = [
-  `http://localhost:${ports.RELAY}/gun`,
+const peers = [
+  `http://0.0.0.0:${ports.RELAY}gun`,
+  `http://${ports.DOMAIN}:${ports.CLIENT}gun` || `https://${ports.DOMAIN}:${ports.CLIENT}gun`,
   'https://relay.peer.ooo/gun',
   'https://replicant.adamantium.online/gun',
   'http://gun-matrix.herokuapp.com/gun',
@@ -81,7 +100,7 @@ Gun({
   web: app.listen(ports.CLIENT, () => {
     console.log(`Express server listening on port ${ports.CLIENT}`);
   }),
-  localStorage:false,
+  localStorage: false,
   radisk: false
 });
 

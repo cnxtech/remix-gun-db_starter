@@ -1,11 +1,11 @@
 import React from 'react';
 import Avatar from '../Avatar';
 
-interface Props {
+export interface BlogCardProps{
   img?: string;
   title: string;
   desc: string;
-  tags: string[];
+  tags?: string[];
   categ?: string;
   icon?: string;
   showTags?: boolean;
@@ -13,7 +13,7 @@ interface Props {
   alias?: string;
 }
 
-const BlogCard = (props: Props) => {
+const BlogCard = (props: BlogCardProps) => {
   return (
     <div className="overflow-hidden shadow-lg rounded-lg h-90 w-60 md:w-80 cursor-pointer m-auto">
       <a href="#" className="w-full block h-full">
