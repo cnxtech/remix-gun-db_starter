@@ -1,4 +1,5 @@
 node_modules
+lib/GunDb/*.js
 .env
 radata
 *.tmp
