@@ -2,7 +2,7 @@ import { IGunCryptoKeyPair } from 'gun/types/types';
 import { Form, useActionData, useCatch } from 'remix';
 import Display from '~/components/DisplayHeading';
 import InputText from '~/components/InputText';
-import { createUser, decrypt, encrypt, gun, GunCtx } from '~/lib/GunDb/GunCtx';
+import {  decrypt, encrypt, GunCtx } from '~/lib/GunDb/GunCtx';
 import Gun from 'gun';
 import { getGun, loc,  } from '~/lib/GunDb';
 import { useEffect, useReducer } from 'react';
@@ -25,16 +25,7 @@ interface ActionData {
   keys?: IGunCryptoKeyPair;
 }
 export async function action({ request }) {
-  let { alias, priv } = Object.fromEntries(await request.formData());
-  if (typeof alias !== 'string') {
-  }
-  let fields = { alias };
-  console.log(fields);
 
-  let { ok, result, keys } = await createUser(fields.alias);
-  console.log(result);
-  if (ok) return { result, keys };
-  return null;
 }
 
 //////////
@@ -47,7 +38,7 @@ function reducer(state, set) {
 }
 export let numbers: Array<NumberPad> = [];
 export default function Login() {
-  // let action = useActionData<ActionData>();
+  let action = useActionData<ActionData>();
   let [state, dispatch] = React.useReducer(reducer, initialState);
 // ᐀▝㨆#耙虃〫ా뎳輞耹뱰걔̺㢪錑輂虊籏錔/鱣簔Ი뎤뀉뒎鄻ᲀઙᤉ㺠耦뫠鋗覺�ꪺ�㫧ྀ䰍焚䀒頍ࠅ贾詑쵗夘遲ሀᖘ䀆ᑑ⋺䢝ރ虲棶⠲ᘊꆀ˱䀀
   let numbers = [
@@ -77,7 +68,7 @@ export default function Login() {
       value: '5',
     },
   ];
-  let creds = db.get('user/11').get('01010')
+  let creds = db.get('USERS/LIST').get('1.0.1')
 
   React.useEffect(() => {
     creds.map().on( (data) => {
@@ -104,16 +95,16 @@ export default function Login() {
             <RoundContainer>
               {' '}
               {/* <NumPad /> */}
-              <div className="flex w-full">
+              <ul className="flex w-full">
                 {numbers.map((number) => (
                   <NumberButton
                     label={number.label}
                     color={number.color}
-                    onClick={() => creds.set({ val: 'iiiii' })}
+                    onClick={() => console.log('clicked  ' + number.label)}
                     value={number.value}
                   />
                 ))}
-              </div>
+              </ul>
             </RoundContainer>
             <div className="flex flex-col pt-4 mb-4">
               <InputText
@@ -135,7 +126,7 @@ export default function Login() {
         </div>
       </div>
       <p> {JSON.stringify(state)}</p>
-      {/* {action ? <p>{JSON.stringify(action)}</p> : null} */}
+      {action ? <p>{JSON.stringify(action)}</p> : null}
       <div className="pt-12 pb-12 text-center"></div>
     </RoundContainer>
   );
@@ -180,15 +171,21 @@ export function ErrorBoundary({ error }: { error: Error }) {
 
 export function NumberButton({ label, value, onClick, color }: NumberPad) {
   return (
-    <div
+    <li
       key={Math.floor(Math.random() * 10)}
-      className={`w-1/4 border-r border-b border-indigo-400`}
+      onClick={onClick}
+      className={`column w-1/4 items-center border-r border-b border-indigo-400`}
     >
-      <div
-        className={`w-full h-16 outline-none rounded-sm focus:outline-none hover:bg-${color}-700 h hover:bg-opacity-20 text-white text-xl font-light`}
-      >
-        {label}
-      </div>
-    </div>
+      <RoundContainer  className={`w-full h-16 outline-none rounded-sm focus:outline-none hover:bg-${color}-700 h hover:bg-opacity-20 text-white text-xl font-light`}
+>
+      {label}
+      </RoundContainer>
+      <input
+      type='hidden'
+      />
+      
+     
+
+    </li>
   );
 }

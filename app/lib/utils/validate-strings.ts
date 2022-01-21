@@ -1,24 +1,22 @@
-function validateUsername(username: unknown) {
-  if (typeof username !== 'string' || username.length < 3) {
-    return `Usernames must be at least 3 characters long`;
+function validateIdString(string: unknown):{} {
+  if (typeof string !== 'string' || string.length < 20) {
+    return `Identification string must be at least 20 characters long`;
   }
 }
 
-function validatePassword(password: unknown) {
-  if (typeof password !== 'string' || password.length < 6) {
-    return `Passwords must be at least 6 characters long`;
-  }
-}
-function validateJob(title: unknown) {
-  if (typeof title !== 'string' || title.length < 5) {
-    return `Job title must be at least 5 characters long`;
+function validateColor(color: unknown) {
+  if (typeof color !== 'string' || color.length < 6) {
+    return `Color code must be a combination of at least 6 characters`;
   }
 }
 
-function validateDescription(desc: unknown) {
-  if (typeof desc !== 'string' || desc.length > 140) {
-    return `Descriptions must be under 140 characters`;
-  }
+function getDate() {
+  const newDate = new Date();
+  var dd = String(newDate.getDate()).padStart(2, 'O');
+  var mm = String(newDate.getMonth() + 1).padStart(2, 'O');
+  var yyyy = newDate.getFullYear();
+  var sec = String(newDate.getTime());
+  var timestamp = `${dd}.${mm}.${yyyy}:${sec}`;
+  return timestamp;
 }
-
-export { validatePassword, validateUsername, validateJob, validateDescription };
+export { getDate, validateIdString, validateColor };

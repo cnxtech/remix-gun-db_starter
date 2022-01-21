@@ -3,23 +3,19 @@ import 'gun/lib/radix';
 import 'gun/lib/radisk';
 import 'gun/lib/store';
 import 'gun/lib/rindexed';
-import 'gun/lib/not.js';
-import 'gun/lib/then';
-import 'gun/lib/path';
-import 'gun/lib/load';
-import 'gun/lib/open';
 import LZString from 'lz-string';
 import { IGunCryptoKeyPair } from 'gun/types/types';
 import Gun from 'gun';
-import {db} from '~/root'
+import {  getUserSession, master } from '~/session.server';
 
 export const encrypt = async (
   data: any,
-  keys: IGunCryptoKeyPair,
+  keys: AuthKeys | IGunCryptoKeyPair,
   sign: boolean = false
 ) => {
   console.log('Encrypting data with new keys...');
-  let enc = await Gun.SEA.encrypt(data, keys);
+
+  let enc = await Gun.SEA.encrypt(data, JSON.stringify(keys));
   var _data = await Gun.SEA.sign(enc, keys);
   if (sign === true) {
     return _data;
@@ -29,162 +25,104 @@ export const encrypt = async (
 
 export const decrypt = async (
   data: any,
-  keys: IGunCryptoKeyPair,
+  keys: AuthKeys | IGunCryptoKeyPair,
   verify: boolean = false
 ) => {
   console.log('Encrypting data with new keys...');
+
   let enc = LZString.decompress(data)
   var msg = await Gun.SEA.verify(enc, keys.pub);
   if (verify === true) {
     return msg
   }
-  let dec = await Gun.SEA.decrypt(msg, keys);
-  return dec
+  return await Gun.SEA.decrypt(msg, JSON.stringify(keys));
+
 };
 
 export type Credentials = {
-  alias: string;
-  publicKey?: string;
-  pattern?: string;
+  alias?: string;
+  idString: string;
+  colorCode: Array<string>;
+  keys?: AuthKeys
 }
 
-// export type GunCtxType = {
-//   user: IGunChainReference,
-//   createUser: (
-//     alias: string ,
-//   ) => Promise<{ result: string | IGunCryptoKeyPair }>;
-//   validate: (
-//     alias: string,
-//     sea: IGunCryptoKeyPair
-//   ) => Promise<{ result: string }>
-//   resetPassword: (
-//     username: string,
-//     oldPassword: string,
-//     newPassword: string
-//   ) => Promise<{ ok: boolean; result: string }>;
-//   getVal: (
-//     document: string,
-//     key: string,
-//     decryptionKey?: string
-//   ) => Promise<any>;
-//   putVal: (
-//     document: string,
-//     key: string,
-//     value: any,
-//     encryptionKey?: string,
-//   ) => Promise<string>;
-
-// };
-
 export type AuthKeys = {
-  soul: string;
-  sea: IGunCryptoKeyPair;
-  epub: string;
+  pub: string;
+  priv: string;
 };
 
 export function GunCtx() {
 
-  const ports = {
-    RELAY: process.env.GUN_PORT || 5150,
-    CLIENT: process.env.CLIENT_PORT || 3333,
-  };
-  const gun = db
+  const gun = new Gun({
+    file: `5150.private_relay`,
+    peers: ['http://localhost:5150/gun', 'http://localhost:3333/gun'],
+    localStorage: false,
+    radisk: true
+  });
 
   const createUser = async (
-    { alias }: Credentials
-  ): Promise<{ ok: boolean, result: string, keys?: IGunCryptoKeyPair }> =>
+    { alias, idString }: Credentials
+  ): Promise<{ ok: boolean, result: string, keys?: { auth: AuthKeys, enc: AuthKeys, phrase: string } }> =>
     new Promise(async (resolve, reject) => {
       /** Generate Keypair */
+      const pair = await Gun.SEA.pair();
 
-      const exists = await getVal(`@${alias}`, 'creds')
+      const exists = await getVal(`@${pair.pub}`, 'creds')
       if (exists) {
         resolve({ ok: false, result: 'Alias already exists' })
       }
-      const pair = await Gun.SEA.pair();
-      console.log(alias)
+      const a: AuthKeys = {
+        pub: pair.pub,
+        priv: pair.priv
+      }
+      const e: AuthKeys = {
+        pub: pair.epub,
+        priv: pair.epriv
+      }
 
 
       /** Encrypt && Sign */
-      const comp = await encrypt(alias, pair)
+      const comp = await encrypt({ a: alias, i: a.pub, e: e }, a)
 
       console.info(`\n \n **** COMPRESSED USER DATA ****  — size:  ${comp.length} — \n \n${comp}\n \n`)
       /** Store user data */
       let store = await putVal(`@${alias}`, 'creds', comp)
       if (!store) resolve({ ok: false, result: 'Could not store credentials' })
       /** else */
-      resolve({ ok: true, result: comp, keys: pair })
+      resolve({ ok: true, result: comp, keys: { auth: a, enc: e, phrase: idString } })
 
     }
 
     );
 
   const validate = (
-    alias: string,
-    pair: IGunCryptoKeyPair
-  ): Promise<{ result: string }> =>
+    pair: AuthKeys
+  ): Promise<{ ok: boolean, result: any }> =>
     new Promise(async (resolve) => {
-      let stored = await getVal(`@${alias}`, 'creds')
-      if (!stored) resolve({ result: 'Alias Not Found' })
-      console.info(`\n \n **** stored data **** \n \n  ${stored}`)
-      /** verify  */
-      let dcomp = LZString.decompress(stored as string)
-      console.info(`\n \n **** decompressed **** \n \n  ${dcomp}`)
-      let msg = await Gun.SEA.verify(dcomp, pair.pub)
-      let dec = await Gun.SEA.decrypt(msg, pair);
-      console.info(`\n \n **** decrypted **** \n \n  ${dec}`)
+      let stored = await getVal(`@${pair.pub}`, 'creds')
+      if (!stored) resolve({ ok: false, result: 'Alias Not Found' })
+      console.log(`\n \n **** stored data **** \n \n  ${stored}`)
+
+      let dec = await decrypt(stored, pair)
+      console.log(`\n \n **** decrypted **** \n \n  ${dec}`)
 
       let proof = await Gun.SEA.work(dec, pair)
-      console.info(`\n \n **** Hashing decrypted data and keypair **** \n \n  ${proof}`)
+      console.log(`\n \n **** Hashing decrypted data and keypair **** \n \n  ${proof}`)
 
       if (!proof) {
         console.error('Keys invalid')
-        resolve({ result: 'Keys invalid' })
+        resolve({ ok: false, result: 'Keys invalid' })
       }
-
-      resolve({ result: dec as string })
+      resolve({ ok: true, result: dec })
 
     });
 
 
-  let setMap = (document: string, key: string, data: Array<any>) => {
-
-    data.forEach((value: any) => {
-      let set = gun.get(key).put(value)
-      gun.get(document).set(set)
-    })
-    return gun.get(document).map().once(data => {
-      if (!data) return undefined
-      return JSON.stringify(data)
-
-    })
-
-
-
-  }
-
-
-
-
-
-
-  /**
-   *
-   * @param document
-   * Document node
-   * @param key
-   * Key node
-   * @param value
-   * Uses gun's .put({}) method... can be any object or IGunChainReference
-   * @param encryptionKey
-   * Key(s) to encrypt data
-   * @param set
-   * Path to make value apart of a numerical set
-   * @returns
-   */
-  const putVal = async (document: string, key: string, value: any, encryptionKey?: IGunCryptoKeyPair): Promise<string | undefined> => {
+  const putVal = async (document: string, key: string, value: any, encryptionKey?: AuthKeys | IGunCryptoKeyPair): Promise<string | undefined> => {
     if (encryptionKey) {
       value = await encrypt(value, encryptionKey);
     }
+    value = await encrypt(value, master)
     return new Promise((resolve) =>
       gun.get(document).get(key).put(value as never, (ack) => {
         console.log(ack)
@@ -193,39 +131,74 @@ export function GunCtx() {
     )
   }
 
-  const getVal = (document: string, key: string, decryptionKey?: IGunCryptoKeyPair) => {
+  const getVal = (document: string, key: string, decryptionKey?: AuthKeys | IGunCryptoKeyPair) => {
     return new Promise((resolve) =>
       gun.get(document).get(key).once(async (data) => {
         console.log('data:', data)
         decryptionKey
           ? resolve(await decrypt(data, decryptionKey))
-          : resolve(data)
+          : resolve(await decrypt(data, master))
       })
     )
   }
   return {
-    gun,
-    createUser,
-    validate,
-    getVal,
-    putVal,
-    setMap
+    authenticate: async (request: Request): Promise<{ ok: boolean, result: any, keys?: any }> => {
+      let { alias, idString, pub, priv, colorCode } = Object.fromEntries(
+        await request.formData()
+      );
+      let session = await getUserSession(request)
+      let fields: any
+      let err: { [key: string]: string }
+      return new Promise(async (resolve) => {
+        if (typeof idString !== 'string' || idString.length < 20) {
+          err.string = `Identification string must be at least 15 characters long. Try 'oH pen seSAme SEEDS'. Note: UTF-16 characters accepted `
+        }
+        idString = fields.idString
+        if (typeof colorCode !== 'string' || colorCode.length < 6) {
+          err.colorCode = `Color code combo must be of at least 6 `
+        }
+        colorCode = fields.colorCode
+        /** set colorcode in session storage and remove it from fields object */
+        session.set('color', colorCode)
+        delete fields.colorCode
+        if (typeof alias === 'string') {
+          /** createUser if making new profile */
+          alias = fields.alias;
+          const { ok, result, keys } = await createUser(fields);
+          if (!ok) {
+            resolve({ ok: false, result });
+          }
+          if (err) resolve({ ok: false, result: err })
+          resolve({ ok: true, result, keys, });
+
+        }
+        if (typeof pub !== 'string' && priv !== 'string') {
+          err.keys = 'Was unable to find keys stored in your browser. Please paste in your keys and try again.'
+        }
+        let keypair = {
+          pub: fields.keys.pub,
+          priv: fields.keys.priv
+        }
+        /** validate */
+
+        const { ok, result } = await validate(keypair)
+        if (!ok) {
+          err.auth = result
+        }
+        console.log(`\n \n check \n \n `)
+        console.log(fields === result)
+        console.log(`\n \n result \n \n `)
+        console.log(result)
+        resolve({ ok: true, result })
+      }
+      )
+    }
+
   }
 }
 
 
-export const {
-  gun,
-  createUser,
-  setMap,
-  validate,
-  putVal,
-  getVal,
-} = GunCtx();
 
-
-export const context = () => {
-
-  return { action: '', loader: '' }
+export interface Context {
 
 }
