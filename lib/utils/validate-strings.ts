@@ -1,4 +1,4 @@
-function validateIdString(string: unknown):{} {
+function validateIdString(string: unknown): {} {
   if (typeof string !== 'string' || string.length < 20) {
     return `Identification string must be at least 20 characters long`;
   }

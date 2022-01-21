@@ -28,7 +28,7 @@ interface HeaderLink {
   to?: string;
   isSelected?: boolean;
   desc?: string;
-  icon?: {item:number ,path:string}
+  icon?: { item: number; path: string };
   onClick?: () => void;
 }
 interface DDMItem {

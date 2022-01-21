@@ -6,11 +6,9 @@ import { Form } from 'remix';
 
 const BasicForm = () => {
   return (
-    <Form method='post' className="flex w-full max-w-2xl space-x-3">
+    <Form method="post" className="flex w-full max-w-2xl space-x-3">
       <div className="w-full max-w-2xl px-5 py-10 m-auto mt-10 bg-white rounded-lg shadow dark:bg-gray-800">
-        <div className="mb-6 text-3xl font-light text-center text-gray-800 dark:text-white">
-          
-        </div>
+        <div className="mb-6 text-3xl font-light text-center text-gray-800 dark:text-white"></div>
 
         <div className="grid max-w-xl grid-cols-2 gap-4 m-auto">
           <div className="col-span-2 lg:col-span-1">

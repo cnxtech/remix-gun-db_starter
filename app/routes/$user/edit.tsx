@@ -25,7 +25,7 @@ export let loader: LoaderFunction = async ({ params }) => {
 ///////////////
 
 export let action: ActionFunction = async ({ request, params }) => {
-return null;
+  return null;
 };
 
 ///////////////

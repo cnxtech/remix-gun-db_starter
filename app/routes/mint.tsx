@@ -23,17 +23,16 @@ export let action: ActionFunction = async ({ request }) => {
   let publisher = body.get('publisher');
   let url = body.get('url');
 
-  return null
+  return null;
 };
 
 export default function ActionsDemo() {
   // https://remix.run/api/remix#useactiondata
   let err = useActionData();
-  
 
   return (
     <>
-    <BasicForm />
+      <BasicForm />
     </>
   );
 }

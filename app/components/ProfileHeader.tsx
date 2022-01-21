@@ -22,7 +22,13 @@ interface Social {
 const ProfileHeader = (props: Props) => {
   return (
     <div>
-  <Display title={props.name} span={props.job} description={props.desc} titleColor='red-500' spanColor='blue-500' />
+      <Display
+        title={props.name}
+        span={props.job}
+        description={props.desc}
+        titleColor="red-500"
+        spanColor="blue-500"
+      />
       <div className="text-center items-center mb-4 opacity-90">
         <Avatar size={props.size} img={props.img} />
       </div>
@@ -30,10 +36,10 @@ const ProfileHeader = (props: Props) => {
         {props.social &&
           props.social.map((link: Social) => (
             <Link to={link.to}>
-             <SvgIcon path={link.svgPath} fill={'blue'} size={'20'} />
+              <SvgIcon path={link.svgPath} fill={'blue'} size={'20'} />
             </Link>
           ))}
-          {/* <H1 title={props.name} span={props.job} /> */}
+        {/* <H1 title={props.name} span={props.job} /> */}
       </div>
     </div>
   );

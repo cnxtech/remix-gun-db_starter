@@ -4,17 +4,19 @@ import ProfileHeader from '~/components/ProfileHeader';
 import Display from '~/components/DisplayHeading';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
-  return null
+  return null;
 };
 
 export default function User() {
-  let {data, keys} = useLoaderData();
-console.log(keys)
+  let { data, keys } = useLoaderData();
+  console.log(keys);
 
   return (
     <div className="mt-5">
       <ProfileHeader
-        img={`https://avatars.dicebear.com/api/micah/${data.alias?? data.alias}}.svg`}
+        img={`https://avatars.dicebear.com/api/micah/${
+          data.alias ?? data.alias
+        }}.svg`}
         name={data.alias ?? data.alias}
         size="monster"
         job={data.job ?? data.job}

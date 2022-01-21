@@ -1,7 +1,5 @@
-
-
-export default function H1({title, span}) {
-// main function
+export default function H1({ title, span }) {
+  // main function
   return (
     <div className="bg-white dark:bg-gray-800 ">
       <div className="lg:flex lg:items-center lg:justify-between w-full mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 z-20">

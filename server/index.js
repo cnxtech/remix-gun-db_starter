@@ -3,7 +3,7 @@ const express = require('express');
 const compression = require('compression');
 const morgan = require('morgan');
 const { createRequestHandler } = require('@remix-run/express');
-const { createContext } = require('remix-gun-context')
+const { createContext } = require('remix-gun-context');
 /**
  * GUN Relay
  */
@@ -15,18 +15,19 @@ let env = {
   GUN_PORT: process.env.GUN_PORT,
   CLIENT_PORT: process.env.CLIENT_PORT,
   DOMAIN: process.env.DOMAIN,
-}
+};
 if (!env) {
-  throw Error('Set your environment variables ya dingus!');
+  throw Error();
 }
-let Gun = require('gun');
 
 const ports = {
+  DOMAIN: env.DOMAIN,
   RELAY: env.GUN_PORT,
-  CLIENT: env.CLIENT_PORT
+  CLIENT: env.CLIENT_PORT,
 };
 
-
+/** Private Gun relay that can only be reached by client  */
+let Gun = require('gun');
 const http = require('http');
 
 Gun({
@@ -59,24 +60,29 @@ app.all(
   '*',
   MODE === 'production'
     ? createRequestHandler({
-      build: require('./build'),
-      // load context
-      getLoadContext(req, res) {
-        return (createContext(req, env))
-      }
-    })
+        build: require('./build'),
+        // load context
+        getLoadContext(req, res) {
+          return createContext(req, env);
+        },
+      })
     : (req, res, next) => {
-      purgeRequireCache();
-      let build = require('./build');
-      function getLoadContext(req, res) {
-        return (createContext(req, env))
+        purgeRequireCache();
+        let build = require('./build');
+        function getLoadContext(req, res) {
+          return createContext(req, env);
+        }
+        return createRequestHandler({ build, getLoadContext, mode: MODE })(
+          req,
+          res,
+          next
+        );
       }
-      return createRequestHandler({ build, getLoadContext, mode: MODE })(req, res, next);
-    }
 );
 const peers = [
   `http://0.0.0.0:${ports.RELAY}gun`,
-  `http://${ports.DOMAIN}:${ports.CLIENT}gun` || `https://${ports.DOMAIN}:${ports.CLIENT}gun`,
+  `http://${ports.DOMAIN}:${ports.CLIENT}gun` ||
+  `https://${ports.DOMAIN}:${ports.CLIENT}gun`,
   'https://relay.peer.ooo/gun',
   'https://replicant.adamantium.online/gun',
   'http://gun-matrix.herokuapp.com/gun',
@@ -94,14 +100,15 @@ const peers = [
   'https://gun-manhattan.herokuapp.com/gun',
   'https://us-west.xerberus.net/gun',
   'https://dletta.rig.airfaas.com/gun',
-  'https://e2eec.herokuapp.com/gun']
+  'https://e2eec.herokuapp.com/gun',
+];
 Gun({
   peers: peers,
   web: app.listen(ports.CLIENT, () => {
     console.log(`Express server listening on port ${ports.CLIENT}`);
   }),
   localStorage: false,
-  radisk: false
+  radisk: false,
 });
 
 ////////////////////////////////////////////////////////////////////////////////

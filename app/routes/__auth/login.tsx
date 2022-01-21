@@ -2,7 +2,7 @@ import { IGunCryptoKeyPair } from 'gun/types/types';
 import { ActionFunction, Form, useActionData, useCatch } from 'remix';
 import Display from '~/components/DisplayHeading';
 import InputText from '~/components/InputText';
-import { decrypt, encrypt} from '../../../lib/RemiGunCtx/context';
+import { decrypt, encrypt } from '../../../lib/RemiGunCtx/context';
 import React from 'react';
 import RoundContainer from '~/components/RoundContainer';
 import { db } from '~/root';
@@ -17,9 +17,9 @@ interface ActionData {
   result: string;
   keys?: IGunCryptoKeyPair;
 }
-export let action:ActionFunction = async({ context }) =>{
-return null
-}
+export let action: ActionFunction = async ({ context }) => {
+  return null;
+};
 
 //////////
 

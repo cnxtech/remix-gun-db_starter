@@ -29,5 +29,3 @@ export const blogs = [
     desc: 'The new supercar is here, 543 cv and 140 000$ !!',
   },
 ];
-
-

@@ -3,7 +3,7 @@ import InputText from '../inputtext/InputText';
 import Button from '../../elements/buttons/Button';
 import { InputTextProps } from '~/components/InputText';
 
-const LoginWithBackground = (input:Array<InputTextProps>) => {
+const LoginWithBackground = (input: Array<InputTextProps>) => {
   return (
     <div className="w-full h-screen font-sans bg-cover bg-landscape">
       <div className="container flex items-center justify-center flex-1 h-full mx-auto">
@@ -14,10 +14,18 @@ const LoginWithBackground = (input:Array<InputTextProps>) => {
                 Login
               </p>
               <div className="mb-2">
-                <InputText placeholder="username" name="username"  id="login-with-bg-email" />
+                <InputText
+                  placeholder="username"
+                  name="username"
+                  id="login-with-bg-email"
+                />
               </div>
               <div className="mb-2">
-                <InputText placeholder="password" name="password" id="login-with-bg-password" />
+                <InputText
+                  placeholder="password"
+                  name="password"
+                  id="login-with-bg-password"
+                />
               </div>
 
               <div className="flex items-center justify-between mt-4">

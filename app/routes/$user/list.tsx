@@ -4,7 +4,7 @@ import BlogList from '~/components/blog/BlogList';
 import Display from '~/components/DisplayHeading';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
-return null
+  return null;
 };
 
 ///////////////
@@ -14,23 +14,21 @@ export let action: ActionFunction = async ({ request }) => {
 };
 ///////////////
 
-  const initialState = [];
+const initialState = [];
 
-  // Create a reducer that will update the components array
-  function reducer(state, set) {
-    return [set, ...state];
-  }
+// Create a reducer that will update the components array
+function reducer(state, set) {
+  return [set, ...state];
+}
 
-  export default function List() {
-
+export default function List() {
   let data = useLoaderData();
-console.log(data)
-
+  console.log(data);
 
   return (
     <>
-    {/* <p>{JSON.stringify(state)}</p> */}
-      <BlogList  alias={''} />
+      {/* <p>{JSON.stringify(state)}</p> */}
+      <BlogList alias={''} />
     </>
   );
 }
@@ -70,7 +68,3 @@ export function ErrorBoundary({ error }: { error: Error }) {
     </div>
   );
 }
-
-
-
-

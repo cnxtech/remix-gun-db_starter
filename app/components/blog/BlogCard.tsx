@@ -1,7 +1,7 @@
 import React from 'react';
 import Avatar from '../Avatar';
 
-export interface BlogCardProps{
+export interface BlogCardProps {
   img?: string;
   title: string;
   desc: string;

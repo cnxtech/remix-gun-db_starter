@@ -1,7 +1,13 @@
-import { LoaderFunction, MetaFunction, Outlet, useCatch, useLoaderData, useLocation } from 'remix';
+import {
+  LoaderFunction,
+  MetaFunction,
+  Outlet,
+  useCatch,
+  useLoaderData,
+  useLocation,
+} from 'remix';
 import React from 'react';
 import Document from './components/remix/Document';
-
 import type { LinksFunction } from 'remix';
 import styles from '~/styles/tailwind.css';
 import globalStylesUrl from '~/styles/global.css';
@@ -9,13 +15,45 @@ import darkStylesUrl from '~/styles/dark.css';
 import Layout from './components/remix/Layout';
 import Display from './components/DisplayHeading';
 import Header from './components/Header';
-import Logo from './components/svg/logos/BDS';
-import FMLogo from './components/svg/logos/FltngMmth';
 import CNXTLogo from './components/svg/logos/CNXT';
-import { decrypt, } from '../lib/RemiGunCtx/context';
-import { master } from './session.server';
 import Gun from 'gun';
+import { IGunCryptoKeyPair } from 'gun/types/types';
+import { decrypt, encrypt } from '../lib/remix-gun-context/context';
+import { AuthKeys } from '../lib/remix-gun-context/types';
 
+export const loader: LoaderFunction = () => {
+  return null;
+};
+
+export default function App() {
+  const location = useLocation();
+  console.log(location);
+  let data = {
+    links: [
+      { to: '/', label: 'Home', isFat: true },
+      { to: '/login', label: 'LogIn' },
+      { to: '/logout', label: 'LogOut' },
+    ],
+  };
+  let p = put('test', 'testy', { data: 'test' });
+  if (!p) console.error('put failed' + p);
+  let g = get('test', 'testy');
+  if (!g) console.error('get failed' + g);
+  console.log(g);
+  return (
+    <Document>
+      <Layout theme={'dark'}>
+        <Header
+          links={data.links}
+          hideHelp={true}
+          hideGitHubLink={true}
+          logo={<CNXTLogo />}
+        />
+        <Outlet />
+      </Layout>
+    </Document>
+  );
+}
 export let links: LinksFunction = () => {
   return [
     { rel: 'stylesheet', href: globalStylesUrl },
@@ -29,7 +67,10 @@ export let links: LinksFunction = () => {
       rel: 'stylesheet',
       href: 'https://use.fontawesome.com/releases/v5.15.4/css/all.css',
     },
-    { rel:'stylesheet', href:"https://cdn.materialdesignicons.com/6.5.95/css/materialdesignicons.min.css"},
+    {
+      rel: 'stylesheet',
+      href: 'https://cdn.materialdesignicons.com/6.5.95/css/materialdesignicons.min.css',
+    },
     {
       rel: 'apple-touch-icon',
       sizes: '180x180',
@@ -65,37 +106,6 @@ export const meta: MetaFunction = () => {
     'msapplication-TileColor': '#000',
   };
 };
-
-export const loader: LoaderFunction = () => {
-  
-return null
-}
-
-export default function App() {
-
-  const location = useLocation()
-  console.log(location)
-  let data = {
-    links: [
-      { to: '/', label: 'Home', isFat:true },
-      { to: '/login', label: 'LogIn' },
-      { to: '/logout', label: 'LogOut' },
-    ],
-  };
-  return (
-    <Document>
-      <Layout theme={'dark'}>
-        <Header
-          links={data.links}
-          hideHelp={true}
-          hideGitHubLink={true}
-          logo={<CNXTLogo />}
-        />
-        <Outlet  />
-      </Layout>
-    </Document>
-  );
-}
 
 // https://remix.run/docs/en/v1/api/conventions#errorboundary
 export function ErrorBoundary({ error }) {
@@ -143,11 +153,55 @@ export function CatchBoundary() {
       );
   }
 }
-export const db = Gun({
-  peers: ['http://localhost:5150/gun','http://localhost:3333/gun'],
+
+/** Gun — for browser storage */
+
+export const gun = new Gun({
+  peers: ['http://localhost:5150/gun', 'http://localhost:3333/gun'],
   radisk: false,
   localStorage: true,
 });
+
+export const put = (
+  document: string,
+  key: string,
+  value: any,
+  encryptionKey?: AuthKeys | IGunCryptoKeyPair
+) => {
+  return gun
+    .get(document)
+    .get(key)
+    .put(value as never, async (ack) => {
+      if (encryptionKey) {
+        value = await encrypt(value, encryptionKey);
+      }
+      value = await encrypt(value, master);
+      console.log(ack);
+      return ack.ok ? 'Added data!' : ack.err?.message ?? undefined;
+    });
+};
+
+export const get = (
+  document: string,
+  key: string,
+  decryptionKey?: AuthKeys | IGunCryptoKeyPair,
+  cb?: (data: any) => any
+) => {
+  return gun
+    .get(document)
+    .get(key)
+    .once(async (data) => {
+      console.log('data:', data);
+      decryptionKey
+        ? (data = await decrypt(data, decryptionKey))
+        : (data = await decrypt(data, master));
+      if (cb) {
+        return cb(data);
+      }
+      return data;
+    });
+};
+
 export let initialState = [];
 export let reducer = (state: any, set: any) => {
   return [...state, set];
@@ -155,18 +209,20 @@ export let reducer = (state: any, set: any) => {
 /////
 
 // const gun = Gun({ peers: peers });
- export function map(
-  document: string,
-  dispatch: React.Dispatch<any>,
-
-) {
-  return db
+export function map(document: string, dispatch: React.Dispatch<any>) {
+  return gun
     .get(document)
     .map()
-    .on(async(data) => {
-      if (!data) return  undefined ;
-      data = await decrypt(data, master)
+    .on(async (data) => {
+      if (!data) return undefined;
+      data = await decrypt(data, master);
       dispatch(data);
     });
 }
 
+const master: IGunCryptoKeyPair = {
+  pub: process.env.PUB,
+  priv: process.env.PRIV,
+  epub: process.env.EPUB,
+  epriv: process.env.EPRIV,
+};

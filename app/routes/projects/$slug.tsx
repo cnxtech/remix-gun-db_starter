@@ -1,27 +1,17 @@
-import {
-  ActionFunction,
-  Form,
-  Link,
-  LoaderFunction,
-} from 'remix';
+import { ActionFunction, Form, Link, LoaderFunction } from 'remix';
 import JobCard from '~/components/elements/data/JobCard';
 import PaymentCard from '~/components/elements/data/PaymentCard';
 import ProfileHeader from '~/components/ProfileHeader';
-import {  paths } from '~/components/svg/logos/SvgIcon';
+import { paths } from '~/components/svg/logos/SvgIcon';
 export let loader: LoaderFunction = async () => {
-
-
-  return null
+  return null;
 };
 ///////////////
 export let action: ActionFunction = async () => {
-
   return null;
 };
 ///////////////
 export default function ProjectSlug() {
-  
-
   // let transition = useTransition();
   // let pendingForm = transition.submission;
 
@@ -44,8 +34,8 @@ export default function ProjectSlug() {
         </div>
         <div className="lg:col-span-4">
           <div className="overflow-hidden bg-gray-100 rounded-lg aspect-w-4 aspect-h-3">
-          <PaymentCard />
-          <JobCard/>
+            <PaymentCard />
+            <JobCard />
             {/* <img
               src={'/images/landscape/5.svg'}
               className="object-cover object-center "

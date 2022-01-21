@@ -1,8 +1,8 @@
 import React from 'react';
-import BlogCard, {BlogCardProps}from './BlogCard';
+import BlogCard, { BlogCardProps } from './BlogCard';
 
 interface Props {
-  blogs: Array<BlogCardProps>
+  blogs: Array<BlogCardProps>;
   withSearch?: boolean;
   alias?: string;
 }

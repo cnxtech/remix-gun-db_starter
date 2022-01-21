@@ -1,4 +1,4 @@
-import RoundContainer from "./RoundContainer"
+import RoundContainer from './RoundContainer';
 
 interface Props {
   title: string;
@@ -17,7 +17,7 @@ export default function Display({
 }: Props) {
   // main fun?ction
   return (
-    <RoundContainer className='pl-5 mt-5'>
+    <RoundContainer className="pl-5 mt-5">
       <span className="w-20 h-2 bg-gray-800 dark:bg-white mb-12 animate-bounce animate-infinite"></span>
       <h1
         className={`font-display uppercase text-5xl sm:text-7xl font-black flex flex-col leading-none dark:text-${titleColor} text-gray-800`}

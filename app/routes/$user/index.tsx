@@ -3,8 +3,7 @@ import { ActionFunction, Link, LoaderFunction, useLoaderData } from 'remix';
 import Button from '~/components/buttons/Button';
 
 export let loader: LoaderFunction = async ({ request, params }) => {
-  
-  return null ;
+  return null;
 };
 ///////////////
 export let action: ActionFunction = async ({ request }) => {

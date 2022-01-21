@@ -23,10 +23,10 @@ module.exports = withAnimations({
       },
     },
   },
- plugins: [
-    require("@tailwindcss/aspect-ratio"),
-    require("@tailwindcss/forms"),
-    require("@tailwindcss/typography"),
+  plugins: [
+    require('@tailwindcss/aspect-ratio'),
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
   ],
   future: {
     purgeLayersByDefault: true,

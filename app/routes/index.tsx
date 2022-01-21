@@ -66,9 +66,7 @@ export default function Index() {
             <div className="flex flex-col gap-4">
               <h1 className="capitalize text-4xl font-extrabold">Nike</h1>
               <h2 className="text-3xl">$44</h2>
-              <p className="text-lg text-gray-500	">
-This is a tag
-              </p>
+              <p className="text-lg text-gray-500	">This is a tag</p>
               <div className="flex items-center gap-4 my-6 cursor-pointer ">
                 <div className="bg-blue-600 px-5 py-3 text-white rounded-lg w-2/4 text-center">
                   Add to wallet
