@@ -52,7 +52,7 @@ const Header = (props: HeaderProps) => {
     <>
       <div>
         <nav
-          className={`bg-white dark:bg-gray-800 sticky ${
+          className={`bg-white dark:bg-gray-800 ${
             props.withShadow ? ' shadow-lg ' : ''
           }${props.isFat ? ' py-4' : ''} `}
         >

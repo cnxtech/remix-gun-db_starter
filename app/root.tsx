@@ -18,16 +18,17 @@ import Header from './components/Header';
 import CNXTLogo from './components/svg/logos/CNXT';
 import Gun from 'gun';
 import { IGunCryptoKeyPair } from 'gun/types/types';
-import { decrypt, encrypt } from '../lib/remix-gun-context/context';
-import { AuthKeys } from '../lib/remix-gun-context/types';
+import { get, gun, put } from './lib/remix-gun-context/context';
 
 export const loader: LoaderFunction = () => {
+
+  put('test', 'testy', { data: 'test2', hello: 'world', data3:'threeemancheese' });
   return null;
 };
 
 export default function App() {
   const location = useLocation();
-  console.log(location);
+  // console.log(location);
   let data = {
     links: [
       { to: '/', label: 'Home', isFat: true },
@@ -35,11 +36,18 @@ export default function App() {
       { to: '/logout', label: 'LogOut' },
     ],
   };
-  let p = put('test', 'testy', { data: 'test' });
-  if (!p) console.error('put failed' + p);
-  let g = get('test', 'testy');
-  if (!g) console.error('get failed' + g);
-  console.log(g);
+  let [state, setState] = React.useState({})
+  // if (!p) console.error('put failed' + p);
+  // if (!g) console.error('get failed' + g);
+  React.useEffect(() => {
+    
+     get('test', 'testy', (data) => {
+      setState(data)
+    });
+  })
+
+  console.log(state)
+  ;
   return (
     <Document>
       <Layout theme={'dark'}>
@@ -154,53 +162,12 @@ export function CatchBoundary() {
   }
 }
 
-/** Gun — for browser storage */
+/** Gun — 
+ * setting up the initial schema browser storage
+ * 
+ */
 
-export const gun = new Gun({
-  peers: ['http://localhost:5150/gun', 'http://localhost:3333/gun'],
-  radisk: false,
-  localStorage: true,
-});
 
-export const put = (
-  document: string,
-  key: string,
-  value: any,
-  encryptionKey?: AuthKeys | IGunCryptoKeyPair
-) => {
-  return gun
-    .get(document)
-    .get(key)
-    .put(value as never, async (ack) => {
-      if (encryptionKey) {
-        value = await encrypt(value, encryptionKey);
-      }
-      value = await encrypt(value, master);
-      console.log(ack);
-      return ack.ok ? 'Added data!' : ack.err?.message ?? undefined;
-    });
-};
-
-export const get = (
-  document: string,
-  key: string,
-  decryptionKey?: AuthKeys | IGunCryptoKeyPair,
-  cb?: (data: any) => any
-) => {
-  return gun
-    .get(document)
-    .get(key)
-    .once(async (data) => {
-      console.log('data:', data);
-      decryptionKey
-        ? (data = await decrypt(data, decryptionKey))
-        : (data = await decrypt(data, master));
-      if (cb) {
-        return cb(data);
-      }
-      return data;
-    });
-};
 
 export let initialState = [];
 export let reducer = (state: any, set: any) => {
@@ -215,14 +182,9 @@ export function map(document: string, dispatch: React.Dispatch<any>) {
     .map()
     .on(async (data) => {
       if (!data) return undefined;
-      data = await decrypt(data, master);
+      data = await Gun.SEA.decrypt(data, master);
       dispatch(data);
     });
 }
 
-const master: IGunCryptoKeyPair = {
-  pub: process.env.PUB,
-  priv: process.env.PRIV,
-  epub: process.env.EPUB,
-  epriv: process.env.EPRIV,
-};
+const master= 'abcdefg'

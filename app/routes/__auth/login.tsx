@@ -2,11 +2,9 @@ import { IGunCryptoKeyPair } from 'gun/types/types';
 import { ActionFunction, Form, useActionData, useCatch } from 'remix';
 import Display from '~/components/DisplayHeading';
 import InputText from '~/components/InputText';
-import { decrypt, encrypt } from '../../../lib/RemiGunCtx/context';
 import React from 'react';
 import RoundContainer from '~/components/RoundContainer';
-import { db } from '~/root';
-
+import Gun from 'gun';
 interface NumberPad {
   label: string;
   color: string;
@@ -22,6 +20,11 @@ export let action: ActionFunction = async ({ context }) => {
 };
 
 //////////
+ const gun = Gun({
+   peers: ['http://localhost:5150/gun', 'http://localhost:3333/gun'],
+   radisk: false,
+   localStorage: true,
+ });
 
 const initialState = [];
 
@@ -61,7 +64,7 @@ export default function Login() {
       value: '5',
     },
   ];
-  let creds = db.get('USERS/LIST').get('1.0.1');
+  let creds = gun.get('USERS/LIST').get('1.0.1');
 
   React.useEffect(() => {
     creds.map().on((data) => {
