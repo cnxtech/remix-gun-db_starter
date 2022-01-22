@@ -3,7 +3,7 @@ const express = require('express');
 const compression = require('compression');
 const morgan = require('morgan');
 const { createRequestHandler } = require('@remix-run/express');
-const { createContext } = require('remix-gun-context');
+// const { createContext } = require('remix-gun-context');
 /**
  * GUN Relay
  */
@@ -79,24 +79,7 @@ app.all(
 const peers = [
   `http://${ports.DOMAIN}:${ports.CLIENT}gun` ||
   `https://${ports.DOMAIN}:${ports.CLIENT}gun`,
-  // 'https://relay.peer.ooo/gun',
-  // 'https://replicant.adamantium.online/gun',
-  // 'http://gun-matrix.herokuapp.com/gun',
-  // 'https://gun-ams1.maddiex.wtf:443/gun',
-  // 'https://gun-sjc1.maddiex.wtf:443/gun',
-  // 'https://shockblox-gun-server.herokuapp.com/gun',
-  // 'https://mg-gun-manhattan.herokuapp.com/gun',
-  // 'https://gunmeetingserver.herokuapp.com/gun',
-  // 'https://gun-eu.herokuapp.com/gun',
-  // 'https://gunjs.herokuapp.com/gun',
-  // 'https://myriad-gundb-relay-peer.herokuapp.com/gun',
-  // 'https://gun-armitro.herokuapp.com/',
-  // 'https://fire-gun.herokuapp.com/gun',
-  // 'http://34.101.247.230:8765/gun',
-  // 'https://gun-manhattan.herokuapp.com/gun',
-  // 'https://us-west.xerberus.net/gun',
-  // 'https://dletta.rig.airfaas.com/gun',
-  // 'https://e2eec.herokuapp.com/gun',
+ 
 ];
 Gun({
   peers: peers,

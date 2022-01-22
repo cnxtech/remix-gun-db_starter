@@ -2,6 +2,7 @@ import {
   LoaderFunction,
   MetaFunction,
   Outlet,
+  useActionData,
   useCatch,
   useLoaderData,
   useLocation,
@@ -18,24 +19,31 @@ import Header from './components/Header';
 import CNXTLogo from './components/svg/logos/CNXT';
 import Gun from 'gun';
 import { IGunCryptoKeyPair } from 'gun/types/types';
-import { get, gun, put } from './lib/remix-gun-context/context';
+import { IGunChainReference } from 'gun/types/chain';
+import { encrypt, decrypt } from './lib/remix-gun-context/context';
+import { OptParams } from './lib/remix-gun-context/types';
 
-export const loader: LoaderFunction = () => {
+ const master: IGunCryptoKeyPair = {
+  pub: process.env.PUB,
+  priv: process.env.PRIV,
+  epub: process.env.EPUB,
+  epriv: process.env.EPRIV,
+};
 
-  
-  return null;
+export let loader: LoaderFunction = () => {
+
+  let links= [
+        { to: '/', label: 'Home' },
+        { to: '/login', label: 'LogIn' },
+        { to: '/logout', label: 'LogOut' },
+      ]
+  return {links}
 };
 
 export default function App() {
-  const location = useLocation();
-  // console.log(location);
-  let data = {
-    links: [
-      { to: '/', label: 'Home', isFat: true },
-      { to: '/login', label: 'LogIn' },
-      { to: '/logout', label: 'LogOut' },
-    ],
-  };
+  const {links} = useLoaderData()
+
+
   let [state, setState] = React.useState({})
   React.useEffect(() => {
     
@@ -44,13 +52,13 @@ export default function App() {
     }, {client: true});
   })
 
-  console.log(state)
+
   ;
   return (
     <Document>
       <Layout theme={'dark'}>
         <Header
-          links={data.links}
+          links={links}
           hideHelp={true}
           hideGitHubLink={true}
           logo={<CNXTLogo />}
@@ -113,7 +121,6 @@ export const meta: MetaFunction = () => {
   };
 };
 
-// https://remix.run/docs/en/v1/api/conventions#errorboundary
 export function ErrorBoundary({ error }) {
   console.error(error);
   return (
@@ -131,7 +138,6 @@ export function ErrorBoundary({ error }) {
   );
 }
 
-// https://remix.run/docs/en/v1/api/conventions# catchboundary
 export function CatchBoundary() {
   let caught = useCatch();
 
@@ -165,24 +171,74 @@ export function CatchBoundary() {
  * 
  */
 
-
-
-export let initialState = [];
-export let reducer = (state: any, set: any) => {
-  return [...state, set];
+const ports = {
+  DOMAIN: process.env.DOMAIN,
+  RELAY: process.env.GUN_PORT,
+  CLIENT: process.env.CLIENT_PORT,
 };
-/////
 
-// const gun = Gun({ peers: peers });
-export function map(document: string, dispatch: React.Dispatch<any>) {
-  return gun
+export const gun = new Gun({
+  peers: [`http://0.0.0.0:${ports.RELAY}gun`],
+  radisk: false,
+  localStorage: true,
+});
+export const relay = new Gun({
+  peers: [
+    `http://${ports.DOMAIN}:${ports.CLIENT}gun` ||
+      `https://${ports.DOMAIN}:${ports.CLIENT}gun`,
+  ],
+  radisk: false,
+  localStorage: true,
+});
+export const put = (
+  document: string,
+  key: string,
+  value: any,
+  { client = false, encryptionKey }: OptParams
+) => {
+  let db: IGunChainReference;
+  if (!client) {
+    db = relay;
+  }
+  db = gun;
+  return db
     .get(document)
-    .map()
-    .on(async (data) => {
-      if (!data) return undefined;
-      data = await Gun.SEA.decrypt(data, master);
-      dispatch(data);
+    .get(key)
+    .put(value as never, async (ack) => {
+      if (encryptionKey) {
+        value = await encrypt(value, encryptionKey);
+      }
+      value = await encrypt(value, master);
+      // console.log(ack);
+      return ack.ok ? 'Added data!' : ack.err?.message ?? undefined;
     });
-}
+};
 
-const master= 'abcdefg'
+export const get = (
+  document: string,
+  key: string,
+  cb: (data: any) => any,
+  { client = false, encryptionKey }: OptParams
+) => {
+  let db: IGunChainReference;
+  if (!client) {
+    db = relay;
+  }
+  db = gun;
+  return db
+    .get(document)
+    .get(key)
+    .once(async (data) => {
+      // console.log('data:', data);
+      encryptionKey
+        ? (data = await decrypt(data, encryptionKey))
+        : (data = await decrypt(data, master));
+      if (cb) {
+        return cb(data);
+      }
+      return data;
+    });
+};
+
+
+

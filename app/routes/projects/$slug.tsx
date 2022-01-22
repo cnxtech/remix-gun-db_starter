@@ -29,7 +29,7 @@ export default function ProjectSlug() {
             name="profile"
             desc="Profile"
             job="profile"
-            social={paths}
+            // social={paths}
           />
         </div>
         <div className="lg:col-span-4">

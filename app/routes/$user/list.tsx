@@ -28,7 +28,7 @@ export default function List() {
   return (
     <>
       {/* <p>{JSON.stringify(state)}</p> */}
-      <BlogList alias={''} />
+      {/* <BlogList alias={''} /> */}
     </>
   );
 }
