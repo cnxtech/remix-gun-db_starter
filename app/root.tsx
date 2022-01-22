@@ -22,7 +22,7 @@ import { get, gun, put } from './lib/remix-gun-context/context';
 
 export const loader: LoaderFunction = () => {
 
-  put('test', 'testy', { data: 'test2', hello: 'world', data3:'threeemancheese' });
+  
   return null;
 };
 
@@ -37,13 +37,11 @@ export default function App() {
     ],
   };
   let [state, setState] = React.useState({})
-  // if (!p) console.error('put failed' + p);
-  // if (!g) console.error('get failed' + g);
   React.useEffect(() => {
     
      get('test', 'testy', (data) => {
       setState(data)
-    });
+    }, {client: true});
   })
 
   console.log(state)

@@ -77,7 +77,6 @@ app.all(
       }
 );
 const peers = [
-  `http://0.0.0.0:${ports.RELAY}gun`,
   `http://${ports.DOMAIN}:${ports.CLIENT}gun` ||
   `https://${ports.DOMAIN}:${ports.CLIENT}gun`,
   // 'https://relay.peer.ooo/gun',
