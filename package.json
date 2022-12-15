@@ -27,7 +27,7 @@
     "cross-env": "^7.0.3",
     "dotenv": "^10.0.0",
     "eslint-plugin-mdx": "^1.16.0",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "front-matter": "^4.0.2",
     "get-urls": "^10.0.1",
     "gun": "^0.2020.1235",
