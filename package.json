@@ -32,7 +32,7 @@
     "get-urls": "^10.0.1",
     "gun": "^0.2020.1235",
     "gun-synclist": "^1.0.2",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "lz-string": "^1.4.4",
     "marked": "^4.0.8",
     "moment": "^2.29.1",
